@@ -1,0 +1,9 @@
+* {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+html,body {
+    min-width: 800px;
+    min-height: 600px;
+}
