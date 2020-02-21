@@ -6,14 +6,34 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
+    redirect: '/maintain'
+  },
+  {
+    path: '/home',
+    redirect: '/maintain',
     name: 'home',
     component: () => import('../views/home.vue'),
     children: [
-      // {
-      //   path: '/',
-      //   name: 'home',
-      //   component: () => import('../views/home.vue'),
-      // }
+      {
+        path: '/maintain',
+        name: 'maintain',
+        component: () => import('../components/maintain.vue'),
+      },
+      {
+        path: '/report',
+        name: 'report',
+        component: () => import('../components/report.vue'),
+      },
+      {
+        path: '/production',
+        name: 'production',
+        component: () => import('../components/production.vue'),
+      },
+      {
+        path: '/stock',
+        name: 'stock',
+        component: () => import('../components/stock.vue'),
+      }
     ]
   },
   {

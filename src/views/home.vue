@@ -5,21 +5,49 @@
         <div class="title">印染管理系统</div>
       </el-header>
       <el-container class="main">
-        <el-aside width="200px">Aside</el-aside>
-        <el-main>Main</el-main>
+        <el-aside width="200px">
+          <el-menu
+            :default-active="this.$route.name"
+            class="el-menu-vertical-demo"
+            background-color="#D3DCE6"
+            text-color="rgb(138, 138, 138)"
+            active-text-color="rgb(4, 25, 17)"
+            router>
+            <el-submenu index="1">
+              <template slot="title">
+                <i class="el-icon-s-data"></i>
+                <span>主数据维护</span>
+              </template>
+              <el-menu-item index="1-1">染化料/助剂管理</el-menu-item>
+              <el-menu-item index="1-2">原料管理</el-menu-item>
+              <el-menu-item index="1-2">色号管理</el-menu-item>
+              <el-menu-item index="1-2">设备管理</el-menu-item>
+              <el-menu-item index="1-2">客户管理</el-menu-item>
+              <el-menu-item index="1-2">供应商管理</el-menu-item>
+            </el-submenu>
+            <el-menu-item index="maintain">
+              <i class="el-icon-s-data"></i>
+              <span slot="title">主数据维护</span>
+            </el-menu-item>
+            <el-menu-item index="production">
+              <i class="el-icon-s-tools"></i>
+              <span slot="title">生产管理</span>
+            </el-menu-item>
+            <el-menu-item index="stock">
+              <i class="el-icon-box"></i>
+              <span slot="title">物料的库存管理</span>
+            </el-menu-item>
+            <el-menu-item index="report">
+              <i class="el-icon-document"></i>
+              <span slot="title">数据报表</span>
+            </el-menu-item>
+          </el-menu>
+        </el-aside>
+        <el-main>
+          <router-view></router-view>
+        </el-main>
       </el-container>
     </el-container>
-    <!-- <div class="header">
-      
-    </div>
-    <div class="main">
-      <div class="left-nav">
-        <div class="nav-item"></div>
-      </div>
-      <div class="content-area">
-
-      </div>
-    </div> -->
   </div>
 </template>
 
@@ -32,6 +60,9 @@ export default {
       pageHeight: window.innerHeight,
     };
   },
+  created() {
+    
+  },
   mounted() {
     this.getHeightAndWidth();
   },
@@ -40,7 +71,7 @@ export default {
       window.onresize = () => {
         this.pageHeight = window.innerHeight;
       }
-    }
+    },
   }
   
 }
@@ -82,6 +113,23 @@ export default {
 // .el-container:nth-child(7) .el-aside {
 //   line-height: 320px;
 // }
+.el-menu-vertical-demo {
+  .el-submenu {
+    text-align: left;
+    .el-menu-item {
+      height: 30px;
+      line-height: 30px;
+    }
+  }
+  .el-menu-item {
+    height: 45px;
+    line-height: 45px;
+    text-align: left;
+    &:hover {
+      background-color: rgba(29, 89, 175, 0.16) !important;
+    }
+  }
+}
 .home {
   position: relative;
 }
