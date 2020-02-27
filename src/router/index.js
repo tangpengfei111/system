@@ -33,7 +33,11 @@ const routes = [
         path: '/stock',
         name: 'stock',
         component: () => import('../components/stock.vue'),
-      }
+      },
+      {
+        path: '/:id',
+        component: () => import('../components/maintainChild.vue'),
+      },
     ]
   },
   {

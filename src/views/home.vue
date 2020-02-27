@@ -7,39 +7,35 @@
       <el-container class="main">
         <el-aside width="200px">
           <el-menu
-            :default-active="this.$route.name"
+            :default-active="this.$route.name || this.$route.params.id"
             class="el-menu-vertical-demo"
             background-color="#D3DCE6"
             text-color="rgb(138, 138, 138)"
             active-text-color="rgb(4, 25, 17)"
             router>
-            <el-submenu index="1">
+            <el-submenu index="maintain">
               <template slot="title">
                 <i class="el-icon-s-data"></i>
-                <span>主数据维护</span>
+                <span>基础数据维护</span>
               </template>
-              <el-menu-item index="1-1">染化料/助剂管理</el-menu-item>
-              <el-menu-item index="1-2">原料管理</el-menu-item>
-              <el-menu-item index="1-2">色号管理</el-menu-item>
-              <el-menu-item index="1-2">设备管理</el-menu-item>
-              <el-menu-item index="1-2">客户管理</el-menu-item>
-              <el-menu-item index="1-2">供应商管理</el-menu-item>
+              <el-menu-item index="dyes">染化料/助剂管理</el-menu-item>
+              <el-menu-item index="raw">原料管理</el-menu-item>
+              <el-menu-item index="color">色号管理</el-menu-item>
+              <el-menu-item index="equipment">设备管理</el-menu-item>
+              <el-menu-item index="customer">客户管理</el-menu-item>
+              <el-menu-item index="supplier">供应商管理</el-menu-item>
             </el-submenu>
-            <el-menu-item index="maintain">
-              <i class="el-icon-s-data"></i>
-              <span slot="title">主数据维护</span>
-            </el-menu-item>
             <el-menu-item index="production">
               <i class="el-icon-s-tools"></i>
               <span slot="title">生产管理</span>
             </el-menu-item>
             <el-menu-item index="stock">
               <i class="el-icon-box"></i>
-              <span slot="title">物料的库存管理</span>
+              <span slot="title">库存管理</span>
             </el-menu-item>
             <el-menu-item index="report">
               <i class="el-icon-document"></i>
-              <span slot="title">数据报表</span>
+              <span slot="title">报表管理</span>
             </el-menu-item>
           </el-menu>
         </el-aside>
@@ -61,7 +57,7 @@ export default {
     };
   },
   created() {
-    
+
   },
   mounted() {
     this.getHeightAndWidth();
@@ -80,7 +76,7 @@ export default {
 <style lang="less" scoped>
 .el-header {
   height: 70px !important;  
-  background-color: #33a4c7;
+  background-color: #4c6eb5;
   padding: 0;
   .title {
     width: 300px;
@@ -93,15 +89,19 @@ export default {
   }
 }
 .el-aside {
+  height: 100%;
   background-color: #D3DCE6;
   color: #333;
   text-align: center;
+  overflow: visible;
 }
 .el-main {
-  background-color: #E9EEF3;
+  height: 100%;
+  background-color: #fff;
   color: #333;
   text-align: center;
-  line-height: 160px;
+  padding: 0;
+  overflow: visible;
 }
 // body > .el-container {
 //   margin-bottom: 40px;
@@ -138,6 +138,7 @@ export default {
   top: 70px;
   bottom: 0;
   width: 100%;
+  height: calc(100% - 70px);
   box-sizing: border-box;
   .left-nav {
     float: left;
