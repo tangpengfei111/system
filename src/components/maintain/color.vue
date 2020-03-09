@@ -11,7 +11,7 @@
       </div>
     </div>
     <el-table 
-      :data="tableData"
+      :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       :height="browserAttr.height - 200"
       :header-cell-style="{background: '#bbd7f9', color: '#354356'}"
       :row-class-name="tableRowClassName"
@@ -60,21 +60,27 @@
 </template>
 
 <script>
-import tableHeaderConfig from '../lib/tableHeaderConfig.js';
-import tableData from '../lib/tableData.js';
-import search from './common/search.vue';
-import utils from '../lib/utils.js';
+import search from '@/components/common/search.vue';
+import utils from '@/lib/utils.js';
 export default {
   components: {
     'my-search': search
   },
   data() {
     return {
-      tableHeader: [], // 表格头部信息
+      tableHeader: [              // 表格头部信息
+        {label: '序号', prop: 'index'},
+        {label: '色号编号', prop: 'color_no'},
+        {label: '色号名称', prop: 'color_name'},
+        {label: '状态', prop: 'state'},
+        {label: '用户id', prop: 'user_id'},
+        {label: '用户名', prop: 'user_name'},
+        {label: '最后操作时间', prop: 'last_update_time'}
+      ],
       tableData: [],   // 表格数据
       copyRow: {},     // 当前行副本
       currentPage: 1,  // 表格当前页码
-      pageSize: 100,   // 表格每一页展示数据的数量
+      pageSize: 50,   // 表格每一页展示数据的数量
       browserAttr: {
         width: window.innerWidth,
         height: window.innerHeight
@@ -88,26 +94,27 @@ export default {
       jump.childNodes[0].nodeValue = '跳至';
     }
     this.browserResize();
-    this.getTbaleData(this.route.params.id);
+    for (let i = 0; i < 100; i++) {
+        let obj = JSON.parse(JSON.stringify({
+          color_no: 1,
+          color_name: 2,
+          state: 5,
+          user_id: 111111,
+          user_name: 'xxxal12',
+          last_update_time: '2019-03-03',
+          isEditor: false
+        }));
+        obj.index = i + 1;
+        this.tableData.push(obj);
+    }
+  },
+  beforeDestroy() {
+    window.onresize = null;
   },
   computed: {
-    route() {
-      return this.$route;
-    },
     // 数据总条数
     totalNum() {
       return this.tableData.length;
-    }
-  },
-  watch: {
-    // 监听路由信息改变
-    route: {
-      handler(newVal) {
-        if (newVal && newVal.params) {
-          this.getTbaleData(newVal.params.id);
-        }
-      },
-      deep:true
     }
   },
   methods: {
@@ -121,10 +128,10 @@ export default {
     }, 
     // 监听窗口大小改变
     browserResize() {
-      console.log('监听窗口改变');
       window.onresize = () => {
         this.browserAttr.width = window.innerWidth;
         this.browserAttr.height = window.innerHeight;
+        console.log('监听窗口改变111');
       };
     },
     // 表格列宽自适应
@@ -146,21 +153,11 @@ export default {
       return tableHeader;
     },
     // 获取表格数据，头部信息
-    getTbaleData(id) {
-      if (id) {
-        this.tableHeader = [];
-        this.tableData = [];
-        let data = tableData[id];
-        for (let i = 0; i < 100; i++) {
-          data.push(JSON.parse(JSON.stringify(data[0])));
-        }
-        this.tableHeader = tableHeaderConfig[id];
-        this.tableData = data;
-      }
-    },
+    // getTbaleData(id) {
+    // },
     // 表格当前页改变
     tableChangePage(nowPage) {
-      console.log('nowPage',nowPage);
+      this.currentPage = nowPage;
     },
     // 文本搜索
     searchContent(text) {
@@ -259,7 +256,7 @@ export default {
         height: 35px;
         margin-right: 10px;
         box-sizing: border-box;
-        background-image: url('../assets/image/add-icon.png');
+        background-image: url('../../assets/image/add-icon.png');
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 25px 25px;

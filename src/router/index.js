@@ -6,18 +6,66 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    redirect: '/maintain'
+    redirect: '/login'
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('../views/login.vue')
   },
   {
     path: '/home',
-    redirect: '/maintain',
+    redirect: '/material',
     name: 'home',
     component: () => import('../views/home.vue'),
     children: [
       {
-        path: '/maintain',
-        name: 'maintain',
-        component: () => import('../components/maintain.vue'),
+        path: '/color',
+        name: 'color',
+        component: () => import('../components/maintain/color.vue'),
+        meta: {
+          til: '色号管理'
+        }
+      },
+      {
+        path: '/customer',
+        name: 'customer',
+        component: () => import('../components/maintain/customer.vue'),
+        meta: {
+          til: '客户管理'
+        }
+      },
+      {
+        path: '/dyeAgent',
+        name: 'dyeAgent',
+        component: () => import('../components/maintain/dyeAgent.vue'),
+        meta: {
+          til: '染化剂管理'
+        }
+      },
+      {
+        path: '/machine',
+        name: 'machine',
+        component: () => import('../components/maintain/machine.vue'),
+        meta: {
+          til: '设备管理'
+        }
+      },
+      {
+        path: '/material',
+        name: 'material',
+        component: () => import('../components/maintain/material.vue'),
+        meta: {
+          til: '原料管理'
+        }
+      },
+      {
+        path: '/supplier',
+        name: 'supplier',
+        component: () => import('../components/maintain/supplier.vue'),
+        meta: {
+          til: '供应商管理'
+        }
       },
       {
         path: '/report',
@@ -35,16 +83,12 @@ const routes = [
         component: () => import('../components/stock.vue'),
       },
       {
-        path: '/:id',
-        component: () => import('../components/maintainChild.vue'),
+        path: '/user',
+        name: 'user',
+        component: () => import('../components/user.vue'),
       },
     ]
   },
-  {
-    path: '/login',
-    name: 'Login',
-    component: () => import('../views/login.vue')
-  }
 ]
 
 const router = new VueRouter({

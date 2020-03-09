@@ -37,8 +37,6 @@ export default {
     font-family: Microsoft Yahei;
     font-size: 14px;
     color: rgb(53, 53, 53);
-    box-sizing: border-box;
-    outline: none;
   }
   .search-btn {
     float: left;

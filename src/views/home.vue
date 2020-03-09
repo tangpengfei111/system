@@ -1,5 +1,5 @@
 <template>
-  <div class="home" :style="{height: this.pageHeight + 'px'}">
+  <div class="home" :style="{height: this.browserAttr.height + 'px'}">
     <el-container>
       <el-header>
         <div class="title">印染管理系统</div>
@@ -7,7 +7,7 @@
       <el-container class="main">
         <el-aside width="200px">
           <el-menu
-            :default-active="this.$route.name || this.$route.params.id"
+            :default-active="this.$route.name"
             class="el-menu-vertical-demo"
             background-color="#D3DCE6"
             text-color="rgb(138, 138, 138)"
@@ -18,10 +18,10 @@
                 <i class="el-icon-s-data"></i>
                 <span>基础数据维护</span>
               </template>
-              <el-menu-item index="dyes">染化料/助剂管理</el-menu-item>
-              <el-menu-item index="raw">原料管理</el-menu-item>
+              <el-menu-item index="material">原料管理</el-menu-item>
+              <el-menu-item index="dyeAgent">染化剂管理</el-menu-item>
               <el-menu-item index="color">色号管理</el-menu-item>
-              <el-menu-item index="equipment">设备管理</el-menu-item>
+              <el-menu-item index="machine">设备管理</el-menu-item>
               <el-menu-item index="customer">客户管理</el-menu-item>
               <el-menu-item index="supplier">供应商管理</el-menu-item>
             </el-submenu>
@@ -37,10 +37,14 @@
               <i class="el-icon-document"></i>
               <span slot="title">报表管理</span>
             </el-menu-item>
+            <el-menu-item index="user">
+              <i class="el-icon-user"></i>
+              <span slot="title">用户管理</span>
+            </el-menu-item>
           </el-menu>
         </el-aside>
         <el-main>
-          <router-view></router-view>
+          <router-view :browserAttr="browserAttr" :pageTitle="pageTitle"></router-view>
         </el-main>
       </el-container>
     </el-container>
@@ -53,20 +57,35 @@
 export default {
   data() {
     return {
-      pageHeight: window.innerHeight,
+      browserAttr: {
+        width: window.innerWidth,
+        height: window.innerHeight
+      },
+      maintainAry: [
+        { index: 'material', label: '原料管理' },
+        { index: 'color', label: '色号管理' },
+        { index: 'dyeAgent', label: '染化剂管理' },
+        { index: 'customer', label: '客户管理' },
+        { index: 'machine', label: '设备管理' },
+        { index: 'supplier', label: '供应商管理' }
+      ],
+      pageTitle: '',     //页面标题
     };
-  },
-  created() {
-
   },
   mounted() {
     this.getHeightAndWidth();
   },
+  beforeDestroy() {
+    console.log('des')
+  },
   methods: {
+    // 获取高度和宽度
     getHeightAndWidth() {
       window.onresize = () => {
-        this.pageHeight = window.innerHeight;
-      }
+        this.browserAttr.width = window.innerWidth;
+        this.browserAttr.height = window.innerHeight;
+        console.log('监听窗口改变111');
+      };
     },
   }
   
