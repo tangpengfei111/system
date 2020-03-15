@@ -2,7 +2,7 @@
   <div class="maintain-child">
     <div class="header">
       <div class="title">
-        <div>任务管理</div>
+        <div>{{this.$route.meta.til || '色号管理'}}</div>
         <div>总计 {{totalNum}} 条数据</div>
       </div>
       <div class="func-bar">
@@ -56,6 +56,22 @@
       layout="prev, pager, next, jumper"
       >
     </el-pagination>
+    <div class="loading dialog-box" v-if="childPageIsShow">
+      <div class="dialog">
+        <div class="content-item">
+          <div>色号</div>
+          <input v-model="params.name" placeholder="请填写色号名称">
+        </div>
+        <div class="content-item">
+          <div>编号</div>
+          <input v-model="params.no" placeholder="请填写色号编号">
+        </div>
+        <div class="footer">
+          <el-button @click="cancelCreate">取消</el-button>
+          <el-button type="primary" @click="sureCreate">确定</el-button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -84,7 +100,12 @@ export default {
       browserAttr: {
         width: window.innerWidth,
         height: window.innerHeight
-      }
+      },
+      childPageIsShow: false,    // 子页面是否展示 默认false
+      params: {                 // 子页面用到的参数对象 
+        name: '', 
+        no: '',
+      },
     };
   },
   mounted() {
@@ -95,17 +116,17 @@ export default {
     }
     this.browserResize();
     for (let i = 0; i < 100; i++) {
-        let obj = JSON.parse(JSON.stringify({
-          color_no: 1,
-          color_name: 2,
-          state: 5,
-          user_id: 111111,
-          user_name: 'xxxal12',
-          last_update_time: '2019-03-03',
-          isEditor: false
-        }));
-        obj.index = i + 1;
-        this.tableData.push(obj);
+      let obj = JSON.parse(JSON.stringify({
+        color_no: 1,
+        color_name: 2,
+        state: 5,
+        user_id: 111111,
+        user_name: 'xxxal12',
+        last_update_time: '2019-03-03',
+        isEditor: false
+      }));
+      obj.index = i + 1;
+      this.tableData.push(obj);
     }
   },
   beforeDestroy() {
@@ -159,6 +180,25 @@ export default {
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
     },
+    // 获取所有颜色数据
+    getAllColors(type) {
+      // 两种类型，一是所有颜色，二是可用颜色
+      let url = '';
+      if (type === 'all') {
+        url = '/colorController/queryAllColors';
+      }else if (type === 'available') {
+        url = '/colorController/queryAvailableColor';
+      }
+      // 查询所有颜色
+      // this.$http.get(url).then(res => {
+      //   console.log('res',res);
+      //   if (res.data.code == 0 && res.data.message == 'success') {
+
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // })
+    },
     // 文本搜索
     searchContent(text) {
       console.log(text);
@@ -171,15 +211,48 @@ export default {
       if (flag) {
         this.$message({
           showClose: true,
-          message: '已经存在编辑项，请完成后再继续操作'
+          message: '已经存在编辑项，请完成后再进行添加操作'
         });
       }else {
-        let obj = {};
-        this.tableHeader.forEach(item => {
-          obj[item.prop] = '';
-        });
-        obj.isEditor = true;
-        this.tableData.unshift(obj);
+        this.childPageIsShow = true;
+        console.log(this.params);
+      }
+    },
+    // 取消创建
+    cancelCreate() {
+      this.childPageIsShow = false;
+      this.params = {
+        name: '',
+        no: '',
+      }
+    },
+    // 确定创建
+    sureCreate() {
+      let obj = {};
+      this.tableHeader.forEach(item => {
+        obj[item.prop] = '';
+      });
+      obj.isEditor = true;
+      this.tableData.unshift(obj);
+      let user = JSON.parse(sessionStorage.getItem('user'));
+      let createAt = user.name;
+      console.log(createAt)
+      // 添加色号请求
+      // this.$http.post('/colorController/addColor',{
+
+      // }).then(res => {
+      //   console.log('res',res);
+      //   if (res.data.code == 0 && res.data.message == 'success') {
+
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // })
+      
+      this.childPageIsShow = false;
+      this.params = {
+        name: '',
+        no: '',
       }
     },
     // 编辑行
@@ -195,6 +268,17 @@ export default {
       }else {
         this.copyRow = JSON.parse(JSON.stringify(row));
         row.isEditor = true;
+        // 编辑色号请求
+        // this.$http.post('/colorController/removeColor',{
+
+        // }).then(res => {
+        //   console.log('res',res);
+        //   if (res.data.code == 0 && res.data.message == 'success') {
+
+        //   }
+        // }).catch(error => {
+        //   console.log('失败原因:' + error);
+        // })
       }
     },
     // 删除行
@@ -277,7 +361,6 @@ export default {
       }
     }
   }
-  
   .el-table {
     input {
       width: 80%;
@@ -289,6 +372,47 @@ export default {
     }
     .el-button {
       padding: 4px 8px;
+    }
+  }
+  .dialog-box {
+    background-color: rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    .dialog {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 35px;
+      box-sizing: border-box;
+      width: 400px;
+      height: 300px;
+      background-color: #ffffff;
+      .content-item {
+        width: 100%;
+        margin: 20px auto;
+        box-sizing: border-box;
+        div {
+          display: inline-block;
+          width: 80px;
+          color: #606266;
+          font-size: 14px;
+        }
+        input {
+          width: 160px;
+          margin-left: 10px;
+          &::-webkit-input-placeholder {
+            font-family: Microsoft YaHei;
+            font-size: 14px;
+            font-weight: 500;
+            color: #a9adb3;
+          }
+        }
+      }
+    }
+    .footer {
+      position: absolute;
+      bottom: 25px;
+      right: 30px;
     }
   }
 }

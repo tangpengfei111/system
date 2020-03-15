@@ -2,7 +2,7 @@
   <div class="maintain-child">
     <div class="header">
       <div class="title">
-        <div>任务管理</div>
+        <div>{{this.$route.meta.til || '原料管理'}}</div>
         <div>总计 {{totalNum}} 条数据</div>
       </div>
       <div class="func-bar">
@@ -24,10 +24,22 @@
         :label="item.label"
         align="center">
         <template slot-scope="scope">
-          <div v-if="scope.row.isEditor">
-            <input type="text" v-model="scope.row[item.prop]">
+          <div v-if="scope.row.isEditor && item.editor">
+            <div v-if="item.label == '供应商'">
+              <el-select v-model="scope.row[item.prop]" placeholder="请选择供应商">
+                <el-option
+                  v-for="item in supplierOption"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </div>
+            <div v-if="item.label !== '供应商'">
+              <input type="text" v-model="scope.row[item.prop]">
+            </div>
           </div>
-          <div v-if="!scope.row.isEditor">{{scope.row[item.prop]}}</div>
+          <div v-if="!scope.row.isEditor || !item.editor">{{scope.row[item.prop]}}</div>
         </template>
       </el-table-column>
       <el-table-column
@@ -56,6 +68,26 @@
       layout="prev, pager, next, jumper"
       >
     </el-pagination>
+    <div class="loading dialog-box" v-if="childPageIsShow">
+      <div class="dialog">
+        <div class="content-item">
+          <div>原料名</div>
+          <input v-model="params.name" placeholder="请填写原料名称">
+        </div>
+        <div class="content-item">
+          <div>原料编号</div>
+          <input v-model="params.no" placeholder="请填写原料编号">
+        </div>
+        <div class="content-item">
+          <div>供应商编号</div>
+          <input v-model="params.supplierNo" placeholder="请填写供应商编号">
+        </div>
+        <div class="footer">
+          <el-button @click="cancelCreate">取消</el-button>
+          <el-button type="primary" @click="sureCreate">确定</el-button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -69,15 +101,14 @@ export default {
   data() {
     return {
       tableHeader: [              // 表格头部信息
-        {label: '序号', prop: 'index'},
-        {label: '原料编号', prop: 'material_no'},
-        {label: '原料名称', prop: 'material_name'},
-        {label: '供应商', prop: 'supplier_name'},
-        {label: '供应商编号', prop: 'supplier_no'},
-        {label: '状态', prop: 'state'},
-        {label: '用户id', prop: 'user_id'},
-        {label: '用户名', prop: 'user_name'},
-        {label: '最后操作时间', prop: 'last_update_time'}
+        { label: '原料编号', prop: 'material_no', editor: true },
+        { label: '原料名称', prop: 'material_name', editor: true },
+        { label: '供应商', prop: 'supplier_name', editor: true },
+        { label: '供应商编号', prop: 'supplier_no', editor: true },
+        { label: '状态', prop: 'state', editor: true },
+        { label: '用户id', prop: 'user_id', editor: false },
+        { label: '用户名', prop: 'user_name', editor: false },
+        { label: '最后操作时间', prop: 'last_update_time', editor: false }
       ],
       tableData: [],   // 表格数据
       copyRow: {},     // 当前行副本
@@ -86,7 +117,18 @@ export default {
       browserAttr: {
         width: window.innerWidth,
         height: window.innerHeight
-      }
+      },
+      childPageIsShow: false,    // 子页面是否展示 默认false
+      params: {                 // 子页面用到的参数对象 
+        name: '', 
+        no: '',
+        supplierNo: '',
+      },
+      supplierOption: [       // 供应商列表 用于编辑中供应商选择
+        { label: '甲供应商', value: '0' },
+        { label: '乙供应商', value: '1' },
+        { label: '丙供应商', value: '2' },
+      ],      
     };
   },
   mounted() {
@@ -102,7 +144,7 @@ export default {
             material_name: 2,
             supplier_name: 3,
             supplier_no: 4,
-            state: 5,
+            state: '停用',
             user_id: 111111,
             user_name: 'xxxal12',
             last_update_time: '2019-03-03',
@@ -163,6 +205,25 @@ export default {
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
     },
+    // 获取所有原料数据
+    getAllMaterials(type) {
+      // 两种类型，一是所有原料，二是可用原料
+      let url = '';
+      if (type === 'all') {
+        url = '/materialController/queryAllMaterials';
+      }else if (type === 'available') {
+        url = '/materialController/queryAvailableMaterial';
+      }
+      // 查询所有原料
+      // this.$http.get(url).then(res => {
+      //   console.log('res',res);
+      //   if (res.data.code == 0 && res.data.message == 'success') {
+
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // })
+    },
     // 文本搜索
     searchContent(text) {
       console.log(text);
@@ -175,15 +236,51 @@ export default {
       if (flag) {
         this.$message({
           showClose: true,
-          message: '已经存在编辑项，请完成后再继续操作'
+          message: '已经存在编辑项，请完成后再进行添加操作'
         });
       }else {
-        let obj = {};
-        this.tableHeader.forEach(item => {
-          obj[item.prop] = '';
-        });
-        obj.isEditor = true;
-        this.tableData.unshift(obj);
+        this.childPageIsShow = true;
+        console.log(this.params);
+      }
+    },
+    // 取消创建
+    cancelCreate() {
+      this.childPageIsShow = false;
+      this.params = {
+        name: '',
+        no: '',
+        supplierNo: '',
+      }
+    },
+    // 确定创建
+    sureCreate() {
+      let obj = {};
+      this.tableHeader.forEach(item => {
+        obj[item.prop] = '';
+      });
+      obj.isEditor = true;
+      this.tableData.unshift(obj);
+      let user = JSON.parse(sessionStorage.getItem('user'));
+      let createAt = user.name;
+      console.log(createAt)
+      //   // 添加原料
+      //   this.$http.post('/materialController/addMaterial',{
+
+      //   }).then(res => {
+      //     console.log('res',res);
+      //     if (res.data.code == 0 && res.data.message == 'success') {
+
+      //     }
+      //   }).catch(error => {
+      //     console.log('失败原因:' + error);
+      //   })
+      // }
+      
+      this.childPageIsShow = false;
+      this.params = {
+        name: '',
+        no: '',
+        supplierNo: '',
       }
     },
     // 编辑行
@@ -194,7 +291,7 @@ export default {
       if (flag) {
         this.$message({
           showClose: true,
-          message: '已经存在编辑项，请完成后再继续操作'
+          message: '已存在编辑项，请完成后再进行操作'
         });
       }else {
         this.copyRow = JSON.parse(JSON.stringify(row));
@@ -204,17 +301,40 @@ export default {
     // 删除行
     deleteRow(index) {
       this.tableData.splice(index,1);
+      // 删除原料
+      // this.$http.get('/materialController/removeMaterial').then(res => {
+      //   console.log('res',res);
+      //   if (res.data.code == 0 && res.data.message == 'success') {
+
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // })
     },
     // 确定编辑
     sureEditor(row) {
       row.isEditor = false;
+      // let option = {      //请求参数
+      //   no: '11111',
+      //   status: '0',
+      //   supplierNo: '22222'
+      // }
+      // this.$http.post('/materialController/modifyMaterial',row).then(res => {
+      // console.log('res',res);
+      //   if (res.data.code == 0 && res.data.message == 'success') {
+
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // })
     },
     // 取消编辑
     cancelEditor(row) {
       for (let k in this.copyRow) {
         row[k] = this.copyRow[k]
       }
-    }
+    },
+   
   },
 };
 </script>
@@ -290,9 +410,62 @@ export default {
       outline: none;
       padding: 0 5px;
       box-sizing: border-box;
+      text-align: center;
     }
     .el-button {
       padding: 4px 8px;
+    }
+    /deep/ .el-input__inner {
+      height: 25px;
+      line-height: 25px;
+      text-align: center;
+    }
+    /deep/ .el-select {
+      width: 80%;
+      .el-input__icon {
+        line-height: 25px;
+      }
+    }
+  }
+  .dialog-box {
+    background-color: rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    .dialog {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 35px;
+      box-sizing: border-box;
+      width: 400px;
+      height: 300px;
+      background-color: #ffffff;
+      .content-item {
+        width: 100%;
+        margin: 20px auto;
+        box-sizing: border-box;
+        div {
+          display: inline-block;
+          width: 80px;
+          color: #606266;
+          font-size: 14px;
+        }
+        input {
+          width: 160px;
+          margin-left: 10px;
+          &::-webkit-input-placeholder {
+            font-family: Microsoft YaHei;
+            font-size: 14px;
+            font-weight: 500;
+            color: #a9adb3;
+          }
+        }
+      }
+    }
+    .footer {
+      position: absolute;
+      bottom: 25px;
+      right: 30px;
     }
   }
 }

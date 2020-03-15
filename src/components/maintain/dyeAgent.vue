@@ -2,7 +2,7 @@
   <div class="maintain-child">
     <div class="header">
       <div class="title">
-        <div>任务管理</div>
+        <div>{{this.$route.meta.til || '染化剂管理'}}</div>
         <div>总计 {{totalNum}} 条数据</div>
       </div>
       <div class="func-bar">

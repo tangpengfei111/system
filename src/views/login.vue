@@ -4,7 +4,7 @@
     <div class="login-dialog">
       <div class="image"></div>
       <div class="dialog">
-        <div class="title">数据建模系统管理平台</div>
+        <div class="title">印染业务系统管理平台</div>
         <div class="message">Welcome欢迎登陆</div>
         <div class="login-info">
           <div class="username">
@@ -20,71 +20,26 @@
       </div>
     </div>
     <div class="copyright">Copyright © xxxx有限公司 |苏ICP备000000000</div>
-    <div class="loading dialog-box" v-if="registerPageIsShow">
-      <div class="dialog">
-        <div class="content-item">
-          <div class="username">用户名</div>
-          <input v-model="regObj.name" placeholder="请填写用户名">
-        </div>
-        <div class="content-item">
-          <div class="password">密 码</div>
-          <input v-model="regObj.password" placeholder="请填写密码">
-        </div>
-        <div class="footer">
-          <el-button @click="cancelRegister">取消</el-button>
-          <el-button type="primary" @click="sureRegister">确定</el-button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 export default {
   data() {
     return {
       loginHeight: window.innerHeight,
       username: "",
       password: "",
-      registerPageIsShow: false, // 注册页面是否显示  默认false 不显示
-      regObj: {
-        name: "",
-        password: ""
-      },
-      userInfo: [
-        {
-          name: 'admin1',
-          password: '123456',
-          permissions: [
-            'maintain'
-          ]
-        },
-        {
-          name: 'admin2',
-          password: '123456',
-          permissions: [
-            'production'
-          ]
-        },
-        {
-          name: 'admin3',
-          password: '123456',
-          permissions: [
-            'report'
-          ]
-        },
-        {
-          name: 'admin4',
-          password: '123456',
-          permissions: [
-            'stock'
-          ]
-        }
-      ]
     };
   },
   mounted() {
     this.getHeightAndWidth();
+  },
+  computed: {
+    userInfo() {
+      return this.$store.state.userInfo;
+    }
   },
   methods: {
     getHeightAndWidth() {
@@ -108,6 +63,7 @@ export default {
         });
         return;
       }
+      
       let option = {};
       let flag = this.userInfo.some(item => {
         return item.name === this.username;
@@ -117,7 +73,7 @@ export default {
           if (item.name === this.username) {
             if (item.password === this.password) {
               option.name = item.name;
-              option.permissions = item.permissions;
+              option.role = item.role;
             }else {
               this.$message({
                 message: '密码输入错误',
@@ -132,7 +88,7 @@ export default {
           type: 'error'
         });
       }
-      if (option.name && option.permissions) {
+      if (option.name && option.role) {
         sessionStorage.setItem('user',JSON.stringify(option))
         this.$router.push({
           name:'home', 
@@ -141,15 +97,19 @@ export default {
           }
         });
       }
+      // 用户登录
+      // this.$http.post('/userController/loginIn', {
+      //   name: this.username,
+      //   password: this.password
+      // }).then(res => {
+      //   console.log('res',res);
+      //   if (res.data.code == 0 && res.data.message == 'success') {
+
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // })
     },
-    // 用户注册
-    userRegister() {
-      this.registerPageIsShow = true;
-    },
-    // 取消注册
-    cancelRegister() {},
-    // 确定注册
-    sureRegister() {}
   }
 };
 </script>
@@ -179,15 +139,17 @@ export default {
       float: left;
       width: 50%;
       height: 100%;
-      border: 1px solid blue;
       box-sizing: border-box;
+      background-image: url('../assets/image/dialog-bg.png');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-size: 80% 70%;
     }
     .dialog {
       float: left;
       width: 50%;
       height: 100%;
       padding: 60px 60px 70px 20px;
-      border: 1px solid blue;
       box-sizing: border-box;
       .title {
         width: 100%;
@@ -279,52 +241,6 @@ export default {
     font-family: Simhei;
     font-size: 14px;
     color: #ffffff;
-  }
-}
-.dialog-box {
-  background-color: rgba(0, 0, 0, 0.5);
-  box-sizing: border-box;
-  .dialog {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    padding: 20px 35px;
-    box-sizing: border-box;
-    width: 350px;
-    height: 260px;
-    background-color: #ffffff;
-    .content-item {
-      width: 100%;
-      margin: 20px auto;
-      box-sizing: border-box;
-    }
-    div {
-      display: inline-block;
-      color: #606266;
-      font-size: 14px;
-    }
-    .username {
-      margin-right: 20px;
-    }
-    .password {
-      letter-spacing: 5px;
-      margin-right: 15px;
-    }
-    input {
-      width: 200px;
-      &::-webkit-input-placeholder {
-        font-family: Microsoft YaHei;
-        font-size: 14px;
-        font-weight: 500;
-        color: #a9adb3;
-      }
-    }
-  }
-  .footer {
-    position: absolute;
-    bottom: 25px;
-    right: 30px;
   }
 }
 </style>

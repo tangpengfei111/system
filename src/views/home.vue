@@ -13,7 +13,7 @@
             text-color="rgb(138, 138, 138)"
             active-text-color="rgb(4, 25, 17)"
             router>
-            <el-submenu index="maintain">
+            <el-submenu index="maintain" v-if="this.menuItemIsShow.material">
               <template slot="title">
                 <i class="el-icon-s-data"></i>
                 <span>基础数据维护</span>
@@ -25,26 +25,26 @@
               <el-menu-item index="customer">客户管理</el-menu-item>
               <el-menu-item index="supplier">供应商管理</el-menu-item>
             </el-submenu>
-            <el-menu-item index="production">
+            <el-menu-item index="production" v-if="this.menuItemIsShow.production">
               <i class="el-icon-s-tools"></i>
               <span slot="title">生产管理</span>
             </el-menu-item>
-            <el-menu-item index="stock">
+            <el-menu-item index="stock" v-if="this.menuItemIsShow.stock">
               <i class="el-icon-box"></i>
               <span slot="title">库存管理</span>
             </el-menu-item>
-            <el-menu-item index="report">
+            <el-menu-item index="report" v-if="this.menuItemIsShow.report">
               <i class="el-icon-document"></i>
               <span slot="title">报表管理</span>
             </el-menu-item>
-            <el-menu-item index="user">
+            <el-menu-item index="user" v-if="this.menuItemIsShow.user">
               <i class="el-icon-user"></i>
               <span slot="title">用户管理</span>
             </el-menu-item>
           </el-menu>
         </el-aside>
         <el-main>
-          <router-view :browserAttr="browserAttr" :pageTitle="pageTitle"></router-view>
+          <router-view></router-view>
         </el-main>
       </el-container>
     </el-container>
@@ -53,7 +53,7 @@
 
 <script>
 
-
+import role from '../lib/role.js';
 export default {
   data() {
     return {
@@ -69,14 +69,33 @@ export default {
         { index: 'machine', label: '设备管理' },
         { index: 'supplier', label: '供应商管理' }
       ],
-      pageTitle: '',     //页面标题
     };
   },
   mounted() {
     this.getHeightAndWidth();
   },
   beforeDestroy() {
-    console.log('des')
+    window.onresize = null;
+  },
+  computed: {
+    // 左侧菜单每一项是否显示，根据用户权限来控制
+    menuItemIsShow() {
+      let user = JSON.parse(sessionStorage.getItem('user'));
+      console.log()
+      let option = {
+        material: true,
+        production: true,
+        stock: true,
+        report: true,
+        user: true
+      }
+      for (let k in option) {
+        if (!role.define[user.role].includes(k)) {
+          option[k] = false;
+        }
+      } 
+      return option;
+    }
   },
   methods: {
     // 获取高度和宽度
@@ -84,7 +103,6 @@ export default {
       window.onresize = () => {
         this.browserAttr.width = window.innerWidth;
         this.browserAttr.height = window.innerHeight;
-        console.log('监听窗口改变111');
       };
     },
   }
@@ -122,16 +140,6 @@ export default {
   padding: 0;
   overflow: visible;
 }
-// body > .el-container {
-//   margin-bottom: 40px;
-// }
-// .el-container:nth-child(5) .el-aside,
-// .el-container:nth-child(6) .el-aside {
-//   line-height: 260px;
-// }
-// .el-container:nth-child(7) .el-aside {
-//   line-height: 320px;
-// }
 .el-menu-vertical-demo {
   .el-submenu {
     text-align: left;

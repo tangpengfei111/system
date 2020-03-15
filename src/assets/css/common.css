@@ -160,3 +160,9 @@ input {
     font-size: 16px;
     color: #666666;
 }
+
+
+/* 全局下拉选择框 选择项样式 */
+.el-select-dropdown__item {
+    text-align: center;
+}
