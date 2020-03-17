@@ -9,9 +9,9 @@
           <el-menu
             :default-active="this.$route.name"
             class="el-menu-vertical-demo"
-            background-color="#D3DCE6"
-            text-color="rgb(138, 138, 138)"
-            active-text-color="rgb(4, 25, 17)"
+            background-color="rgb(42,66,102)"
+            text-color="#c9d7ec"
+            active-text-color="#ffffff"
             router>
             <el-submenu index="maintain" v-if="this.menuItemIsShow.material">
               <template slot="title">
@@ -25,18 +25,28 @@
               <el-menu-item index="customer">客户管理</el-menu-item>
               <el-menu-item index="supplier">供应商管理</el-menu-item>
             </el-submenu>
-            <el-menu-item index="production" v-if="this.menuItemIsShow.production">
-              <i class="el-icon-s-tools"></i>
-              <span slot="title">生产管理</span>
-            </el-menu-item>
+            <el-submenu index="production" v-if="this.menuItemIsShow.productionorder">
+              <template slot="title">
+                <i class="el-icon-s-tools"></i>
+                <span>生产管理</span>
+              </template>
+              <el-menu-item index="productionorder">订单管理</el-menu-item>
+              <el-menu-item index="productionplan">生产计划</el-menu-item>
+            </el-submenu>
             <el-menu-item index="stock" v-if="this.menuItemIsShow.stock">
               <i class="el-icon-box"></i>
               <span slot="title">库存管理</span>
             </el-menu-item>
-            <el-menu-item index="report" v-if="this.menuItemIsShow.report">
-              <i class="el-icon-document"></i>
-              <span slot="title">报表管理</span>
-            </el-menu-item>
+            <el-submenu index="report" v-if="this.menuItemIsShow.dayproduction">
+              <template slot="title">
+                <i class="el-icon-document"></i>
+                <span>报表管理</span>
+              </template>
+              <el-menu-item index="dayproduction">日生产报表</el-menu-item>
+              <el-menu-item index="yieldrate">良品率报表</el-menu-item>
+              <el-menu-item index="stocklist">库存清单报表</el-menu-item>
+              <el-menu-item index="stockdetails">库存流水详情报表</el-menu-item>
+            </el-submenu>
             <el-menu-item index="user" v-if="this.menuItemIsShow.user">
               <i class="el-icon-user"></i>
               <span slot="title">用户管理</span>
@@ -84,9 +94,9 @@ export default {
       console.log()
       let option = {
         material: true,
-        production: true,
+        productionorder: true,
+        dayproduction: true,
         stock: true,
-        report: true,
         user: true
       }
       for (let k in option) {
@@ -127,7 +137,7 @@ export default {
 }
 .el-aside {
   height: 100%;
-  background-color: #D3DCE6;
+  background-color: rgb(42,66,102);
   color: #333;
   text-align: center;
   overflow: visible;
@@ -148,12 +158,15 @@ export default {
       line-height: 30px;
     }
   }
+  /deep/.el-submenu__title:hover{
+    background-color: #1d324f !important;
+  }
   .el-menu-item {
     height: 45px;
     line-height: 45px;
     text-align: left;
     &:hover {
-      background-color: rgba(29, 89, 175, 0.16) !important;
+      background-color: #1d324f !important;
     }
   }
 }

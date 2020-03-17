@@ -1,13 +1,13 @@
 <template>
     <div>
-        222222
+        232131231
     </div>
 </template>
 
 <script>
-    export default {
-        
-    }
+export default {
+    
+}
 </script>
 
 <style lang="less" scoped>

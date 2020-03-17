@@ -1,47 +1,27 @@
 var role = {
     define: {
         superAdmin: [
-            'color',
-            'customer',
-            'dyeAgent',
-            'machine',
-            'material',
-            'supplier',
-            'production',
-            'report',
+            'color','customer','dyeAgent','machine','material','supplier',  // 基础数据维护
+            'dayproduction','yieldrate','stocklist','stockdetails',         // 报表管理
+            'productionorder','productionplan',
             'stock',
             'user'
         ],
         generalAdmin: [
-            'color',
-            'customer',
-            'dyeAgent',
-            'machine',
-            'material',
-            'supplier',
-            'production',
-            'report',
+            'color','customer','dyeAgent','machine','material','supplier',
+            'dayproduction','yieldrate','stocklist','stockdetails',
+            'productionorder','productionplan',
             'stock'
         ],
         prodUser: [
-            'color',
-            'customer',
-            'dyeAgent',
-            'machine',
-            'material',
-            'supplier',
-            'production',
-            'report'
+            'color','customer','dyeAgent','machine','material','supplier',
+            'dayproduction','yieldrate','stocklist','stockdetails',
+            'productionorder','productionplan',
         ],
         stockUser: [
-            'color',
-            'customer',
-            'dyeAgent',
-            'machine',
-            'material',
-            'supplier',
+            'color','customer','dyeAgent','machine','material','supplier',
+            'dayproduction','yieldrate','stocklist','stockdetails',
             'stock',
-            'report'
         ],
     },
     options: [

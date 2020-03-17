@@ -1,10 +1,10 @@
 <template>
   <div class="user">
     <div class="header">
-        <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-            <el-tab-pane label="所有用户" name="first"></el-tab-pane>
-            <el-tab-pane label="普通用户" name="second"></el-tab-pane>
-            <el-tab-pane label="管理员用户" name="third"></el-tab-pane>
+        <el-tabs v-model="activeName" type="card" @tab-click="tabsChange">
+            <el-tab-pane label="所有用户" name="all"></el-tab-pane>
+            <el-tab-pane label="普通用户" name="user"></el-tab-pane>
+            <el-tab-pane label="管理员用户" name="admin"></el-tab-pane>
         </el-tabs>
         <div class="add-user" @click="addUser">创建用户</div>
     </div>
@@ -80,6 +80,11 @@ import userRole from '../lib/role.js';
 export default {
   data() {
     return {
+      userObj: {
+        name: '',
+        password: '',
+        role: ''
+      },
       browserAttr: {
         width: window.innerWidth,
         height: window.innerHeight
@@ -87,7 +92,7 @@ export default {
       addUserPageIsShow: false,    //添加用户是否显示
       pageSize: 50,
       currentPage: 1,
-      activeName: "first",
+      activeName: "all",
       userHeader: [
         { label: "用户ID", prop: "id" },
         { label: "用户名", prop: "name" },
@@ -95,22 +100,8 @@ export default {
         { label: "权限", prop: "role" },
         { label: "最后操作时间", prop: "lastUpdateTime" }
       ],
-      userList: [
-        {
-          id: 100000,
-          name: "123123",
-          password: "sssss",
-          role: "stockUser",
-          type: 1,
-          lastUpdateTime: "2018-08-09",
-          isEditor: false
-        }
-      ],
-      userObj: {
-        name: '',
-        password: '',
-        role: ''
-      },
+      userList: [],       // 用户列表
+      copyUserList: [],   // 用户列表副本
       roleOptions: [
         {
           value: '选项1',
@@ -122,7 +113,6 @@ export default {
   created() {
     this.roleOptions = userRole.options;
     this.getUserList();
-    console.log(userRole);
   },
   beforeDestroy() {
     window.onresize = null;
@@ -145,13 +135,15 @@ export default {
     },
     // 获取用户列表
     getUserList() {
+      console.log(userRole)
+      let roleAry = userRole.options.map(item => item.label);
       for (let i = 0; i < 100; i++) {
         let obj = JSON.parse(
           JSON.stringify({
             id: Math.round(Math.random() * 1000000),
             name: "123123",
             password: "sssss",
-            role: "stockUser",
+            role: roleAry[Math.round(Math.random() * 2)],
             type: 1,
             lastUpdateTime: "2018-08-09",
             isEditor: false
@@ -159,6 +151,7 @@ export default {
         );
         this.userList.push(obj);
       }
+      this.copyUserList = this._.cloneDeep(this.userList);
       // 查询所有非管理员用户
       // this.$http.get('/userController/queryAllUsers').then(res => {
       //   console.log('res',res);
@@ -172,8 +165,21 @@ export default {
     currentChange(val) {
       this.currentPage = val;
     },
-    handleClick(tab) {
-      console.log(tab.label);
+    // 标签页改变
+    tabsChange(tab) {
+      console.log(tab.name);
+      console.log(this.copyUserList)
+      if (tab.name === 'all') {
+        this.userList = this._.cloneDeep(this.copyUserList);
+      }else if (tab.name === 'user') {
+        this.userList = this.copyUserList.filter(item => {
+          return item.role !== '普通管理员';
+        });
+      }else if (tab.name === 'admin') {
+        this.userList = this.copyUserList.filter(item => {
+          return item.role === '普通管理员';
+        });
+      }
     },
     // 表格当前页改变
     tableChangePage(nowPage) {
