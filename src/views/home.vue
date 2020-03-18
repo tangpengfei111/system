@@ -25,14 +25,10 @@
               <el-menu-item index="customer">客户管理</el-menu-item>
               <el-menu-item index="supplier">供应商管理</el-menu-item>
             </el-submenu>
-            <el-submenu index="production" v-if="this.menuItemIsShow.productionorder">
-              <template slot="title">
-                <i class="el-icon-s-tools"></i>
-                <span>生产管理</span>
-              </template>
-              <el-menu-item index="productionorder">订单管理</el-menu-item>
-              <el-menu-item index="productionplan">生产计划</el-menu-item>
-            </el-submenu>
+            <el-menu-item index="production" v-if="this.menuItemIsShow.production">
+              <i class="el-icon-s-tools"></i>
+              <span>生产管理</span>
+            </el-menu-item>
             <el-menu-item index="stock" v-if="this.menuItemIsShow.stock">
               <i class="el-icon-box"></i>
               <span slot="title">库存管理</span>
@@ -94,7 +90,7 @@ export default {
       console.log()
       let option = {
         material: true,
-        productionorder: true,
+        production: true,
         dayproduction: true,
         stock: true,
         user: true

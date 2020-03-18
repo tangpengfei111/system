@@ -3,20 +3,20 @@ var role = {
         superAdmin: [
             'color','customer','dyeAgent','machine','material','supplier',  // 基础数据维护
             'dayproduction','yieldrate','stocklist','stockdetails',         // 报表管理
-            'productionorder','productionplan',
+            'production',
             'stock',
             'user'
         ],
         generalAdmin: [
             'color','customer','dyeAgent','machine','material','supplier',
             'dayproduction','yieldrate','stocklist','stockdetails',
-            'productionorder','productionplan',
+            'production',
             'stock'
         ],
         prodUser: [
             'color','customer','dyeAgent','machine','material','supplier',
             'dayproduction','yieldrate','stocklist','stockdetails',
-            'productionorder','productionplan',
+            'production',
         ],
         stockUser: [
             'color','customer','dyeAgent','machine','material','supplier',

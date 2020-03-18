@@ -68,21 +68,21 @@ const routes = [
         }
       },
       {
-        path: '/productionorder',
-        name: 'productionorder',
-        component: () => import('../components/production/productionorder.vue'),
+        path: '/production',
+        name: 'production',
+        component: () => import('../components/production.vue'),
         meta: {
           til: '订单管理'
         }
       },
-      {
-        path: '/productionplan',
-        name: 'productionplan',
-        component: () => import('../components/production/productionplan.vue'),
-        meta: {
-          til: '生产计划'
-        }
-      },
+      // {
+      //   path: '/productionplan',
+      //   name: 'productionplan',
+      //   component: () => import('../components/production/productionplan.vue'),
+      //   meta: {
+      //     til: '生产计划'
+      //   }
+      // },
 
       
       {
