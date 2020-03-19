@@ -3,8 +3,8 @@
     <div class="header">
         <el-tabs v-model="activeName" type="card" @tab-click="tabsChange">
             <el-tab-pane label="所有用户" name="all"></el-tab-pane>
+            <el-tab-pane label="管理员" name="admin"></el-tab-pane>
             <el-tab-pane label="普通用户" name="user"></el-tab-pane>
-            <el-tab-pane label="管理员用户" name="admin"></el-tab-pane>
         </el-tabs>
         <div class="add-user" @click="addUser">创建用户</div>
     </div>
@@ -12,8 +12,6 @@
       :data="userList.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       :height="browserAttr.height - 190"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
-      :row-class-name="tableRowClassName"
-      border
     >
       <el-table-column
         v-for="(item,index) in userHeader"
@@ -102,12 +100,7 @@ export default {
       ],
       userList: [],       // 用户列表
       copyUserList: [],   // 用户列表副本
-      roleOptions: [
-        {
-          value: '选项1',
-          label: '黄金糕'
-        }
-      ]
+      roleOptions: []
     };
   },
   created() {
@@ -167,17 +160,15 @@ export default {
     },
     // 标签页改变
     tabsChange(tab) {
-      console.log(tab.name);
-      console.log(this.copyUserList)
       if (tab.name === 'all') {
         this.userList = this._.cloneDeep(this.copyUserList);
       }else if (tab.name === 'user') {
         this.userList = this.copyUserList.filter(item => {
-          return item.role !== '普通管理员';
+          return item.role !== '管理员';
         });
       }else if (tab.name === 'admin') {
         this.userList = this.copyUserList.filter(item => {
-          return item.role === '普通管理员';
+          return item.role === '管理员';
         });
       }
     },

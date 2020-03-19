@@ -7,12 +7,12 @@ var role = {
             'stock',
             'user'
         ],
-        generalAdmin: [
-            'color','customer','dyeAgent','machine','material','supplier',
-            'dayproduction','yieldrate','stocklist','stockdetails',
-            'production',
-            'stock'
-        ],
+        // generalAdmin: [
+        //     'color','customer','dyeAgent','machine','material','supplier',
+        //     'dayproduction','yieldrate','stocklist','stockdetails',
+        //     'production',
+        //     'stock'
+        // ],
         prodUser: [
             'color','customer','dyeAgent','machine','material','supplier',
             'dayproduction','yieldrate','stocklist','stockdetails',
@@ -25,9 +25,9 @@ var role = {
         ],
     },
     options: [
-        { label: '普通管理员', value: 'generalAdmin' },
-        { label: '生产管理用户', value: 'prodUser' },
-        { label: '库存管理用户', value: 'stockUser' },
+        { label: '管理员', value: 'superAdmin', ype: 0 },
+        { label: '生产用户', value: 'prodUser', type: 1 },
+        { label: '库存用户', value: 'stockUser', type: 1 },
     ]
 }
 

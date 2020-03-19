@@ -14,7 +14,8 @@ export default new Vuex.Store({
       {
         name: 'admin2',
         password: '123456',
-        role: 'generalAdmin'
+        role: 'superAdmin'
+        // role: 'generalAdmin'
       },
       {
         name: 'admin3',

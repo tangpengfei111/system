@@ -14,9 +14,8 @@
       :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       :height="browserAttr.height - 200"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
-      :row-class-name="tableRowClassName"
       style="width: 100%" 
-      border>
+     >
       <el-table-column
         v-for="(item,index) in tableHeader"
         :key="'row' + index"
@@ -183,12 +182,12 @@ export default {
     // 获取所有颜色数据
     getAllColors(type) {
       // 两种类型，一是所有颜色，二是可用颜色
-      let url = '';
-      if (type === 'all') {
-        url = '/colorController/queryAllColors';
-      }else if (type === 'available') {
-        url = '/colorController/queryAvailableColor';
-      }
+      // let url = '';
+      // if (type === 'all') {
+      //   url = '/colorController/queryAllColors';
+      // }else if (type === 'available') {
+      //   url = '/colorController/queryAvailableColor';
+      // }
       // 查询所有颜色
       // this.$http.get(url).then(res => {
       //   console.log('res',res);

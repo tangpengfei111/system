@@ -123,6 +123,18 @@ input {
 
 
 /* 全局分页器默认样式 */
+.pagination {
+    overflow: hidden;
+}
+.pagination .data-show {
+    float: right;
+    margin: 16px 20px 0 0;
+    height: 30px;
+    line-height: 30px;
+    font-family: Microsoft Yahei;
+    font-size: 14px;
+    color: #666666;
+}
 .el-pagination {
     float: right;
     margin-top: 16px;

@@ -10,12 +10,12 @@
         <div class="add btn" @click="addRow">新建订单</div>
       </div>
     </div>
+    <!-- :row-class-name="tableRowClassName" -->
     <el-table
-      :data="tableList.slice((currentPage-1)*pageSize,currentPage*pageSize)"
+      :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       :height="browserAttr.height - 200"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%"
-      border
     >
       <el-table-column
         v-for="(item,index) in tableHeader"
@@ -44,16 +44,20 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
-      background
-      :current-page.sync="currentPage"
-      :total="totalNum"
-      :page-size="pageSize"
-      :page-count="5"
-      @current-change="tableChangePage"
-      layout="prev, pager, next, jumper"
-      >
-    </el-pagination>
+    <div class="pagination">
+      <el-pagination
+        background
+        :current-page.sync="currentPage"
+        :total="totalNum"
+        :page-size="pageSize"
+        :page-count="5"
+        @current-change="tableChangePage"
+        layout="prev, pager, next, jumper"
+        >
+      </el-pagination>
+      <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
+    </div>
+   
     <div class="loading dialog-box" v-if="childPageIsShow">
       <div class="dialog">
         <div class="content-item">
@@ -83,8 +87,8 @@
           </el-select>
         </div>
         <div class="footer">
-          <el-button @click="cancelCreateUser">取消</el-button>
-          <el-button type="primary" @click="sureCreateUser">确定</el-button>
+          <el-button @click="cancelCreate">取消</el-button>
+          <el-button type="primary" @click="sureCreate">确定</el-button>
         </div>
       </div>
     </div>
@@ -92,7 +96,12 @@
 </template>
 
 <script>
+import search from '@/components/common/search.vue';
+import utils from '@/lib/utils.js';
 export default {
+  components: {
+    'my-search': search
+  },
   data() {
     return {
       childPageIsShow: false,
@@ -102,15 +111,15 @@ export default {
         width: window.innerWidth,
         height: window.innerHeight
       },
-      tableList: [],
+      tableData: [],
       tableHeader: [
         {label: '订单编号', prop: 'orderNumber'},
         {label: '客户', prop: 'custom'},
         {label: '商品', prop: 'goods'},
-        {label: '数量', prop: 'requirement'},
+        {label: '需求量', prop: 'requirement'},
         {label: '金额', prop: 'money'},
         {label: '交货日期', prop: 'deliveryDate'},
-        {label: '制单日期', prop: 'orderDate'},
+        // {label: '制单日期', prop: 'orderDate'},
       ],
       params: {                    // 子页面参数
         custom: '',
@@ -130,13 +139,26 @@ export default {
   },
   mounted() {
     this.browserResize();
+    for (let i = 0; i < 100; i++) {
+      let obj = JSON.parse(JSON.stringify({
+        orderNumber: 'xasdasd1',
+        custom: '客户1',
+        goods: '商品1',
+        requirement: 50,
+        money: '3000',
+        deliveryDate: '2019-05-03',
+        isEditor: false
+      }));
+      obj.index = i + 1;
+      this.tableData.push(obj);
+    }
   },
   beforeDestroy() {
     window.onresize = null;
   },
   computed: {
     totalNum() {
-      return this.tableList.length;
+      return this.tableData.length;
     }
   },
   methods: {
@@ -166,64 +188,31 @@ export default {
     cancelCreate() {
       this.childPageIsShow = false;
       this.params = {
-        name: '',
-        no: '',
+        custom: '',
+        goods: '',
       }
     },
     // 确定创建
     sureCreate() {
-      let obj = {};
-      this.tableHeader.forEach(item => {
-        obj[item.prop] = '';
-      });
-      obj.isEditor = true;
-      this.tableData.unshift(obj);
-      let user = JSON.parse(sessionStorage.getItem('user'));
-      let createAt = user.name;
-      console.log(createAt)
-      // 添加色号请求
-      // this.$http.post('/colorController/addColor',{
-
-      // }).then(res => {
-      //   console.log('res',res);
-      //   if (res.data.code == 0 && res.data.message == 'success') {
-
-      //   }
-      // }).catch(error => {
-      //   console.log('失败原因:' + error);
-      // })
-      
       this.childPageIsShow = false;
       this.params = {
-        name: '',
-        no: '',
+        custom: '',
+        goods: '',
       }
     },
     // 编辑行
     editorRow(row) {
-      let flag = this.tableData.some(item => {
-        return item.isEditor;
-      });
-      if (flag) {
-        this.$message({
-          showClose: true,
-          message: '已经存在编辑项，请完成后再继续操作'
-        });
-      }else {
-        this.copyRow = JSON.parse(JSON.stringify(row));
-        row.isEditor = true;
-        // 编辑色号请求
-        // this.$http.post('/colorController/removeColor',{
-
-        // }).then(res => {
-        //   console.log('res',res);
-        //   if (res.data.code == 0 && res.data.message == 'success') {
-
-        //   }
-        // }).catch(error => {
-        //   console.log('失败原因:' + error);
-        // })
-      }
+      this.childPageIsShow = true;
+      this.params = JSON.parse(JSON.stringify(row));
+      // if (flag) {
+      //   this.$message({
+      //     showClose: true,
+      //     message: '已经存在编辑项，请完成后再继续操作'
+      //   });
+      // }else {
+      //   this.copyRow = JSON.parse(JSON.stringify(row));
+      //   row.isEditor = true;
+      // }
     },
     // 删除行
     deleteRow(index) {
@@ -238,8 +227,7 @@ export default {
       for (let k in this.copyRow) {
         row[k] = this.copyRow[k]
       }
-    }
-    
+    },
   }
 };
 </script>
@@ -300,7 +288,8 @@ export default {
         font-family: Microsoft Yahei;
         font-size: 12px;
         color: #f3f3f3;
-        background: #009AFE;
+        background: #1e79eb;
+        // background: #009AFE;
         border-radius: 4px;
         cursor: pointer;
       }
