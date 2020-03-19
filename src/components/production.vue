@@ -13,8 +13,7 @@
     <el-table
       :data="tableList.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       :height="browserAttr.height - 200"
-      :header-cell-style="{background: '#bbd7f9', color: '#354356'}"
-      :row-class-name="tableRowClassName"
+      :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%"
       border
     >
@@ -55,6 +54,40 @@
       layout="prev, pager, next, jumper"
       >
     </el-pagination>
+    <div class="loading dialog-box" v-if="childPageIsShow">
+      <div class="dialog">
+        <div class="content-item">
+          <!-- <div class="username">用户名</div>
+          <input v-model="userObj.name" placeholder="请填写用户名"> -->
+        </div>
+        <div class="content-item">
+          <div class="custom">客户</div>
+          <el-select v-model="params.custom" placeholder="请选择客户">
+            <el-option
+              v-for="item in customList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </div>
+        <div class="content-item">
+          <div class="goods">商品</div>
+          <el-select v-model="params.goods" placeholder="请选择客户">
+            <el-option
+              v-for="item in goodsList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </div>
+        <div class="footer">
+          <el-button @click="cancelCreateUser">取消</el-button>
+          <el-button type="primary" @click="sureCreateUser">确定</el-button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -62,6 +95,7 @@
 export default {
   data() {
     return {
+      childPageIsShow: false,
       currentPage: 1, // 表格当前页码
       pageSize: 50, // 表格每一页展示数据的数量
       browserAttr: {
@@ -73,9 +107,24 @@ export default {
         {label: '订单编号', prop: 'orderNumber'},
         {label: '客户', prop: 'custom'},
         {label: '商品', prop: 'goods'},
-        {label: '需求量', prop: 'requirement'},
+        {label: '数量', prop: 'requirement'},
         {label: '金额', prop: 'money'},
-        {label: '交货日期', prop: 'date'},
+        {label: '交货日期', prop: 'deliveryDate'},
+        {label: '制单日期', prop: 'orderDate'},
+      ],
+      params: {                    // 子页面参数
+        custom: '',
+        goods: '',
+      },
+      customList: [            // 客户列表
+        { label: '客户1', value: '客户1' },
+        { label: '客户2', value: '客户2' },
+        { label: '客户3', value: '客户3' },
+      ],
+      goodsList: [             // 商品列表
+        { label: '商品1', value: '商品1' },
+        { label: '商品2', value: '商品2' },
+        { label: '商品3', value: '商品3' },
       ]
     };
   },
@@ -243,15 +292,15 @@ export default {
       }
       .btn {
         float: right;
-        width: 80px;
+        width: 70px;
         height: 30px;
         line-height: 30px;
         text-align: center;
         margin: 0 0 0 10px;
         font-family: Microsoft Yahei;
-        font-size: 16px;
+        font-size: 12px;
         color: #f3f3f3;
-        background: #1e79eb;
+        background: #009AFE;
         border-radius: 4px;
         cursor: pointer;
       }

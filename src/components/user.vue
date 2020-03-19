@@ -11,7 +11,7 @@
     <el-table
       :data="userList.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       :height="browserAttr.height - 190"
-      :header-cell-style="{background: '#bbd7f9', color: '#354356'}"
+      :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       :row-class-name="tableRowClassName"
       border
     >
