@@ -3,7 +3,7 @@
     <div class="header">
       <div class="title">
         <div>{{this.$route.meta.til || '染化剂管理'}}</div>
-        <div>总计 {{totalNum}} 条数据</div>
+        <!-- <div>总计 {{totalNum}} 条数据</div> -->
       </div>
       <div class="func-bar">
         <my-search style="float:left" @searchContent="searchContent"></my-search>
@@ -45,16 +45,19 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination
-      background
-      :current-page.sync="currentPage"
-      :total="totalNum"
-      :page-size="pageSize"
-      :page-count="5"
-      @current-change="tableChangePage"
-      layout="prev, pager, next, jumper"
-      >
-    </el-pagination>
+    <div class="pagination">
+      <el-pagination
+        background
+        :current-page.sync="currentPage"
+        :total="totalNum"
+        :page-size="pageSize"
+        :page-count="5"
+        @current-change="tableChangePage"
+        layout="prev, pager, next, jumper"
+        >
+      </el-pagination>
+      <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
+    </div>
   </div>
 </template>
 

@@ -3,11 +3,11 @@
     <div class="header">
       <div class="title">
         <div>{{this.$route.meta.til || '订单管理'}}</div>
-        <div>总计 {{totalNum}} 条数据</div>
+        <!-- <div>总计 {{totalNum}} 条数据</div> -->
       </div>
       <div class="func-bar">
         <my-search style="float:left" @searchContent="searchContent"></my-search>
-        <div class="add btn" @click="addRow">新建订单</div>
+        <div class="add btn" @click="addOrder">新建订单</div>
       </div>
     </div>
     <!-- :row-class-name="tableRowClassName" -->
@@ -183,7 +183,9 @@ export default {
       this.currentPage = nowPage;
     },
     searchContent() {},
-    addRow() {},
+    addOrder() {
+      this.childPageIsShow = true;
+    },
      // 取消创建
     cancelCreate() {
       this.childPageIsShow = false;
