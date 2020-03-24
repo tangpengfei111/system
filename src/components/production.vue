@@ -31,13 +31,29 @@
               <el-date-picker
                 v-model="scope.row.deliveryDate"
                 type="datetime"
-                format="yyyy-MM-dd"
-                value-format="yyyy-MM-dd"
-                placeholder="选择日期时间">
+                format="yyyy-MM-dd HH:mm:ss"
+                value-format="yyyy-MM-dd HH:mm:ss"
+                placeholder="选择日期时间"
+                :editable="false">
               </el-date-picker>
             </div>
-            <div v-if="item.label !== '交货日期'">
+            <div v-if="item.label == '客户' || item.label == '商品'">
               <input type="text" v-model="scope.row[item.prop]">
+            </div>
+            <div v-if="item.label == '需求量'">
+              <input type="text" 
+                v-model="scope.row[item.prop]" 
+                oninput="value=value.replace(/[^\d]/g,'')"
+                >
+            </div>
+            <div v-if="item.label == '金额'">
+              <input type="text" 
+                v-model="scope.row[item.prop]" 
+                @keyup="checkNumber"
+                >
+            </div>
+            <div v-if="item.label == '合格品数量'">
+              <input type="number" :disabled='!scope.row.productionPlan' v-model="scope.row[item.prop]" oninput="value=value.replace(/[^\d]/g,'')">
             </div>
           </div>
           <div v-if="!scope.row.isEditor || !item.editor">
@@ -153,6 +169,13 @@
 <script>
 import search from '@/components/common/search.vue';
 import utils from '@/lib/utils.js';
+function checkNumber(obj){
+      obj.value = obj.value.replace(/[^\d.]/g,"");//清除"数字"和"."以外的字符
+      obj.value = obj.value.replace(/^\./g,"");//验证第一个字符是数字而不是字符
+      obj.value = obj.value.replace(/\.{2,}/g,".");//只保留第一个.清除多余的
+      obj.value = obj.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");
+      obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');//只能输入两个小数
+    }
 export default {
   components: {
     'my-search': search
@@ -176,6 +199,7 @@ export default {
         {label: '需求量', prop: 'requirement', editor: true },
         {label: '金额', prop: 'money', editor: true },
         {label: '交货日期', prop: 'deliveryDate', editor: true, width: 210},
+        {label: '合格品数量', prop: 'qualityNum', editor: true },
         {label: '生产计划', prop: 'productionPlan', editor: false, width: 180 },
         // {label: '制单日期', prop: 'orderDate'},
       ],
@@ -211,7 +235,8 @@ export default {
         goods: '商品1',
         requirement: '50',
         money: '3000',
-        deliveryDate: '2019-05-03',
+        deliveryDate: '2019-05-03 08:08:08',
+        qualityNum: '0',
         productionPlan: 1,
         isEditor: false
       }));
@@ -266,18 +291,20 @@ export default {
           obj[item.prop] = '';
         });
         obj.orderNumber = '系统自动生成';
+        obj.qualityNum = '0';
         obj.isEditor = true;
         this.tableData.unshift(obj);
       }
     },
     // 确定编辑（创建）
     sureEditor(row) {
-      if (row.custom.trim() === '' || row.goods.trim() === '' || row.requirement.trim() === '' || row.money.trim() === '' || row.deliveryDate.trim() === ''){
+      if (row.custom.trim() === '' || row.goods.trim() === '' || row.requirement.trim() === '' || row.money.trim() === '' || !row.deliveryDate){
         this.$message({
           message: '请填写客户、商品、需求量、金额、交货日期等信息'
         })
         return;
       }
+      console.log('xxxxx',row.deliveryDate);
       if (this.eidtorState === 'add') {
         let letter = 'qwertyuiopasdfghjklzxcvbnm';
         let number = '0123456789';
@@ -367,6 +394,34 @@ export default {
     },
     onSubmit() {
       console.log('submit!');
+    },
+    inputChange(e) {
+      console.log(3,e)
+      let { min = undefined, onChange } = this.props
+      // console.log(this.props, "value onchange")
+      min = typeof min == "undefined" ? min : Number(min)
+      // max = typeof max == "undefined" ? max : Number(max)
+      let newValue
+      let value = e.target.value.toString().replace(/^0+/, '0')
+      let numberValue = Number(value)
+      if (isNaN(numberValue) === true && value != "-") return
+      if (min !== undefined && min >= 0 && value.indexOf('-') > -1) return
+      //输入的内容超过两个连续的0
+      if (numberValue == 0 && (value == "00" || value == "-00") && Number(value) == numberValue) {
+        return
+      }
+      newValue = value
+    },
+    inputBlur(e) {
+      console.log(4,e)
+    },
+    // 处理金额输入框  只输入数字且允许保留两位小数
+    checkNumber(event){
+      event.target.value = event.target.value.replace(/[^\d.]/g,"");//清除"数字"和"."以外的字符
+      event.target.value = event.target.value.replace(/^\./g,"");//验证第一个字符是数字而不是字符
+      event.target.value = event.target.value.replace(/\.{2,}/g,".");//只保留第一个.清除多余的
+      event.target.value = event.target.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");
+      event.target.value = event.target.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');//只能输入两个小数
     }
   }
 };
@@ -448,18 +503,6 @@ export default {
     .el-button {
       padding: 4px 8px;
       margin: 0 8px 0 0;
-    }
-    .el-date-editor.el-input, .el-date-editor.el-input__inner {
-      width: 80%;
-      height: 30px;
-      line-height: 30px;
-    }
-    /deep/.el-input__inner {
-      height: 30px;
-      line-height: 30px;
-    }
-    /deep/.el-input__icon {
-      line-height: 30px;
     }
   }
   .dialog-box {

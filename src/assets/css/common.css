@@ -21,6 +21,15 @@ input {
     outline: none;
 }
 
+/* 移除input类型为number时上下浮标 */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+input[type="number"]{
+    -moz-appearance: textfield;
+}
+
 
 /* 显示省略号 */
 .ellipsis {
@@ -179,7 +188,7 @@ input {
     text-align: center;
 }
 
-/* 全局气泡确认框样式 */
+/* 全局气泡确认框 样式 */
 .el-popover {
     min-width: 0;
 }
@@ -194,4 +203,18 @@ input {
 .el-popconfirm .el-popconfirm__action .el-button{
     padding: 5px 10px;
     border-radius: 0;
+}
+
+/* 全局日期时间选择框 样式 */
+.el-date-editor.el-input, .el-date-editor.el-input__inner {
+    width: 80%;
+}
+.el-date-editor .el-input__inner {
+    height: 30px;
+    line-height: 30px;
+    padding: 0 25px 0 28px;
+}
+.el-date-editor .el-input__icon {
+    line-height: 30px;
+    width: 20px;
 }
