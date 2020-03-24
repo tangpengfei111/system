@@ -147,6 +147,7 @@ export default {
   overflow: visible;
 }
 .el-menu-vertical-demo {
+  width: 200px;
   .el-submenu {
     text-align: left;
     .el-menu-item {

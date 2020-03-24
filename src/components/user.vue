@@ -30,7 +30,13 @@
       <el-table-column label="操作" width="130" align="center">
         <template slot-scope="scope">
           <el-button size="mini" @click="editorRow(scope.row)">编辑</el-button>
-          <el-button size="mini" type="danger" @click="deleteRow(scope.row)">删除</el-button>
+          <el-popconfirm
+              title="确定要删除吗?"
+              cancelButtonType="plain"
+              @onConfirm="deleteRow(scope.row)"
+            >
+            <el-button slot="reference" size="mini" type="danger">删除</el-button>
+          </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
@@ -299,6 +305,7 @@ export default {
   .el-table {
     .el-button {
       padding: 4px 8px;
+      margin: 0 8px 0 0;
     }
   }
 }

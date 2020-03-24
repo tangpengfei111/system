@@ -58,7 +58,13 @@
         <template slot-scope="scope">
           <div v-if="!scope.row.isEditor">
             <el-button size="mini" @click="editorRow(scope.row)">编辑</el-button>
-            <el-button size="mini" type="danger" @click="deleteRow(scope.$index, scope.row)">删除</el-button>
+            <el-popconfirm
+                title="确定要删除吗?"
+                cancelButtonType="plain"
+                @onConfirm="deleteRow(scope.$index, scope.row)"
+              >
+              <el-button slot="reference" size="mini" type="danger">删除</el-button>
+            </el-popconfirm>
           </div>
           <div v-if="scope.row.isEditor">
             <el-button size="mini" @click="sureEditor(scope.row)">确定</el-button>
@@ -203,7 +209,7 @@ export default {
         orderNumber: 'xasdasd1',
         custom: '客户1',
         goods: '商品1',
-        requirement: 50,
+        requirement: '50',
         money: '3000',
         deliveryDate: '2019-05-03',
         productionPlan: 1,
@@ -314,6 +320,7 @@ export default {
     // 删除行
     deleteRow(index) {
       this.tableData.splice(index,1);
+
     },
     // 显示子页面
     showChildPage(row) {
@@ -440,6 +447,7 @@ export default {
     }
     .el-button {
       padding: 4px 8px;
+      margin: 0 8px 0 0;
     }
     .el-date-editor.el-input, .el-date-editor.el-input__inner {
       width: 80%;

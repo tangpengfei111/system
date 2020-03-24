@@ -178,3 +178,20 @@ input {
 .el-select-dropdown__item {
     text-align: center;
 }
+
+/* 全局气泡确认框样式 */
+.el-popover {
+    min-width: 0;
+}
+.el-popconfirm {
+    width: 130px;
+    height: 60px;
+}
+.el-popconfirm .el-popconfirm__action {
+    text-align: center;
+    margin-top: 15px;
+}
+.el-popconfirm .el-popconfirm__action .el-button{
+    padding: 5px 10px;
+    border-radius: 0;
+}
