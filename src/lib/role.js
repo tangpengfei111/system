@@ -4,7 +4,7 @@ var role = {
             'color','customer','dyeAgent','machine','material','supplier',  // 基础数据维护
             'dayproduction','yieldrate','stocklist','stockdetails',         // 报表管理
             'production',
-            'stock',
+            'dyestock','materialstock',
             'user'
         ],
         // generalAdmin: [
@@ -21,7 +21,7 @@ var role = {
         stockUser: [
             'color','customer','dyeAgent','machine','material','supplier',
             'dayproduction','yieldrate','stocklist','stockdetails',
-            'stock',
+            'dyestock','materialstock',
         ],
     },
     options: [

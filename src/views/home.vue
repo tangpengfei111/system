@@ -29,10 +29,18 @@
               <i class="el-icon-s-tools"></i>
               <span>生产管理</span>
             </el-menu-item>
-            <el-menu-item index="stock" v-if="this.menuItemIsShow.stock">
+            <el-submenu index="stock" v-if="this.menuItemIsShow.dyestock">
+              <template slot="title">
+                <i class="el-icon-box"></i>
+                <span>库存管理</span>
+              </template>
+              <el-menu-item index="dyestock">染化剂库存</el-menu-item>
+              <el-menu-item index="materialstock">原料库存</el-menu-item>
+            </el-submenu>
+            <!-- <el-menu-item index="stock" v-if="this.menuItemIsShow.stock">
               <i class="el-icon-box"></i>
               <span slot="title">库存管理</span>
-            </el-menu-item>
+            </el-menu-item> -->
             <el-submenu index="report" v-if="this.menuItemIsShow.dayproduction">
               <template slot="title">
                 <i class="el-icon-document"></i>
@@ -92,7 +100,7 @@ export default {
         material: true,
         production: true,
         dayproduction: true,
-        stock: true,
+        dyestock: true,
         user: true
       }
       for (let k in option) {

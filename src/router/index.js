@@ -75,15 +75,6 @@ const routes = [
           til: '订单管理'
         }
       },
-      // {
-      //   path: '/productionplan',
-      //   name: 'productionplan',
-      //   component: () => import('../components/production/productionplan.vue'),
-      //   meta: {
-      //     til: '生产计划'
-      //   }
-      // },
-
       
       {
         path: '/dayproduction',
@@ -118,14 +109,27 @@ const routes = [
         }
       },
       
-
-
-
       {
-        path: '/stock',
-        name: 'stock',
-        component: () => import('../components/stock.vue'),
+        path: '/dyestock',
+        name: 'dyestock',
+        component: () => import('../components/stock/dyestock.vue'),
+        meta: {
+          til: '染化剂库存'
+        }
       },
+      {
+        path: '/materialstock',
+        name: 'materialstock',
+        component: () => import('../components/stock/materialstock.vue'),
+        meta: {
+          til: '原料库存'
+        }
+      },
+      // {
+      //   path: '/stock',
+      //   name: 'stock',
+      //   component: () => import('../components/stock.vue'),
+      // },
       {
         path: '/user',
         name: 'user',
