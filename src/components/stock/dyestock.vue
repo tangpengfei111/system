@@ -4,6 +4,10 @@
       <div class="title">
         <div>{{this.$route.meta.til || '染化剂库存'}}</div>
       </div>
+      <div class="func-bar">
+        <my-search style="float:left" @searchContent="searchContent"></my-search>
+        <!-- <div class="add btn" @click="addOrder">新建订单</div> -->
+      </div>
     </div>
     <el-table
       :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
@@ -85,7 +89,11 @@
 </template>
 
 <script>
+import search from '@/components/common/search.vue';
 export default {
+  components: {
+    'my-search': search
+  },
   data() {
     return {
       childPageIsShow: false,
@@ -168,6 +176,9 @@ export default {
     },
     // 确定库存操作
     sureStockOperation() {
+
+    },
+    searchContent() {
 
     }
   }

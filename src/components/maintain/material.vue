@@ -380,7 +380,7 @@ export default {
       position: absolute;
       top: 15px;
       right: 0;
-      width: 330px;
+      // width: 330px;
       overflow: hidden;
       .add {
         float: right;
