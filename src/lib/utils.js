@@ -32,6 +32,13 @@ var utils = {
         m = m < 10 ? '0' + m : m;
         s = s < 10 ? '0' + s : s;
         return `${y}-${M}-${d} ${h}:${m}:${s}`;
+    },
+    /**
+     * 获取用户信息，返回用户对象，name,role
+     */
+    getUserInfo() {
+        let userInfo = sessionStorage.getItem('user');
+        return JSON.parse(userInfo);
     }
 }
 

@@ -23,9 +23,6 @@
         :width="item.width"
         align="center"
       >
-        <!-- <template slot-scope="scope">
-          
-        </template> -->
       </el-table-column>
       <el-table-column label="操作" width="200" align="center" fixed="right">
         <template slot-scope="scope">
@@ -60,24 +57,24 @@
           <div class="title-label">生产计划</div>
         </div>
         <div class="content-item">
-          <div>类型</div>
-          <el-select v-model="userObj.changeType" placeholder="请选择变化类型">
-            <el-option
-              v-for="item in roleOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
+          <div class="item-label">类型</div>
+          <el-select v-model="params.changeType" placeholder="请选择变化类型">
+            <el-option label="增加库存" value="增加库存"></el-option>
+            <el-option label="减少库存" value="增加库存"></el-option>
           </el-select>
-          
         </div>
         <div class="content-item">
-          <div>原因</div>
-          <input v-model="params.reason" placeholder="请填写变化原因">
+          <div class="item-label">数量</div>
+          <input type="text" v-model="params.number" oninput="value=value.replace(/[^\d]/g,'')" placeholder="请填写变化数量">
         </div>
         <div class="content-item">
-          <div>数量</div>
-          <input v-model="params.number" placeholder="请填写变化数量">
+          <div class="item-label reason">原因</div>
+          <el-input
+            type="textarea"
+            placeholder="请填写变化原因"
+            v-model="params.reason"
+            >
+          </el-input>
         </div>
         <div class="footer">
           <el-button @click="cancelStockOperation">取消</el-button>
@@ -90,6 +87,7 @@
 
 <script>
 import search from '@/components/common/search.vue';
+import utils from '@/lib/utils.js';
 export default {
   components: {
     'my-search': search
@@ -160,11 +158,19 @@ export default {
     },
     // 库存变化
     stockChange(row) {
-
+      this.childPageIsShow = true;
     },
     // 查看日志
     viewLog(row) {
-
+      console.log(111)
+      this.$router.push({
+        path: '/stocklog', 
+        query: {
+          title: '染化剂',
+          agentName: row.agentName,
+          agentNo: row.agentNo,
+        }
+      });
     },
     // 删除行信息
     deleteRow(index,row) {
@@ -172,11 +178,21 @@ export default {
     },
     // 取消库存操作
     cancelStockOperation() {
-
+      this.childPageIsShow = false;
+      for(let k in this.params) {
+        this.params[k] = '';
+      }
     },
     // 确定库存操作
     sureStockOperation() {
+      let userInfo = utils.getUserInfo();
+      this.params.user = userInfo.name;
+      this.params.number = parseFloat(this.params.number);
+      console.log('确定库存',JSON.parse(JSON.stringify(this.params)));
 
+      // 添加库存操作请求
+
+      this.cancelStockOperation();
     },
     searchContent() {
 
@@ -219,7 +235,7 @@ export default {
       position: absolute;
       top: 15px;
       right: 0;
-      width: 330px;
+      width: 280px;
       overflow: hidden;
       .add {
         float: right;
@@ -272,6 +288,90 @@ export default {
     .el-button {
       padding: 4px 8px;
       margin: 0 8px 0 0;
+    }
+  }
+  .dialog-box {
+    background-color: rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    .dialog {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 20px;
+      box-sizing: border-box;
+      width: 400px;
+      height: 350px;
+      background-color: #ffffff;
+      .title {
+        overflow: hidden;
+        height: 30px;
+        .title-label {
+          float: left;
+          width: 80px;
+          height: 30px;
+          line-height: 30px;
+          font-family: Microsoft Yahei;
+          font-size: 18px;
+        }
+        .export {
+          float: right;
+          width: 50px;
+          height: 30px;
+          line-height: 30px;
+          text-align: center;
+          font-family: Microsoft Yahei;
+          font-size: 14px;
+          color: #f3f3f3;
+          background: #1e79eb;
+          border-radius: 4px;
+        }
+      }
+      .content-item {
+        width: 100%;
+        margin: 20px auto;
+        box-sizing: border-box;
+        .item-label {
+          display: inline-block;
+          width: 70px;
+          color: #606266;
+          font-size: 14px;
+        }
+        .item-label.reason {
+          height: 54px;
+          line-height: 54px;
+        }
+        .el-select {
+          width: 180px;
+          margin-left: 10px;
+        }
+        .el-input__inner {
+          width: 180px;
+        }
+        .el-textarea {
+          width: 180px;
+          margin-left: 10px;
+        }
+        input {
+          width: 180px;
+          margin-left: 10px;
+          outline-color: #409EFF;
+          &::-webkit-input-placeholder {
+            font-family: Microsoft YaHei;
+            font-size: 14px;
+            font-weight: 500;
+            color: #a9adb3;
+          }
+        }
+        input:focus {
+          border-color: #409EFF;
+        }
+      }
+    }
+    .footer {
+      position: absolute;
+      bottom: 25px;
+      right: 30px;
     }
   }
 }

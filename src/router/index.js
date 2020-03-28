@@ -125,6 +125,14 @@ const routes = [
           til: '原料库存'
         }
       },
+      {
+        path: '/stocklog',
+        name: 'stocklog',
+        component: () => import('../components/stock/stocklog.vue'),
+        meta: {
+          til: '库存日志'
+        }
+      },
       // {
       //   path: '/stock',
       //   name: 'stock',

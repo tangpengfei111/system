@@ -21,6 +21,11 @@ input {
     outline: none;
 }
 
+/* 禁止textarea拉伸样式 */
+textarea {
+    resize: none !important;
+}
+
 /* 移除input类型为number时上下浮标 */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
