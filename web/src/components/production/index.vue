@@ -29,7 +29,7 @@
           <div v-if="scope.row.isEditor && item.editor">
             <div v-if="item.label == '交货日期'">
               <el-date-picker
-                v-model="scope.row.deliveryDate"
+                v-model="scope.row.transactionDate"
                 type="datetime"
                 format="yyyy-MM-dd HH:mm:ss"
                 value-format="yyyy-MM-dd HH:mm:ss"
@@ -37,7 +37,17 @@
                 :editable="false">
               </el-date-picker>
             </div>
-            <div v-if="item.label == '客户' || item.label == '商品'">
+            <div v-if="item.label == '客户'">
+              <el-select v-model="scope.row[item.prop]" placeholder="请选择客户">
+                <el-option
+                  v-for="item in customList"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </div>
+            <div v-if="item.label == '商品'">
               <input type="text" v-model="scope.row[item.prop]">
             </div>
             <div v-if="item.label == '需求量'">
@@ -52,35 +62,26 @@
                 @keyup="checkNumber"
                 >
             </div>
-            <div v-if="item.label == '合格品数量'">
-              <input type="number" :disabled='!scope.row.productionPlan' v-model="scope.row[item.prop]" oninput="value=value.replace(/[^\d]/g,'')">
-            </div>
           </div>
           <div v-if="!scope.row.isEditor || !item.editor">
-            <div v-if="item.label !== '生产计划'">{{scope.row[item.prop]}}</div>
-            <div v-if="item.label == '生产计划'">
+            <div>{{scope.row[item.prop]}}</div>
+            <!-- <div v-if="item.label == '生产计划'">
               <div v-if="!scope.row.productionPlan">
                 <el-button size="mini" :disabled="scope.row.isEditor" @click="createPlan(scope.row)">创建</el-button>
               </div>
               <div v-if="scope.row.productionPlan">
-                <el-button size="mini" :disabled="scope.row.isEditor" @click="viewPlan(scope.row)">查看</el-button>
+                
                 <el-button size="mini" :disabled="scope.row.isEditor" @click="editorPlan(scope.row)">修改</el-button>
               </div>
-            </div>
+            </div> -->
           </div>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="150" align="center" fixed="right">
         <template slot-scope="scope">
           <div v-if="!scope.row.isEditor">
-            <el-button size="mini" @click="editorRow(scope.row)">编辑</el-button>
-            <el-popconfirm
-                title="确定要删除吗?"
-                cancelButtonType="plain"
-                @onConfirm="deleteRow(scope.$index, scope.row)"
-              >
-              <el-button slot="reference" size="mini" type="danger">删除</el-button>
-            </el-popconfirm>
+            <el-button size="mini" :disabled="scope.row.isEditor" @click="viewPlan(scope.row)">查看计划</el-button>
+            <el-button size="mini" @click="editorRow(scope.row)">编辑订单</el-button>
           </div>
           <div v-if="scope.row.isEditor">
             <el-button size="mini" @click="sureEditor(scope.row)">确定</el-button>
@@ -124,7 +125,7 @@
             <el-input v-model="planParams.goods" :disabled='true'></el-input>
           </el-form-item>
           <el-form-item label="生产数量">
-            <el-input v-model="planParams.requirement" :disabled='true'></el-input>
+            <el-input v-model="planParams.productionSummary" :disabled='true'></el-input>
           </el-form-item>
           <el-form-item label="设备">
             <el-select v-model="planParams.machine" placeholder="请选择设备">
@@ -193,15 +194,12 @@ export default {
       copyRow: {},
       tableData: [],
       tableHeader: [
-        {label: '订单编号', prop: 'orderNumber', editor: false},
-        {label: '客户', prop: 'custom', editor: true },
+        // {label: '订单编号', prop: 'orderNumber', editor: false},
+        {label: '客户', prop: 'customerName', editor: true },
         {label: '商品', prop: 'goods', editor: true },
-        {label: '需求量', prop: 'requirement', editor: true },
-        {label: '金额', prop: 'money', editor: true },
-        {label: '交货日期', prop: 'deliveryDate', editor: true, width: 210},
-        {label: '合格品数量', prop: 'qualityNum', editor: true },
-        {label: '生产计划', prop: 'productionPlan', editor: false, width: 180 },
-        // {label: '制单日期', prop: 'orderDate'},
+        {label: '需求量', prop: 'productionSummary', editor: true },
+        {label: '金额', prop: 'amount', editor: true },
+        {label: '交货日期', prop: 'transactionDate', editor: true, width: 210}
       ],
       planParams: {                    // 子页面参数
         machine: '',
@@ -212,7 +210,7 @@ export default {
         dyeAgentNum: '',
         orderNumber: '',
         goods: '',
-        requirement: ''
+        productionSummary: ''
       },
       customList: [            // 客户列表
         { label: '客户1', value: '客户1' },
@@ -223,7 +221,8 @@ export default {
         { label: '商品1', value: '商品1' },
         { label: '商品2', value: '商品2' },
         { label: '商品3', value: '商品3' },
-      ]
+      ],
+      
     };
   },
   mounted() {
@@ -231,11 +230,11 @@ export default {
     for (let i = 0; i < 100; i++) {
       let obj = JSON.parse(JSON.stringify({
         orderNumber: 'xasdasd1',
-        custom: '客户1',
+        customerName: '客户1',
         goods: '商品1',
-        requirement: '50',
-        money: '3000',
-        deliveryDate: '2019-05-03 08:08:08',
+        productionSummary: '50',
+        amount: '3000',
+        transactionDate: '2019-05-03 08:08:08',
         qualityNum: '0',
         productionPlan: 1,
         isEditor: false
@@ -298,13 +297,13 @@ export default {
     },
     // 确定编辑（创建）
     sureEditor(row) {
-      if (row.custom.trim() === '' || row.goods.trim() === '' || row.requirement.trim() === '' || row.money.trim() === '' || !row.deliveryDate){
+      if (row.customerName.trim() === '' || row.goods.trim() === '' || row.productionSummary.trim() === '' || row.amount.trim() === '' || !row.transactionDate){
         this.$message({
           message: '请填写客户、商品、需求量、金额、交货日期等信息'
         })
         return;
       }
-      console.log('xxxxx',row.deliveryDate);
+      console.log('xxxxx',row.transactionDate);
       if (this.eidtorState === 'add') {
         let letter = 'qwertyuiopasdfghjklzxcvbnm';
         let number = '0123456789';
@@ -354,7 +353,7 @@ export default {
       this.copyRow = row;
       this.planParams.orderNumber = row.orderNumber;
       this.planParams.goods = row.goods;
-      this.planParams.requirement = row.requirement;
+      this.planParams.productionSummary = row.productionSummary;
       this.childPageIsShow = true;
     },
     // 创建计划
@@ -367,14 +366,20 @@ export default {
     },
     // 查看计划
     viewPlan(row) {
-      if (row.productionPlan && row.productionPlan.orderNumber) {
-        this.planParams = this._.cloneDeep(row.productionPlan);
-        this.childPageIsShow = true;
+      // if (row.productionPlan && row.productionPlan.orderNumber) {
+      //   this.planParams = this._.cloneDeep(row.productionPlan);
+      //   this.childPageIsShow = true;
         
-      }else {
-        this.showChildPage(row);
-      }
-      console.log(this.planParams)
+      // }else {
+      //   this.showChildPage(row);
+      // }
+      console.log(row)
+      this.$router.push({
+        path: '/proplan', 
+        query: {
+          orderNumber: row.orderNumber
+        }
+      });
     },
     // 取消创建
     cancelPlan() {
@@ -468,7 +473,7 @@ export default {
         height: 35px;
         margin-right: 10px;
         box-sizing: border-box;
-        background-image: url("../assets/image/add-icon.png");
+        background-image: url("../../assets/image/add-icon.png");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 25px 25px;
@@ -503,6 +508,17 @@ export default {
     .el-button {
       padding: 4px 8px;
       margin: 0 8px 0 0;
+    }
+    /deep/ .el-input__inner {
+      height: 30px;
+      line-height: 30px;
+      text-align: center;
+    }
+    /deep/ .el-select {
+      width: 90%;
+      .el-input__icon {
+        line-height: 30px;
+      }
     }
   }
   .dialog-box {

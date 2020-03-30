@@ -100,7 +100,6 @@ export default {
         { label: '染化剂编号', prop: 'agentNo', editor: false },
         { label: '染化剂名称', prop: 'agentName', editor: false },
         { label: '库存数量', prop: 'stockNum', editor: false },
-        { label: '目前状况', prop: 'dyeInfo', editor: false },
         { label: '最后操作时间', prop: 'lastUpdateTime', editor: false },
       ],
       tableData: [],

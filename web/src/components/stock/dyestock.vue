@@ -54,25 +54,35 @@
     <div class="loading dialog-box" v-if="childPageIsShow">
       <div class="dialog">
         <div class="title">
-          <div class="title-label">生产计划</div>
+          <div class="title-label">库存调整 —
+            <span>{{copyRow.agentName}}</span>
+          </div>
         </div>
         <div class="content-item">
-          <div class="item-label">类型</div>
-          <el-select v-model="params.changeType" placeholder="请选择变化类型">
-            <el-option label="增加库存" value="增加库存"></el-option>
-            <el-option label="减少库存" value="增加库存"></el-option>
+          <div class="item-label">调整类型</div>
+          <el-select v-model="params.type" placeholder="请选择调整类型">
+            <el-option label="增加" value="0"></el-option>
+            <el-option label="减少" value="1"></el-option>
           </el-select>
         </div>
         <div class="content-item">
-          <div class="item-label">数量</div>
-          <input type="text" v-model="params.number" oninput="value=value.replace(/[^\d]/g,'')" placeholder="请填写变化数量">
+          <div class="item-label">调整量</div>
+          <input type="text" v-model="params.variation" oninput="value=value.replace(/[^\d]/g,'')" placeholder="请填写变化数量">
         </div>
         <div class="content-item">
           <div class="item-label reason">原因</div>
-          <el-input
+          <el-input 
+            v-if="params.type === '0'"
             type="textarea"
             placeholder="请填写变化原因"
-            v-model="params.reason"
+            v-model="params.increaseType"
+            >
+          </el-input>
+          <el-input
+            v-if="params.type === '1'"
+            type="textarea"
+            placeholder="请填写变化原因"
+            v-model="params.reduceType"
             >
           </el-input>
         </div>
@@ -100,7 +110,6 @@ export default {
         { label: '染化剂编号', prop: 'agentNo', editor: false },
         { label: '染化剂名称', prop: 'agentName', editor: false },
         { label: '库存数量', prop: 'stockNum', editor: false },
-        { label: '目前状况', prop: 'dyeInfo', editor: false },
         { label: '最后操作时间', prop: 'lastUpdateTime', editor: false },
       ],
       tableData: [],
@@ -112,10 +121,11 @@ export default {
       },
       copyRow: {},
       params: {
-        user: '',
-        changeType: '',
-        reason: '',
-        number: ''
+        createAt: '',
+        type: '0',
+        reduceType: '',
+        increaseType: '',
+        variation: ''
       },
       roleOptions: []
     }
@@ -158,7 +168,10 @@ export default {
     },
     // 库存变化
     stockChange(row) {
+      this.copyRow = row;
+      console.log(this.copyRow.agentName)
       this.childPageIsShow = true;
+      
     },
     // 查看日志
     viewLog(row) {
@@ -182,12 +195,18 @@ export default {
       for(let k in this.params) {
         this.params[k] = '';
       }
+      this.params.type = '0';
     },
     // 确定库存操作
     sureStockOperation() {
       let userInfo = utils.getUserInfo();
-      this.params.user = userInfo.name;
-      this.params.number = parseFloat(this.params.number);
+      this.params.createAt = userInfo.name;
+      this.params.variation = parseFloat(this.params.variation);
+      if (this.params.type === '1') {
+        this.params.increaseType = '';
+      }else {
+        this.params.reduceType = '';
+      }
       console.log('确定库存',JSON.parse(JSON.stringify(this.params)));
 
       // 添加库存操作请求
@@ -308,11 +327,15 @@ export default {
         height: 30px;
         .title-label {
           float: left;
-          width: 80px;
+          width:100%;
           height: 30px;
           line-height: 30px;
+          text-align: left;
           font-family: Microsoft Yahei;
           font-size: 18px;
+          span {
+            font-size: 16px;
+          }
         }
         .export {
           float: right;

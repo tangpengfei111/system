@@ -24,7 +24,7 @@
         align="center"
       >
       </el-table-column>
-      <el-table-column label="操作" width="180" align="center">
+      <!-- <el-table-column label="操作" width="180" align="center">
         <template slot-scope="scope">
           <el-popconfirm
             title="确定要清除吗?"
@@ -34,7 +34,7 @@
             <el-button slot="reference" size="mini" type="danger">清除记录</el-button>
           </el-popconfirm>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
     <div class="pagination">
       <el-pagination
@@ -63,10 +63,11 @@ export default {
       title: "",
       tableHeader: [
         { label: '序号', prop: 'index', width: 80 },
-        { label: '变化类型', prop: 'changeType' },
-        { label: '变化数量', prop: 'number' },
-        { label: '库存余量', prop: 'stockNum' },
-        { label: '操作用户', prop: 'user' },
+        { label: '调整类型', prop: 'type' },
+        { label: '调整量', prop: 'variation' },
+        { label: '调整原因', prop: 'reason' },
+        // { label: '库存余量', prop: 'stockNum' },
+        { label: '操作用户', prop: 'createAt' },
         { label: '操作时间', prop: 'time' },
       ],
       tableData: [],
@@ -96,14 +97,16 @@ export default {
     for (let i = 0; i < 100; i++) {
       let obj = JSON.parse(JSON.stringify({
         stockNum: '100',
-        changeType: '增加',
-        number: '5',
-        user: 'admin1',
+        type: '增加',
+        variation: '5',
+        createAt: 'admin1',
+        reason: '1111',
         time: '2019-05-03 08:08:08',
         isEditor: false
       }));
       obj.index = i + 1;
       this.tableData.push(obj);
+      // reson = increaseType || reduceType
     }
   },
   beforeDestroy() {
