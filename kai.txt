@@ -1,0 +1,36 @@
+库存调整-XXXX
+调整类型（增0、减1）---type
+原因（0-increaseType   1-reduceType）
+调整量（variation）
+createAt
+
+
+
+
+
+订单：（添加弹窗）
+	OPENING(1),//打开
+    PRODUCTION(2),//正在生产中
+    DONE(0),//完成
+    IDLE(99);//暂停
+客户（可选）--customerName
+goods
+需求量--productionSummary   （当前生产量--productionCurrency）
+金额--amount
+交货日期--transactionDate
+
+计划：
+	READY(1),//准备
+    DOING(2),//正在生产中
+    DONE(0),//完成
+    IDLE(99);//暂停
+生产日期 date
+设备 machineName
+色号 colorName
+原料 materialName 用量 materialUse
+染化剂 agent_name 用量 agent_use
+合格品量 production_qualified（仅支持查看）
+
+
+日生产报表：
+根据设备和日期筛选

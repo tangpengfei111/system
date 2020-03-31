@@ -56,6 +56,68 @@
       <div class="save btn" @click="savePlan">保存</div>
       <div class="return btn" @click="returnPage">返回</div>
     </div>
+    <div class="loading dialog-box" v-if="childPageIsShow">
+      <div class="dialog">
+        <div class="title">
+          <div class="title-label">新建计划</div>
+          <!-- <div class="export">导出</div> -->
+        </div>
+        <el-form 
+          :inline="true"
+          class="demo-form-inline"
+          ref="form" 
+          :model="planParams" 
+          label-width="80px"
+          >
+          <el-form-item label="生产日期">
+            <el-date-picker
+              v-model="planParams.date"
+              type="datetime"
+              format="yyyy-MM-dd HH:mm:ss"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              placeholder="选择日期时间"
+              :picker-options="pickerOptions"
+              :editable="false">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item></el-form-item>
+          <el-form-item label="设备">
+            <el-select v-model="planParams.machineName" placeholder="请选择设备">
+              <el-option label="设备1" value="设备1"></el-option>
+              <el-option label="设备2" value="设备2"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="色号">
+            <el-select v-model="planParams.colorName" placeholder="请选择色号">
+              <el-option label="蓝色" value="blue"></el-option>
+              <el-option label="红色" value="red"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="原料">
+            <el-select v-model="planParams.materialName" placeholder="请选择原料">
+              <el-option label="原料1" value="原料1"></el-option>
+              <el-option label="原料2" value="原料2"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="原料用量">
+            <el-input v-model="planParams.materialUse" placeholder="请填写原料数量"></el-input>
+          </el-form-item>
+          <el-form-item label="染化剂">
+            <el-select v-model="planParams.agentName" placeholder="请选择染化剂">
+              <el-option label="染化剂1" value="染化剂1"></el-option>
+              <el-option label="染化剂2" value="染化剂2"></el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="染化剂用量">
+            <el-input v-model="planParams.agentUse" placeholder="请填写染化剂数量"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="surePlan">确定</el-button>
+            <el-button @click="cancelPlan">取消</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -88,7 +150,27 @@ export default {
         {label: '染化剂', prop: 'agentName' },
         {label: '染化剂用量', prop: 'agentUse' },
         {label: '合格品量', prop: 'productionQualified' },
-      ]
+      ],
+      childPageIsShow: false,
+      planParams: {                    // 子页面参数
+        data: '',
+        machineName: '',
+        colorName: '',
+        materialName: '',
+        materialUse:'',
+        agentName: '',
+        agentUse: ''
+      },
+      pickerOptions: {
+        disabledDate: (time) => {
+          // 设置可选择的日期为今天之后的一个月内
+          const curDate = (new Date()).getTime();
+          // 这里算出一个月的毫秒数,这里使用30的平均值,实际中应根据具体的每个月有多少天计算
+          const day = 10 * 24 * 3600 * 1000;
+          const dateRegion = curDate + day;
+          return time.getTime() < Date.now() - 8.64e7 || time.getTime() > dateRegion;
+        }
+      }
     };
   },
   mounted() {
@@ -103,21 +185,21 @@ export default {
       transactionDate: '2019-05-03 08:08:08',
     }
     this.orderTableData.push(obj);
-    for (let i = 0; i < 15; i++) {
-      let obj = JSON.parse(JSON.stringify({
-        date: '2019-05-03 08:08:08',
-        machineName: '设备1',
-        colorName: '红色',
-        materialName: '原料1',
-        materialUse: '50',
-        agentName: '染化剂1',
-        agentUse: '50',
-        productionQualified: 0,
-        isEditor: false
-      }));
-      obj.index = i + 1;
-      this.planTableData.push(obj);
-    }
+    // for (let i = 0; i < 15; i++) {
+    //   let obj = JSON.parse(JSON.stringify({
+    //     date: '2019-05-03 08:08:08',
+    //     machineName: '设备1',
+    //     colorName: '红色',
+    //     materialName: '原料1',
+    //     materialUse: '50',
+    //     agentName: '染化剂1',
+    //     agentUse: '50',
+    //     productionQualified: 0,
+    //     isEditor: false
+    //   }));
+    //   obj.index = i + 1;
+    //   this.planTableData.push(obj);
+    // }
   },
   beforeDestroy() {
     window.onresize = null;
@@ -147,12 +229,29 @@ export default {
     },
     // 新建计划
     addPlan() {
-
+      this.childPageIsShow = true;
     },
     // 保存计划
     savePlan() {
 
-    }
+    },
+    // 取消创建
+    cancelPlan() {
+      this.childPageIsShow = false;
+      for (let k in this.planParams) {
+        this.planParams[k] = ''
+      }
+    },
+    // 确定创建
+    surePlan() {
+      let obj = this._cloneDeep();
+      this.planTableData.push(obj);
+      this.childPageIsShow = false;
+      for (let k in this.planParams) {
+        this.planParams[k] = ''
+      }
+      
+    },
   }
 };
 </script>
@@ -252,6 +351,105 @@ export default {
     }
     .save {
       background: #6aca15;
+    }
+  }
+  .dialog-box {
+    background-color: rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    .dialog {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 20px;
+      box-sizing: border-box;
+      // width: 400px;
+      // height: 300px;
+      background-color: #ffffff;
+      .title {
+        overflow: hidden;
+        height: 30px;
+        .title-label {
+          float: left;
+          width: 80px;
+          height: 30px;
+          line-height: 30px;
+          font-family: Microsoft Yahei;
+          font-size: 18px;
+        }
+        .export {
+          float: right;
+          width: 50px;
+          height: 30px;
+          line-height: 30px;
+          text-align: center;
+          font-family: Microsoft Yahei;
+          font-size: 14px;
+          color: #f3f3f3;
+          background: #1e79eb;
+          border-radius: 4px;
+        }
+      }
+      .el-form {
+        padding: 20px 30px 0 30px;
+        width: 500px;
+        .el-form-item {
+          width: 240px;
+          margin-bottom: 16px;
+        }
+        /deep/.el-form-item__label {
+          width: 100px !important;
+          background-color: rgb(223, 232, 251);
+          text-align: center;
+          padding: 0 12px;
+          border-color: #dcdfe6;
+          color: #303133;
+          font-weight: bold;
+          border: 1px solid #b6b6b6;
+          box-sizing: border-box;
+          height: 40px;
+          border-right: none;
+        }
+        /deep/.el-input__inner {
+          border-radius: 0;
+          border: 1px solid #b6b6b6;
+          outline: none;
+        }
+        /deep/.el-form-item__content {
+          width: calc(100% - 100px);
+          margin-left: 0px !important;
+        }
+        .el-form-item:nth-last-child(1) {
+          width: 100%;
+          margin: 20px 0 10px 0;
+        }
+      }
+      // .content-item {
+      //   width: 100%;
+      //   margin: 20px auto;
+      //   box-sizing: border-box;
+      //   div {
+      //     display: inline-block;
+      //     width: 80px;
+      //     color: #606266;
+      //     font-size: 14px;
+      //   }
+      //   input {
+      //     width: 160px;
+      //     margin-left: 10px;
+      //     &::-webkit-input-placeholder {
+      //       font-family: Microsoft YaHei;
+      //       font-size: 14px;
+      //       font-weight: 500;
+      //       color: #a9adb3;
+      //     }
+      //   }
+      // }
+    }
+    .footer {
+      position: absolute;
+      bottom: 25px;
+      right: 30px;
     }
   }
 }

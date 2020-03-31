@@ -103,67 +103,6 @@
       </el-pagination>
       <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
     </div>
-   
-    <div class="loading dialog-box" v-if="childPageIsShow">
-      <div class="dialog">
-        <div class="title">
-          <div class="title-label">生产计划</div>
-          <!-- <div class="export">导出</div> -->
-        </div>
-        <el-form 
-          :inline="true"
-          class="demo-form-inline"
-          ref="form" 
-          :model="planParams" 
-          label-width="80px"
-          >
-          <el-form-item label="订单编号">
-            <el-input v-model="planParams.orderNumber" :disabled='true'></el-input>
-          </el-form-item>
-          <el-form-item></el-form-item>
-          <el-form-item label="生产商品">
-            <el-input v-model="planParams.goods" :disabled='true'></el-input>
-          </el-form-item>
-          <el-form-item label="生产数量">
-            <el-input v-model="planParams.productionSummary" :disabled='true'></el-input>
-          </el-form-item>
-          <el-form-item label="设备">
-            <el-select v-model="planParams.machine" placeholder="请选择设备">
-              <el-option label="设备1" value="设备1"></el-option>
-              <el-option label="设备2" value="设备2"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="色号">
-            <el-select v-model="planParams.color" placeholder="请选择色号">
-              <el-option label="蓝色" value="blue"></el-option>
-              <el-option label="红色" value="red"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="原料">
-            <el-select v-model="planParams.material" placeholder="请选择原料">
-              <el-option label="原料1" value="原料1"></el-option>
-              <el-option label="原料2" value="原料2"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="原料数量">
-            <el-input v-model="planParams.materialNum" placeholder="请填写原料数量"></el-input>
-          </el-form-item>
-          <el-form-item label="染化剂">
-            <el-select v-model="planParams.dyeAgent" placeholder="请选择染化剂">
-              <el-option label="染化剂1" value="染化剂1"></el-option>
-              <el-option label="染化剂2" value="染化剂2"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="染化剂数量">
-            <el-input v-model="planParams.dyeAgentNum" placeholder="请填写染化剂数量"></el-input>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="surePlan">立即创建</el-button>
-            <el-button @click="cancelPlan">取消</el-button>
-          </el-form-item>
-        </el-form>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -184,7 +123,6 @@ export default {
   data() {
     return {
       eidtorState: 'add',
-      childPageIsShow: false,
       currentPage: 1, // 表格当前页码
       pageSize: 50, // 表格每一页展示数据的数量
       browserAttr: {
@@ -201,17 +139,6 @@ export default {
         {label: '金额', prop: 'amount', editor: true },
         {label: '交货日期', prop: 'transactionDate', editor: true, width: 210}
       ],
-      planParams: {                    // 子页面参数
-        machine: '',
-        color: '',
-        material: '',
-        materialNum:'',
-        dyeAgent: '',
-        dyeAgentNum: '',
-        orderNumber: '',
-        goods: '',
-        productionSummary: ''
-      },
       customList: [            // 客户列表
         { label: '客户1', value: '客户1' },
         { label: '客户2', value: '客户2' },
@@ -348,14 +275,7 @@ export default {
       this.tableData.splice(index,1);
 
     },
-    // 显示子页面
-    showChildPage(row) {
-      this.copyRow = row;
-      this.planParams.orderNumber = row.orderNumber;
-      this.planParams.goods = row.goods;
-      this.planParams.productionSummary = row.productionSummary;
-      this.childPageIsShow = true;
-    },
+    
     // 创建计划
     createPlan(row) {
       this.showChildPage(row);
@@ -366,13 +286,6 @@ export default {
     },
     // 查看计划
     viewPlan(row) {
-      // if (row.productionPlan && row.productionPlan.orderNumber) {
-      //   this.planParams = this._.cloneDeep(row.productionPlan);
-      //   this.childPageIsShow = true;
-        
-      // }else {
-      //   this.showChildPage(row);
-      // }
       console.log(row)
       this.$router.push({
         path: '/proplan', 
@@ -380,22 +293,6 @@ export default {
           orderNumber: row.orderNumber
         }
       });
-    },
-    // 取消创建
-    cancelPlan() {
-      this.childPageIsShow = false;
-      for (let k in this.planParams) {
-        this.planParams[k] = ''
-      }
-    },
-    // 确定创建
-    surePlan() {
-      this.copyRow.productionPlan = this._.cloneDeep(this.planParams);
-      this.childPageIsShow = false;
-      for (let k in this.planParams) {
-        this.planParams[k] = ''
-      }
-      
     },
     onSubmit() {
       console.log('submit!');
@@ -521,105 +418,7 @@ export default {
       }
     }
   }
-  .dialog-box {
-    background-color: rgba(0, 0, 0, 0.5);
-    box-sizing: border-box;
-    .dialog {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      padding: 20px 20px;
-      box-sizing: border-box;
-      // width: 400px;
-      // height: 300px;
-      background-color: #ffffff;
-      .title {
-        overflow: hidden;
-        height: 30px;
-        .title-label {
-          float: left;
-          width: 80px;
-          height: 30px;
-          line-height: 30px;
-          font-family: Microsoft Yahei;
-          font-size: 18px;
-        }
-        .export {
-          float: right;
-          width: 50px;
-          height: 30px;
-          line-height: 30px;
-          text-align: center;
-          font-family: Microsoft Yahei;
-          font-size: 14px;
-          color: #f3f3f3;
-          background: #1e79eb;
-          border-radius: 4px;
-        }
-      }
-      .el-form {
-        padding: 20px 30px 0 30px;
-        width: 500px;
-        .el-form-item {
-          width: 240px;
-          margin-bottom: 16px;
-        }
-        /deep/.el-form-item__label {
-          width: 100px !important;
-          background-color: rgb(223, 232, 251);
-          text-align: center;
-          padding: 0 12px;
-          border-color: #dcdfe6;
-          color: #303133;
-          font-weight: bold;
-          border: 1px solid #b6b6b6;
-          box-sizing: border-box;
-          height: 40px;
-          border-right: none;
-        }
-        /deep/.el-input__inner {
-          border-radius: 0;
-          border: 1px solid #b6b6b6;
-          outline: none;
-        }
-        /deep/.el-form-item__content {
-          width: calc(100% - 100px);
-          margin-left: 0px !important;
-        }
-        .el-form-item:nth-last-child(1) {
-          width: 100%;
-          margin: 20px 0 10px 0;
-        }
-      }
-      // .content-item {
-      //   width: 100%;
-      //   margin: 20px auto;
-      //   box-sizing: border-box;
-      //   div {
-      //     display: inline-block;
-      //     width: 80px;
-      //     color: #606266;
-      //     font-size: 14px;
-      //   }
-      //   input {
-      //     width: 160px;
-      //     margin-left: 10px;
-      //     &::-webkit-input-placeholder {
-      //       font-family: Microsoft YaHei;
-      //       font-size: 14px;
-      //       font-weight: 500;
-      //       color: #a9adb3;
-      //     }
-      //   }
-      // }
-    }
-    .footer {
-      position: absolute;
-      bottom: 25px;
-      right: 30px;
-    }
-  }
+  
   /deep/.el-date-editor.el-input,
   .el-date-editor.el-input__inner {
     width: 100%;
