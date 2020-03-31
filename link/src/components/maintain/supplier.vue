@@ -78,12 +78,12 @@ export default {
     return {
       tableHeader: [              // 表格头部信息
         {label: '序号', prop: 'index'},
-        {label: '供应商编号', prop: 'supplier_no'},
-        {label: '供应商名称', prop: 'supplier_name'},
+        {label: '供应商编号', prop: 'supplierNo'},
+        {label: '供应商名称', prop: 'supplierName'},
         {label: '状态', prop: 'state'},
-        {label: '用户id', prop: 'user_id'},
-        {label: '用户名', prop: 'user_name'},
-        {label: '最后操作时间', prop: 'last_update_time'}
+        {label: '用户id', prop: 'userId'},
+        {label: '用户名', prop: 'userName'},
+        {label: '最后操作时间', prop: 'lastUpdateTime'}
       ],
       tableData: [],   // 表格数据
       copyRow: {},     // 当前行副本
@@ -104,12 +104,12 @@ export default {
     this.browserResize();
     for (let i = 0; i < 100; i++) {
         let obj = JSON.parse(JSON.stringify({
-            supplier_no: 1,
-            supplier_name: 2,
+            supplierNo: 1,
+            supplierName: 2,
             state: 5,
-            user_id: 111111,
-            user_name: 'xxxal12',
-            last_update_time: '2019-03-03',
+            userId: 111111,
+            userName: 'xxxal12',
+            lastUpdateTime: '2019-03-03',
             isEditor: false
         }));
         obj.index = i + 1;
@@ -160,10 +160,43 @@ export default {
       }
       return tableHeader;
     },
-    // 获取表格数据，头部信息
-    // getTbaleData(id) {
-    //   
-    // },
+    // 获取表格数据
+    getSupplierData() {
+      let params = {
+        pageNo: this.currentPage,
+        size: this.pageSize
+      }
+      if (text !== undefined) {
+        params.search = text;
+      }
+      this.$http.post('/supplierController/pageList',params).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.tableData = res.data.data.records.map(item => {
+            if (item.status === 0) {
+              item.state = '可用';
+            }else if (item.status === 1) {
+              item.state = '不可用';
+            }else if (item.status === 2) {
+              item.state = '废弃';
+            }
+            item.isEditor = false;
+            return item;
+          });
+        }else {
+          if (text !== undefined) {
+            this.$message({
+              message: res.data.message || "查询失败",
+              type: 'error',
+              duration: 3000,
+              showClose: true
+            });
+          }
+          // this.tableData = [];
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      })
+    },
     // 表格当前页改变
     tableChangePage(nowPage) {
       this.currentPage = nowPage;

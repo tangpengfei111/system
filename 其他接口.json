@@ -1,0 +1,283 @@
+订单管理（A：添加、E：编辑）
+	{
+		"amount": 0,                    --A/E
+		"createAt": "string",           --A
+		"customerName": "string",       --A
+		"extend": "string",             --
+		"goods": "string",              --A/E
+		"id": "string",                 --E
+		"payAmount": 0,                 --
+		"productionSummary": 0,         --A/E
+		"status": 0,                    --
+		"transactionDate": "string"     --A/E
+	}
+	添加订单
+		http://localhost:8888/factory/orderController/addOrder
+		POST
+		入参：
+		{
+			"amount": 100000,
+			"createAt": "admin",
+			"customerName": "客户1",
+			"goods": "第一个商品",
+			"productionSummary": 1000,
+			"transactionDate": "2020-5-9"
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": "1244977037068783618",
+			"timestamp": "2020-03-31 21:17:10"
+		}
+	
+	编辑订单
+		http://localhost:8888/factory/orderController/editOrder
+		POST
+		入参：
+		{
+			"goods": "商品1",
+			"id": "1244977037068783618"
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": null,
+			"timestamp": "2020-03-31 21:19:52"
+		}
+		
+	设置订单状态
+		http://localhost:8888/factory/orderController/changeStatus
+		GET
+		入参：id = ？
+			  operate = idle/active
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": null,
+			"timestamp": "2020-03-31 21:24:41"
+		}
+	
+	根据客户查询订单
+		http://localhost:8888/factory/orderController/queryOrder
+		POST
+		入参：
+		{
+			"pageNo": 0,
+			"search": "{'name':'客户1','status':99}",
+			"size": 10
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": {
+				"records": [
+				{
+					"id": "1244977037068783618",
+					"createAt": "admin",
+					"customerName": "客户1",
+					"goods": "商品1",
+					"productionSummary": 1000,
+					"amount": 100000,
+					"transactionDate": "2020-5-9",
+					"extend": null,
+					"payAmount": null,
+					"lastUpdateTime": "2020-03-31 21:24:41",
+					"status": 99
+				}
+				],
+				"total": 1,
+				"size": 10,
+				"current": 1,
+				"orders": [],
+				"searchCount": true,
+				"pages": 1
+			},
+			"timestamp": "2020-03-31 21:28:04"
+		}
+		
+	根据订单编号查订单信息
+		http://localhost:8888/factory/orderController/getOrderById
+		GET
+		入参：orderId = ？
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": {
+				"id": "1244977037068783618",
+				"createAt": "admin",
+				"customer": {
+					"no": "1",
+					"name": "客户1",
+					"status": 0,
+					"createAt": "admin",
+					"lastUpdateTime": "2020-03-31 21:12:53"
+				},
+				"goods": "商品1",
+				"productionSummary": 1000,
+				"productionCurrency": 0,
+				"amount": 100000,
+				"payAmount": null,
+				"status": 99,
+				"transactionDate": "2020-5-9",
+				"extend": null,
+				"lastUpdateTime": "2020-03-31 21:24:41"
+			},
+			"timestamp": "2020-03-31 21:29:35"
+		}
+
+工单管理（A：添加、E：编辑）
+	{
+		"agentName": "string",         --A/E
+		"agentUse": 0,                 --A/E
+		"colorName": "string",         --A/E
+		"createAt": "string",          --A
+		"date": "string",              --A/E
+		"id": "string",                --E
+		"machineName": "string",       --A/E
+		"materialName": "string",      --A/E
+		"materialUse": 0,              --A/E
+		"orderId": "string",           --A
+		"productionPlan": 0,           --A/E
+		"productionQualified": 0       --
+	}
+	添加生产计划
+		http://localhost:8888/factory/productionController/addProduction
+		POST
+		入参：
+		{
+			"agentName": "染化剂1",
+			"agentUse": 10,
+			"colorName": "色号1",
+			"createAt": "admin",
+			"date": "2020-3-31",
+			"machineName": "染缸1",
+			"materialName": "原料1",
+			"materialUse": 150,
+			"orderId": "1244977037068783618"
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": "1244981556850774017",
+			"timestamp": "2020-03-31 21:35:08"
+		}
+	
+	修改生产计划
+		http://localhost:8888/factory/productionController/editProduction
+		POST
+		入参：
+		{
+			"date": "2020-4-5",
+			"id": "1244981556850774017"
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": null,
+			"timestamp": "2020-03-31 21:39:15"
+		}
+		
+	导出工单
+		http://localhost:8888/factory/productionController/export
+		GET
+		入参：id = ？计划的主键
+		出参：
+		{
+			"code": 0,
+			"data": null,
+			"message": "操作成功",
+			"timestamp": "2020-03-31 21:35:08"
+		}
+		
+	填写合格品量
+		http://localhost:8888/factory/productionController/fillQuality
+		GET
+		入参：id = ？
+			  qualified = ？
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": null,
+			"timestamp": "2020-03-31 21:44:21"
+		}
+		
+	根据订单查询生产
+		http://localhost:8888/factory/productionController/queryProdByOrder
+		GET
+		入参：orderId = ？
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": [
+				{
+					"id": "1244981556850774017",
+					"orderId": "1244977037068783618",
+					"machineName": "染缸1",
+					"colorName": "色号1",
+					"productionPlan": 150,
+					"date": "2020-4-5",
+					"materialName": "原料1",
+					"materialUse": 150,
+					"agentName": "染化剂1",
+					"agentUse": 10,
+					"productionQualified": 145,
+					"lastUpdateTime": "2020-03-31 21:44:21",
+					"createAt": "admin"
+				}
+			],
+			"timestamp": "2020-03-31 21:46:20"
+		}
+		
+报表管理（接口还不确定）
+
+供应商信息管理
+	添加供应商：/supplierController/addSupplier
+	修改供应商：/supplierController/modifySupplier
+	分页查询信息：/supplierController/pageList
+	查询可用供应商：/supplierController/queryAvailableSupplier
+	删除供应商：/supplierController/removeSupplier
+		
+色号信息管理
+	添加色号：/colorController/addColor
+	修改色号：/colorController/modifyColor
+	分页查询信息：/colorController/pageList
+	查询可用色号：/colorController/queryAvailableColor
+	删除色号：/colorController/removeColor
+	
+客户信息管理
+	添加客户：/customerController/addCustomer
+	修改客户：/customerController/modifyCustomer
+	分页查询信息：/customerController/pageList
+	查询可用客户：/customerController/queryAvailableCustomer
+	删除客户：/customerController/removeCustomer
+	
+染化剂信息管理
+	添加染化剂：/dyeAgentController/addDyeAgent
+	修改染化剂：/dyeAgentController/modifyDyeAgent
+	分页查询信息：/dyeAgentController/pageList
+	查询可用染化剂：/dyeAgentController/queryAvailableDyeAgent
+	删除染化剂：/dyeAgentController/removeDyeAgent
+	
+设备信息管理
+	添加设备：/machineController/addMachine
+	修改设备：/machineController/modifyMachine
+	分页查询信息：/machineController/pageList
+	查询可用设备：/machineController/queryAvailableMachine
+	删除设备：/machineController/removeMachine
+		
+		
+		
+		
+		
+		
+		
+		

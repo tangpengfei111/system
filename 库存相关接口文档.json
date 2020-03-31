@@ -1,0 +1,234 @@
+原料库存管理
+	根据原料名查库存
+		http://localhost:8888/factory/materialStockController/getStockByMaterial
+		GET
+		入参：materialName = ？
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": {
+				"id": "1244969944311975938",
+				"materialName": "原料1",
+				"stock": 0,
+				"lastUpdateTime": "2020-03-31 20:48:58"
+			},
+			"timestamp": "2020-03-31 20:51:03"
+		}
+		
+	分页查询原料库存数据
+		http://localhost:8888/factory/materialStockController/queryByCondition
+		POST
+		入参：
+		{
+			"pageNo": 0,
+			"search": "{'name':'原料1','status':0}",
+			"size": 10
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": {
+				"total": 1,
+				"size": 10,
+				"current": 1,
+				"pages": 1,
+				"materialStockInfos": [
+					{
+						"id": "1244969944311975938",
+						"no": "1",
+						"name": "原料1",
+						"status": 0,
+						"stock": 0,
+						"lastUpdateTime": "2020-03-31 20:48:58"
+					}
+				]
+			},
+			"timestamp": "2020-03-31 20:54:50"
+		}
+
+原料库存日志管理
+	新增一条原料操作库存日志
+		http://localhost:8888/factory/materialStockLogController/addMaterialStockLog
+		POST
+		入参：
+		{
+			"createAt": "admin",
+			"increaseType": "初始化库存",
+			"materialName": "原料1",
+			"type": 0,
+			"variation": 10000
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": null,
+			"timestamp": "2020-03-31 20:58:04"
+		}
+	
+	根据名称查询日志
+		http://localhost:8888/factory/materialStockLogController/queryLogsByName
+		POST
+		入参：
+		{
+			"pageNo": 0,
+			"search": "原料1",
+			"size": 10
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": {
+				"total": 2,
+				"size": 10,
+				"current": 1,
+				"pages": 1,
+				"materialStockLogList": [
+				{
+					"id": "1244973692677574657",
+					"materialName": "原料1",
+					"type": 1,
+					"increaseType": null,
+					"reduceType": "生产中使用",
+					"variation": 100,
+					"createAt": "admin",
+					"updateTime": "2020-03-31 21:03:53"
+				},
+				{
+					"id": "1244972229574316033",
+					"materialName": "原料1",
+					"type": 0,
+					"increaseType": "初始化库存",
+					"reduceType": null,
+					"variation": 10000,
+					"createAt": "admin",
+					"updateTime": "2020-03-31 20:58:04"
+				}
+				]
+			},
+			"timestamp": "2020-03-31 21:04:07"
+		}
+		
+染化剂库存管理
+	根据染化剂名查库存
+		http://localhost:8888/factory/agentStockController/getStockByAgent
+		GET
+		入参：agentName = ？
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": {
+				"id": "1244969944311975938",
+				"agentName": "染化剂1",
+				"stock": 0,
+				"lastUpdateTime": "2020-03-31 20:48:58"
+			},
+			"timestamp": "2020-03-31 20:51:03"
+		}
+		
+	分页查询染化剂库存数据
+		http://localhost:8888/factory/agentStockController/queryByCondition
+		POST
+		入参：
+		{
+			"pageNo": 0,
+			"search": "{'name':'染化剂1','status':0}",
+			"size": 10
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": {
+				"total": 1,
+				"size": 10,
+				"current": 1,
+				"pages": 1,
+				"agentStockInfos": [
+					{
+						"id": "1244969944311975938",
+						"no": "1",
+						"name": "染化剂1",
+						"status": 0,
+						"stock": 0,
+						"lastUpdateTime": "2020-03-31 20:48:58"
+					}
+				]
+			},
+			"timestamp": "2020-03-31 20:54:50"
+		}
+
+染化剂库存日志管理
+	新增一条染化剂操作库存日志
+		http://localhost:8888/factory/agentStockLogController/addAgentStockLog
+		POST
+		入参：
+		{
+			"createAt": "admin",
+			"increaseType": "初始化库存",
+			"agentName": "染化剂1",
+			"type": 0,
+			"variation": 10000
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": null,
+			"timestamp": "2020-03-31 20:58:04"
+		}
+	
+	根据名称查询日志
+		http://localhost:8888/factory/agentStockLogController/queryLogsByName
+		POST
+		入参：
+		{
+			"pageNo": 0,
+			"search": "染化剂1",
+			"size": 10
+		}
+		出参：
+		{
+			"message": "操作成功",
+			"code": 0,
+			"data": {
+				"total": 2,
+				"size": 10,
+				"current": 1,
+				"pages": 1,
+				"agentStockLogList": [
+				{
+					"id": "1244973692677574657",
+					"agentName": "染化剂1",
+					"type": 1,
+					"increaseType": null,
+					"reduceType": "生产中使用",
+					"variation": 100,
+					"createAt": "admin",
+					"updateTime": "2020-03-31 21:03:53"
+				},
+				{
+					"id": "1244972229574316033",
+					"agentName": "染化剂1",
+					"type": 0,
+					"increaseType": "初始化库存",
+					"reduceType": null,
+					"variation": 10000,
+					"createAt": "admin",
+					"updateTime": "2020-03-31 20:58:04"
+				}
+				]
+			},
+			"timestamp": "2020-03-31 21:04:07"
+		}
+		
+		
+		
+		
+		
+		
+		

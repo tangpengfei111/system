@@ -70,12 +70,19 @@ const routes = [
       {
         path: '/production',
         name: 'production',
-        component: () => import('../components/production.vue'),
+        component: () => import('../components/production/index.vue'),
         meta: {
           til: '订单管理'
         }
       },
-      
+      {
+        path: '/proplan',
+        name: 'proplan',
+        component: () => import('../components/production/proplan.vue'),
+        meta: {
+          til: '生产计划'
+        }
+      },
       {
         path: '/dayproduction',
         name: 'dayproduction',

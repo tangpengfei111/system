@@ -284,7 +284,7 @@ export default {
         }
       }).catch(error => {
         console.log('失败原因:' + error);
-      })
+      });
     },
     // 文本搜索
     searchContent(text) {

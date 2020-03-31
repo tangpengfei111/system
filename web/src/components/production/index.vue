@@ -137,6 +137,7 @@ export default {
         {label: '商品', prop: 'goods', editor: true },
         {label: '需求量', prop: 'productionSummary', editor: true },
         {label: '金额', prop: 'amount', editor: true },
+        {label: '状态', prop: 'status', editor: true },
         {label: '交货日期', prop: 'transactionDate', editor: true, width: 210}
       ],
       customList: [            // 客户列表

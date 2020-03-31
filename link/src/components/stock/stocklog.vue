@@ -24,7 +24,7 @@
         align="center"
       >
       </el-table-column>
-      <el-table-column label="操作" width="180" align="center">
+      <!-- <el-table-column label="操作" width="180" align="center">
         <template slot-scope="scope">
           <el-popconfirm
             title="确定要清除吗?"
@@ -34,7 +34,7 @@
             <el-button slot="reference" size="mini" type="danger">清除记录</el-button>
           </el-popconfirm>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
     <div class="pagination">
       <el-pagination
@@ -63,10 +63,11 @@ export default {
       title: "",
       tableHeader: [
         { label: '序号', prop: 'index', width: 80 },
-        { label: '变化类型', prop: 'changeType' },
-        { label: '变化数量', prop: 'number' },
-        { label: '库存余量', prop: 'stockNum' },
-        { label: '操作用户', prop: 'user' },
+        // { label: '名称', prop: 'name' },
+        { label: '调整类型', prop: 'type' },
+        { label: '调整量', prop: 'variation' },
+        { label: '调整原因', prop: 'reason' },
+        { label: '操作用户', prop: 'createAt' },
         { label: '操作时间', prop: 'time' },
       ],
       tableData: [],
@@ -86,7 +87,8 @@ export default {
   created() {
     console.log(this.$route);
     if (this.$route.query) {
-        this.title = this.$route.query.agentName + '日志';
+        this.title = this.$route.query.name + '日志';
+        this.getLogData(this.$route.query.title, this.$route.query.name);
     }else {
         this.title = this.$route.meta.til;
     }
@@ -95,15 +97,17 @@ export default {
     this.browserResize();
     for (let i = 0; i < 100; i++) {
       let obj = JSON.parse(JSON.stringify({
-        stockNum: '100',
-        changeType: '增加',
-        number: '5',
-        user: 'admin1',
+        name: 'xxxx',
+        type: '增加',
+        variation: '5',
+        createAt: 'admin1',
+        reason: '1111',
         time: '2019-05-03 08:08:08',
         isEditor: false
       }));
       obj.index = i + 1;
       this.tableData.push(obj);
+      // reson = increaseType || reduceType
     }
   },
   beforeDestroy() {
@@ -119,14 +123,63 @@ export default {
         console.log("监听窗口改变111");
       };
     },
-    // 删除库存日志记录
-    deleteLogRecord(index,row) {
-        this.tableData.splice(index,1);
-    },
     // 表格当前页改变
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
     },
+    // 获取日志数据
+    getLogData(title,earchText) {
+      let params = {
+			  pageNo: this.currentPage,
+			  search: searchText,
+			  size: this.pageSize
+      }
+      if (title === '染化剂') {
+        this.$http.post('/agentStockLogController/queryLogsByName', params).then(res => {
+          if (res.data.code == 0 && res.data.message == '操作成功') {
+            this.tableData = res.data.data.agentStockLogList.map(item => {
+              item.reason = item.increaseType || item.reduceType;
+              item.name = item.agentName;
+              return item;
+            });
+          }else {
+            this.$message({
+              message: res.data.message || "请求失败",
+              type: 'error',
+              duration: 3000,
+              showClose: true
+            });
+          }
+        }).catch(error => {
+          console.log('失败原因:' + error);
+        });
+      }else if (title === '原料') {
+        this.$http.post('/materialStockLogController/queryLogsByName', params).then(res => {
+          if (res.data.code == 0 && res.data.message == '操作成功') {
+            this.tableData = res.data.data.materialStockLogList.map(item => {
+              item.reason = item.increaseType || item.reduceType;
+              item.name = item.materialName;
+              return item;
+            });
+          }else {
+            this.$message({
+              message: res.data.message || "请求失败",
+              type: 'error',
+              duration: 3000,
+              showClose: true
+            });
+          }
+        }).catch(error => {
+          console.log('失败原因:' + error);
+        });
+      }
+      
+    },
+    // 删除库存日志记录
+    deleteLogRecord(index,row) {
+        this.tableData.splice(index,1);
+    },
+    
   }
 };
 </script>
