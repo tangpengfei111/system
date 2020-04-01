@@ -65,7 +65,7 @@
             <div v-if="item.label == '状态' && scope.row.stateIsEditor">
               <el-select v-model="scope.row.status" placeholder="请选择状态">
                 <el-option
-                  v-for="item in formParams.statusOptions"
+                  v-for="item in statusOptions"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value">
@@ -197,6 +197,10 @@ export default {
         { label: '商品2', value: '商品2' },
         { label: '商品3', value: '商品3' },
       ],
+      statusOptions: [
+        { label: '打开', value: 'active' },
+        { label: '暂停', value: 'idle' }
+      ],
       formParams: {
         namePlaceholder: '请输入搜索内容',
         statusOptions: [
@@ -313,7 +317,7 @@ export default {
       this.$http.post('/orderController/queryOrder', params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
           let options = {};
-          formParams.statusOptions.forEach(item => {
+          this.formParams.statusOptions.forEach(item => {
             options[item.value] = item.label;
           });
           this.tableData = res.data.data.records.map((item,index) => {
@@ -452,6 +456,7 @@ export default {
       }else if (str === 'status') {
         // 编辑订单状态
         row.stateIsEditor = true;
+        row.status = '';
       }
     },
     // 确定编辑（创建）
@@ -487,7 +492,7 @@ export default {
           console.log('失败原因:' + error);
         });
       }else if (row.stateIsEditor) {
-        this.$http.get('/orderController/changeStatus' + '?id=' + row.id).then(res => {
+        this.$http.get('/orderController/changeStatus' + '?id=' + row.id + '?operate=' + row.status).then(res => {
           if (res.data.code == 0 && res.data.message == '操作成功') {
             row.stateIsEditor = false;
             // 获取订单数据
@@ -513,11 +518,10 @@ export default {
     },
     // 查看计划
     viewPlan(row) {
-      console.log(row)
       this.$router.push({
         path: '/proplan', 
         query: {
-          orderNumber: row.orderNumber
+          orderId: row.id
         }
       });
     },

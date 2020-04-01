@@ -136,6 +136,7 @@ export default {
         {label: '需求量', prop: 'productionSummary' },
         {label: '当前生产量', prop: 'productionCurrency' },
         {label: '金额', prop: 'amount' },
+        {label: '状态', prop: 'state' },
         {label: '交货日期', prop: 'transactionDate', width: 210}
       ],
       orderTableData: [],   // 订单数据
@@ -161,6 +162,12 @@ export default {
         agentName: '',
         agentUse: ''
       },
+      statusOptions: {
+        '1': '打开',
+        '2': '正在生产中',
+        '0': '完成',
+        '99': '暂停',
+      },
       pickerOptions: {
         disabledDate: (time) => {
           // 设置可选择的日期为今天之后的一个月内
@@ -173,6 +180,12 @@ export default {
       }
     };
   },
+  created() {
+    console.log(this.$route)
+    if (this.$route.query) {
+      this.getTableData(this.$route.query.orderId)
+    }
+  },
   mounted() {
     this.browserResize();
     let obj = {
@@ -181,6 +194,7 @@ export default {
       goods: '商品1',
       productionSummary: '50',
       productionCurrency: '20',
+      state: '完成',
       amount: '3000',
       transactionDate: '2019-05-03 08:08:08',
     }
@@ -225,6 +239,46 @@ export default {
     returnPage() {
       this.$router.push({
         path: '/production',
+      });
+    },
+    // 获取表格数据
+    getTableData(orderId) {
+      // 根据订单编号查订单信息
+      this.$http.get('/orderController/getOrderById' + '?orderId=' + orderId).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.orderTableData = res.data.data.map(item => {
+            item.customerName  = item.customer.name;
+            item.state = this.statusOptions[item.status];
+            return item;
+          })
+        }else {
+          this.$message({
+            message: res.data.message,
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+      // 根据订单查询生产
+      this.$http.get('/productionController/queryProdByOrder' + '?orderId=' + orderId).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.planTableData = res.data.data.map((item,index) => {
+            item.index = index + 1;
+            return item;
+          });
+        }else {
+          this.$message({
+            message: res.data.message,
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
       });
     },
     // 新建计划
