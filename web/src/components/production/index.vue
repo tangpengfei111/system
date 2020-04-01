@@ -169,6 +169,10 @@ export default {
       }));
       obj.index = i + 1;
       this.tableData.push(obj);
+      // OPENING(1),//打开
+      // PRODUCTION(2),//正在生产中
+      // DONE(0),//完成
+      // IDLE(99);//暂停
     }
   },
   beforeDestroy() {
@@ -200,6 +204,7 @@ export default {
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
     },
+    // 搜索
     searchContent() {},
     // 添加订单
     addOrder() {

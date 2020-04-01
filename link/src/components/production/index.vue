@@ -6,14 +6,14 @@
         <!-- <div>总计 {{totalNum}} 条数据</div> -->
       </div>
       <div class="func-bar">
-        <my-search style="float:left" @searchContent="searchContent"></my-search>
         <div class="add btn" @click="addOrder">新建订单</div>
       </div>
     </div>
+    <my-search style="float:left" @searchContent="searchContent" :formParams="formParams"></my-search>
     <!-- :row-class-name="tableRowClassName" -->
     <el-table
       :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
-      :height="browserAttr.height - 200"
+      :height="browserAttr.height - 265"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%"
     >
@@ -30,11 +30,12 @@
             <div v-if="item.label == '交货日期'">
               <el-date-picker
                 v-model="scope.row.transactionDate"
-                type="datetime"
-                format="yyyy-MM-dd HH:mm:ss"
-                value-format="yyyy-MM-dd HH:mm:ss"
-                placeholder="选择日期时间"
-                :editable="false">
+                type="date"
+                format="yyyy-MM-dd"
+                value-format="yyyy-MM-dd"
+                placeholder="选择日期"
+                :editable="false"
+                :picker-options="pickerOptions">
               </el-date-picker>
             </div>
             <div v-if="item.label == '客户'">
@@ -50,40 +51,38 @@
             <div v-if="item.label == '商品'">
               <input type="text" v-model="scope.row[item.prop]">
             </div>
-            <div v-if="item.label == '需求量'">
-              <input type="text" 
-                v-model="scope.row[item.prop]" 
-                oninput="value=value.replace(/[^\d]/g,'')"
-                >
-            </div>
-            <div v-if="item.label == '金额'">
+            <div v-if="item.label == '金额' || item.label == '需求量'">
               <input type="text" 
                 v-model="scope.row[item.prop]" 
                 @keyup="checkNumber"
+                @blur="blurInput"
                 >
             </div>
           </div>
           <div v-if="!scope.row.isEditor || !item.editor">
-            <div>{{scope.row[item.prop]}}</div>
-            <!-- <div v-if="item.label == '生产计划'">
-              <div v-if="!scope.row.productionPlan">
-                <el-button size="mini" :disabled="scope.row.isEditor" @click="createPlan(scope.row)">创建</el-button>
-              </div>
-              <div v-if="scope.row.productionPlan">
-                
-                <el-button size="mini" :disabled="scope.row.isEditor" @click="editorPlan(scope.row)">修改</el-button>
-              </div>
-            </div> -->
+            <div v-if="item.label !== '状态'">{{scope.row[item.prop]}}</div>
+            <div v-if="item.label == '状态' && !scope.row.stateIsEditor">{{scope.row[item.prop]}}</div>
+            <div v-if="item.label == '状态' && scope.row.stateIsEditor">
+              <el-select v-model="scope.row.status" placeholder="请选择状态">
+                <el-option
+                  v-for="item in formParams.statusOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </div>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="150" align="center" fixed="right">
+      <el-table-column label="操作" width="180" align="center" fixed="right">
         <template slot-scope="scope">
-          <div v-if="!scope.row.isEditor">
-            <el-button size="mini" :disabled="scope.row.isEditor" @click="viewPlan(scope.row)">查看计划</el-button>
-            <el-button size="mini" @click="editorRow(scope.row)">编辑订单</el-button>
+          <div v-if="!scope.row.isEditor && !scope.row.stateIsEditor">
+            <el-button size="mini" @click="viewPlan(scope.row)">查看</el-button>
+            <el-button size="mini" @click="editorRow(scope.row, 'editor')">编辑</el-button>
+            <el-button v-if="scope.row.state === '打开' || scope.row.state === '暂停'" size="mini" @click="editorRow(scope.row, 'status')">状态</el-button>
           </div>
-          <div v-if="scope.row.isEditor">
+          <div v-if="scope.row.isEditor || scope.row.stateIsEditor">
             <el-button size="mini" @click="sureEditor(scope.row)">确定</el-button>
             <el-button size="mini" @click="cancelEditor(scope.row)">取消</el-button>
           </div>
@@ -103,26 +102,74 @@
       </el-pagination>
       <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
     </div>
+    <div class="loading dialog-box" v-if="childPageIsShow">
+      <div class="dialog">
+        <div class="title">
+          <div class="title-label">新建订单</div>
+        </div>
+        <div class="content-item">
+          <div>客户</div>
+          <el-select v-model="params.customerName" placeholder="请填选择客户">
+             <el-option
+               v-for="item in customList"
+               :key="item.value"
+               :label="item.label"
+               :value="item.value">
+             </el-option>
+          </el-select>
+        </div>
+        <div class="content-item">
+          <div>商品</div>
+          <input type="text" v-model="params.goods" placeholder="请填写商品">
+        </div>
+        <div class="content-item">
+          <div>需求量</div>
+          <input type="text" 
+            v-model="params.productionSummary"
+            placeholder="请填写需求量"
+            @keyup="checkNumber" 
+            @blur="blurInput"
+            />
+        </div>
+        <div class="content-item">
+          <div>金额</div>
+          <input type="text" 
+            v-model="params.amount"
+            placeholder="请填写金额"
+            @keyup="checkNumber"
+            @blur="blurInput"
+            />
+        </div>
+        <div class="content-item">
+          <div>交货日期</div>
+          <el-date-picker
+            v-model="params.transactionDate"
+            type="date"
+            format="yyyy-MM-dd"
+            value-format="yyyy-MM-dd"
+            placeholder="选择日期"
+            :editable="false"
+            :picker-options="pickerOptions">
+          </el-date-picker>
+        </div>
+        <div class="footer">
+          <el-button @click="cancelAddOrder">取消</el-button>
+          <el-button type="primary" @click="sureAddOrder">确定</el-button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import search from '@/components/common/search.vue';
+import search from '@/components/common/advancedSearch.vue';
 import utils from '@/lib/utils.js';
-function checkNumber(obj){
-      obj.value = obj.value.replace(/[^\d.]/g,"");//清除"数字"和"."以外的字符
-      obj.value = obj.value.replace(/^\./g,"");//验证第一个字符是数字而不是字符
-      obj.value = obj.value.replace(/\.{2,}/g,".");//只保留第一个.清除多余的
-      obj.value = obj.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");
-      obj.value = obj.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');//只能输入两个小数
-    }
 export default {
   components: {
     'my-search': search
   },
   data() {
     return {
-      eidtorState: 'add',
       currentPage: 1, // 表格当前页码
       pageSize: 50, // 表格每一页展示数据的数量
       browserAttr: {
@@ -133,12 +180,12 @@ export default {
       tableData: [],
       tableHeader: [
         // {label: '订单编号', prop: 'orderNumber', editor: false},
-        {label: '客户', prop: 'customerName', editor: true },
+        {label: '客户', prop: 'customerName', editor: false },
         {label: '商品', prop: 'goods', editor: true },
         {label: '需求量', prop: 'productionSummary', editor: true },
         {label: '金额', prop: 'amount', editor: true },
-        {label: '状态', prop: 'status', editor: true },
-        {label: '交货日期', prop: 'transactionDate', editor: true, width: 210}
+        {label: '状态', prop: 'state', editor: false },
+        {label: '交货日期', prop: 'transactionDate', editor: true, width: 180}
       ],
       customList: [            // 客户列表
         { label: '客户1', value: '客户1' },
@@ -150,22 +197,56 @@ export default {
         { label: '商品2', value: '商品2' },
         { label: '商品3', value: '商品3' },
       ],
-      
+      formParams: {
+        namePlaceholder: '请输入搜索内容',
+        statusOptions: [
+          { label: '打开', value: '1' },
+          { label: '正在生产中', value: '2' },
+          { label: '完成', value: '0' },
+          { label: '暂停', value: '99' }
+        ]
+        //    OPENING(1),//打开
+        //    PRODUCTION(2),//正在生产中
+        //    DONE(0),//完成
+        //    IDLE(99);//暂停
+      },
+      childPageIsShow: false,  // 子页面是否显示
+      params: {                 // 子页面用到的参数对象                
+        createAt: "",           
+        customerName: "",       
+        goods: "",
+        productionSummary: '',   
+        amount: '',
+        transactionDate: ""
+      },
+      pickerOptions: {
+        disabledDate: (time) => {
+          // 禁止选择今天之前的时间，可以选择今天
+          // const curDate = (new Date()).getTime();
+          // 这里算出一天的毫秒数
+          // const day = 24 * 3600 * 1000;
+          // const dateRegion = curDate + day;
+          return time.getTime() < new Date() - 8.64e7;
+        }
+      },
     };
   },
   mounted() {
     this.browserResize();
     for (let i = 0; i < 100; i++) {
       let obj = JSON.parse(JSON.stringify({
-        orderNumber: 'xasdasd1',
+        id: 'xasdasd1',
         customerName: '客户1',
         goods: '商品1',
         productionSummary: '50',
         amount: '3000',
-        transactionDate: '2019-05-03 08:08:08',
+        state: '打开',
+        status: '1',
+        transactionDate: '2020-05-03',
         qualityNum: '0',
         productionPlan: 1,
-        isEditor: false
+        isEditor: false,
+        stateIsEditor: false
       }));
       obj.index = i + 1;
       this.tableData.push(obj);
@@ -177,7 +258,7 @@ export default {
   computed: {
     totalNum() {
       return this.tableData.length;
-    }
+    },
   },
   methods: {
     // 表格 行的样式
@@ -200,90 +281,235 @@ export default {
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
     },
-    searchContent() {},
+    // 查询可用客户列表
+    queryCustomList() {
+      this.$http.get('/customerController/queryAvailableCustomer').then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.customList = res.data.data.map(item => {
+            return { label: item.name, value: item.name };
+          });
+        }else {
+          this.customList = [];
+          this.$message({
+            message: res.data.message || "获取客户信息失败",
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+    },
+    // 获取订单数据
+    getOrderData(options) {
+      let params = {
+        pageNo: this.currentPage,
+        size: this.pageSize
+      };
+      if (options) {
+        params.search = JSON.parse(JSON.stringify(options));
+      }
+      this.$http.post('/orderController/queryOrder', params).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          let options = {};
+          formParams.statusOptions.forEach(item => {
+            options[item.value] = item.label;
+          });
+          this.tableData = res.data.data.records.map((item,index) => {
+            //  将status码 转成 state 汉语标签
+            item.state = options[item.status];
+            item.index = index + 1;
+            item.stateIsEditor = false;     // 编辑状态
+            item.isEditor = false;          // 编辑除状态外数据
+            return item;
+          });
+
+          // "createAt": "admin",
+					// "customerName": "客户1",
+					// "goods": "商品1",
+					// "productionSummary": 1000,
+					// "amount": 100000,
+					// "transactionDate": "2020-5-9",
+					// "extend": null,
+					// "payAmount": null,
+					// "lastUpdateTime": "2020-03-31 21:24:41",
+					// "status": 99
+        }else {
+          if (options !== undefined) {
+            this.$message({
+              message: res.data.message || "搜索失败",
+              type: 'error',
+              duration: 3000,
+              showClose: true
+            });
+          }
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+    },
+    // 搜索
+    searchContent(options) {
+      this.getOrderData(options);
+    },
     // 添加订单
     addOrder() {
-      this.eidtorState = 'add';
-      let flag = this.tableData.some(item => {
+      // 验证是否有编辑项
+      let editorFlag = this.tableData.some(item => {
         return item.isEditor;
       });
-      if (flag) {
+      if (editorFlag) {
         this.$message({
           showClose: true,
-          message: '已经存在编辑项，请完成后再继续操作'
+          message: '当前有订单正在编辑，请完成后再继续操作'
         });
-      }else {
-        let obj = {};
-        this.tableHeader.forEach(item => {
-          obj[item.prop] = '';
+        return;
+      }
+      // 验证是否有修改状态项
+      let statusFlag = this.tableData.some(item => {
+        return item.stateIsEditor;
+      });
+      if (statusFlag) {
+        this.$message({
+          showClose: true,
+          message: '当前有订单正在修改状态，请完成后再继续操作'
         });
-        obj.orderNumber = '系统自动生成';
-        obj.qualityNum = '0';
-        obj.isEditor = true;
-        this.tableData.unshift(obj);
+        return;
+      }
+      this.params.transactionDate = new Date();
+      this.queryCustomList();
+      this.childPageIsShow = true;
+    },
+    // 确认添加订单
+    sureAddOrder() {
+      let user = JSON.parse(sessionStorage.getItem('user'));
+      this.params.createAt = user.name;
+      this.params.productionSummary = Number(this.params.productionSummary);
+      this.params.amount = Number(this.params.amount);
+      console.log(this.params)
+      return
+      this.$http.post('/orderController/addOrder', params).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.cancelAddOrder();
+          // 获取订单数据
+          this.getOrderData(); 
+        }else {
+          this.cancelAddOrder();
+          this.$message({
+            message: res.data.message || "添加订单失败",
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+        this.cancelAddOrder();
+        console.log('失败原因:' + error);
+      });
+    },
+    // 取消添加订单
+    cancelAddOrder() {
+      // 子页面不显示，且初始化params对象
+      this.childPageIsShow = false;
+      this.params = {
+        createAt: "",           
+        customerName: "",       
+        goods: "",
+        productionSummary: '',   
+        amount: '',
+        transactionDate: ""
+      }
+    },
+
+    // 编辑订单
+    editorRow(row,str) {
+      // 验证是否有编辑项
+      let editorFlag = this.tableData.some(item => {
+        return item.isEditor;
+      });
+      if (editorFlag) {
+        this.$message({
+          showClose: true,
+          message: '当前有订单正在编辑，请完成后再继续操作'
+        });
+        return;
+      }
+      // 验证是否有修改状态项
+      let statusFlag = this.tableData.some(item => {
+        return item.stateIsEditor;
+      });
+      if (statusFlag) {
+        this.$message({
+          showClose: true,
+          message: '当前有订单正在修改状态，请完成后再继续操作'
+        });
+        return;
+      }
+      this.copyRow = JSON.parse(JSON.stringify(row));
+      if (str === 'editor') {
+        row.isEditor = true;
+      }else if (str === 'status') {
+        // 编辑订单状态
+        row.stateIsEditor = true;
       }
     },
     // 确定编辑（创建）
     sureEditor(row) {
-      if (row.customerName.trim() === '' || row.goods.trim() === '' || row.productionSummary.trim() === '' || row.amount.trim() === '' || !row.transactionDate){
-        this.$message({
-          message: '请填写客户、商品、需求量、金额、交货日期等信息'
-        })
-        return;
-      }
-      console.log('xxxxx',row.transactionDate);
-      if (this.eidtorState === 'add') {
-        let letter = 'qwertyuiopasdfghjklzxcvbnm';
-        let number = '0123456789';
-        let str = '';
-        for(let i = 0; i < 8; i++) {
-          if (i < 2) {
-            str += letter[Math.round(Math.random() * 25)];
-          }else {
-            str += number[Math.round(Math.random() * 9)]
-          }
+      if (row.isEditor) {
+        if (row.customerName.trim() === '' || row.goods.trim() === '' || row.productionSummary.trim() === '' || row.amount.trim() === '' || !row.transactionDate){
+          this.$message({
+            message: '请填写客户、商品、需求量、金额、交货日期等信息'
+          })
+          return;
         }
-        row.orderNumber = str;
-      }else {
-
+        let params = {
+          id: row.id,
+          goods: row.goods,
+          amount: Number(row.amount),                
+          productionSummary: Number(row.productionSummary),        
+          transactionDate: row.transactionDate
+        }
+        this.$http.post('/orderController/editOrder', params).then(res => {
+          if (res.data.code == 0 && res.data.message == '操作成功') {
+            row.isEditor = false;
+            // 获取订单数据
+            this.getOrderData();
+          }else {
+            this.$message({
+              message: res.data.message || "编辑订单失败",
+              type: 'error',
+              duration: 3000,
+              showClose: true
+            });
+          }
+        }).catch(error => {
+          console.log('失败原因:' + error);
+        });
+      }else if (row.stateIsEditor) {
+        this.$http.get('/orderController/changeStatus' + '?id=' + row.id).then(res => {
+          if (res.data.code == 0 && res.data.message == '操作成功') {
+            row.stateIsEditor = false;
+            // 获取订单数据
+            this.getOrderData();
+          }else {
+            this.$message({
+              message: res.data.message || "编辑订单失败",
+              type: 'error',
+              duration: 3000,
+              showClose: true
+            });
+          }
+        }).catch(error => {
+          console.log('失败原因:' + error);
+        });
       }
-      row.isEditor = false;
     },
     // 取消编辑（创建）
     cancelEditor(row) {
       for (let k in this.copyRow) {
         row[k] = this.copyRow[k]
       }
-    },
-    // 编辑行
-    editorRow(row) {
-      this.eidtorState = 'editor';
-      let flag = this.tableData.some(item => {
-        return item.isEditor;
-      });
-      if (flag) {
-        this.$message({
-          showClose: true,
-          message: '已经存在编辑项，请完成后再继续操作'
-        });
-      }else {
-        this.copyRow = JSON.parse(JSON.stringify(row));
-        row.isEditor = true;
-      }
-    },
-    // 删除行
-    deleteRow(index) {
-      this.tableData.splice(index,1);
-
-    },
-    
-    // 创建计划
-    createPlan(row) {
-      this.showChildPage(row);
-    },
-    // 编辑计划
-    editorPlan(row) {
-      this.showChildPage(row);
     },
     // 查看计划
     viewPlan(row) {
@@ -295,29 +521,6 @@ export default {
         }
       });
     },
-    onSubmit() {
-      console.log('submit!');
-    },
-    inputChange(e) {
-      console.log(3,e)
-      let { min = undefined, onChange } = this.props
-      // console.log(this.props, "value onchange")
-      min = typeof min == "undefined" ? min : Number(min)
-      // max = typeof max == "undefined" ? max : Number(max)
-      let newValue
-      let value = e.target.value.toString().replace(/^0+/, '0')
-      let numberValue = Number(value)
-      if (isNaN(numberValue) === true && value != "-") return
-      if (min !== undefined && min >= 0 && value.indexOf('-') > -1) return
-      //输入的内容超过两个连续的0
-      if (numberValue == 0 && (value == "00" || value == "-00") && Number(value) == numberValue) {
-        return
-      }
-      newValue = value
-    },
-    inputBlur(e) {
-      console.log(4,e)
-    },
     // 处理金额输入框  只输入数字且允许保留两位小数
     checkNumber(event){
       event.target.value = event.target.value.replace(/[^\d.]/g,"");//清除"数字"和"."以外的字符
@@ -325,6 +528,12 @@ export default {
       event.target.value = event.target.value.replace(/\.{2,}/g,".");//只保留第一个.清除多余的
       event.target.value = event.target.value.replace(".","$#$").replace(/\./g,"").replace("$#$",".");
       event.target.value = event.target.value.replace(/^(\-)*(\d+)\.(\d\d).*$/,'$1$2.$3');//只能输入两个小数
+    },
+    blurInput(event) {
+      if (event.target.value !== '') {
+        // 失去焦点，将字符串转换为数字
+        event.target.value = Number(event.target.value);
+      }
     }
   }
 };
@@ -418,11 +627,85 @@ export default {
         line-height: 30px;
       }
     }
+    /deep/.el-date-editor.el-input,
+    .el-date-editor.el-input__inner {
+      width: 100%;
+    }
   }
-  
-  /deep/.el-date-editor.el-input,
-  .el-date-editor.el-input__inner {
-    width: 100%;
+  .dialog-box {
+    background-color: rgba(0, 0, 0, 0.5);
+    box-sizing: border-box;
+    .dialog {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 20px 35px;
+      box-sizing: border-box;
+      width: 400px;
+      height: 450px;
+      background-color: #ffffff;
+      .title {
+        overflow: hidden;
+        height: 30px;
+        .title-label {
+          float: left;
+          width: 80px;
+          height: 30px;
+          line-height: 30px;
+          font-family: Microsoft Yahei;
+          font-size: 18px;
+        }
+      }
+      .content-item {
+        width: 100%;
+        margin: 20px auto;
+        box-sizing: border-box;
+        div {
+          display: inline-block;
+          width: 80px;
+          color: #606266;
+          font-size: 14px;
+        }
+        /deep/.el-date-editor.el-input,
+        .el-date-editor.el-input__inner {
+          width: 170px;
+          margin-left: 10px;
+          .el-input__inner {
+            height: 40px;
+            line-height: 40px;
+          }
+        }
+        /deep/.el-date-editor .el-input__icon {
+          line-height: 40px;
+        }
+        .el-select {
+          width: 170px;
+          margin-left: 10px;
+        }
+        .el-input__inner {
+          width: 170px;
+        }
+        input {
+          width: 170px;
+          margin-left: 10px;
+          &::-webkit-input-placeholder {
+            font-family: Microsoft YaHei;
+            font-size: 14px;
+            font-weight: 500;
+            color: #a9adb3;
+          }
+        }
+        input:focus {
+          border-color: #409EFF;
+        }
+      }
+    }
+    .footer {
+      position: absolute;
+      bottom: 25px;
+      right: 30px;
+    }
   }
 }
 </style>

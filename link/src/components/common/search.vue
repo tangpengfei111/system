@@ -1,12 +1,13 @@
 <template>
   <div class="search-box">
-    <input type="text" v-model="searchText" @keyup.enter="searchContent" placeholder="请输入搜索内容">
+    <input type="text" v-model="searchText" @keyup.enter="searchContent" :placeholder="placeholder ? placeholder : '请输入搜索内容'">
     <div class="search-btn" @click="searchContent">搜索</div>
   </div>
 </template>
 
 <script>
 export default {
+  props: ['placeholder'],
   data() {
     return {
       searchText: ""

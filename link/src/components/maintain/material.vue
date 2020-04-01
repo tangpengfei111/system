@@ -6,7 +6,7 @@
         <!-- <div>总计 {{totalNum}} 条数据</div> -->
       </div>
       <div class="func-bar">
-        <my-search style="float:left" @searchContent="searchContent"></my-search>
+        <my-search style="float:left" @searchContent="searchContent" :placeholder="searchPlaceholder"></my-search>
         <div class="add btn" @click="addRow">添加</div>
       </div>
     </div>
@@ -153,6 +153,7 @@ export default {
         { label: '不可用', value: 1 },
         { label: '废弃', value: 2 }
       ],
+      searchPlaceholder: '请输入搜索的原料名称'
     };
   },
   created() {
