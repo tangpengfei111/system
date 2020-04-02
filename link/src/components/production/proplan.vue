@@ -7,6 +7,7 @@
       </div>
       <div class="func-bar">
         <div class="add btn" @click="addPlan">新建计划</div>
+        <div class="return btn" @click="returnPage">返回</div>
       </div>
     </div>
     <div class="orderInfo">
@@ -35,7 +36,7 @@
       <el-table
         :data="planTableData"
         :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
-        :height="browserAttr.height - 450"
+        :height="browserAttr.height - 400"
         style="width: 100%"
         >
         <el-table-column
@@ -51,10 +52,6 @@
           </template>
         </el-table-column>
       </el-table>
-    </div>
-    <div class="bottom-btn">
-      <div class="save btn" @click="savePlan">保存</div>
-      <div class="return btn" @click="returnPage">返回</div>
     </div>
     <div class="loading dialog-box" v-if="childPageIsShow">
       <div class="dialog">
@@ -72,10 +69,10 @@
           <el-form-item label="生产日期">
             <el-date-picker
               v-model="planParams.date"
-              type="datetime"
-              format="yyyy-MM-dd HH:mm:ss"
-              value-format="yyyy-MM-dd HH:mm:ss"
-              placeholder="选择日期时间"
+              type="date"
+              format="yyyy-MM-dd"
+              value-format="yyyy-MM-dd"
+              placeholder="选择日期"
               :picker-options="pickerOptions"
               :editable="false">
             </el-date-picker>
@@ -83,20 +80,35 @@
           <el-form-item></el-form-item>
           <el-form-item label="设备">
             <el-select v-model="planParams.machineName" placeholder="请选择设备">
-              <el-option label="设备1" value="设备1"></el-option>
-              <el-option label="设备2" value="设备2"></el-option>
+              <el-option 
+                v-for="(item,index) in machineOptions"
+                :key="index"
+                :label="item.label" 
+                :value="item.value"
+                >
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="色号">
             <el-select v-model="planParams.colorName" placeholder="请选择色号">
-              <el-option label="蓝色" value="blue"></el-option>
-              <el-option label="红色" value="red"></el-option>
+              <el-option 
+                v-for="(item,index) in colorOptions"
+                :key="index"
+                :label="item.label" 
+                :value="item.value"
+                >
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="原料">
             <el-select v-model="planParams.materialName" placeholder="请选择原料">
-              <el-option label="原料1" value="原料1"></el-option>
-              <el-option label="原料2" value="原料2"></el-option>
+              <el-option 
+                v-for="(item,index) in materialOptions"
+                :key="index"
+                :label="item.label" 
+                :value="item.value"
+                >
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="原料用量">
@@ -104,8 +116,13 @@
           </el-form-item>
           <el-form-item label="染化剂">
             <el-select v-model="planParams.agentName" placeholder="请选择染化剂">
-              <el-option label="染化剂1" value="染化剂1"></el-option>
-              <el-option label="染化剂2" value="染化剂2"></el-option>
+              <el-option 
+                v-for="(item,index) in agentOptions"
+                :key="index"
+                :label="item.label" 
+                :value="item.value"
+                >
+              </el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="染化剂用量">
@@ -137,7 +154,7 @@ export default {
         {label: '当前生产量', prop: 'productionCurrency' },
         {label: '金额', prop: 'amount' },
         {label: '状态', prop: 'state' },
-        {label: '交货日期', prop: 'transactionDate', width: 210}
+        {label: '交货日期', prop: 'transactionDate', width: 180}
       ],
       orderTableData: [],   // 订单数据
       planTableData: [],    // 计划数据
@@ -170,20 +187,24 @@ export default {
       },
       pickerOptions: {
         disabledDate: (time) => {
-          // 设置可选择的日期为今天之后的一个月内
+          // 当前时间
           const curDate = (new Date()).getTime();
-          // 这里算出一个月的毫秒数,这里使用30的平均值,实际中应根据具体的每个月有多少天计算
-          const day = 10 * 24 * 3600 * 1000;
-          const dateRegion = curDate + day;
+          // 订单交货日期时间
+          const dateRegion = new Date(this.orderTableData[0].transactionDate).getTime();
           return time.getTime() < Date.now() - 8.64e7 || time.getTime() > dateRegion;
         }
-      }
+      },
+      colorOptions: [],
+      materialOptions: [],
+      agentOptions: [],
+      machineOptions: [],
     };
   },
   created() {
     console.log(this.$route)
     if (this.$route.query) {
-      this.getTableData(this.$route.query.orderId)
+      this.getOrderData(this.$route.query.orderId);
+      this.getPlanData(this.$route.query.orderId);
     }
   },
   mounted() {
@@ -196,7 +217,7 @@ export default {
       productionCurrency: '20',
       state: '完成',
       amount: '3000',
-      transactionDate: '2019-05-03 08:08:08',
+      transactionDate: '2020-05-03',
     }
     this.orderTableData.push(obj);
     // for (let i = 0; i < 15; i++) {
@@ -241,16 +262,15 @@ export default {
         path: '/production',
       });
     },
-    // 获取表格数据
-    getTableData(orderId) {
+    // 获取订单信息
+    getOrderData(orderId) {
       // 根据订单编号查订单信息
       this.$http.get('/orderController/getOrderById' + '?orderId=' + orderId).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.orderTableData = res.data.data.map(item => {
-            item.customerName  = item.customer.name;
-            item.state = this.statusOptions[item.status];
-            return item;
-          })
+          let obj = this._.cloneDeep(res.data.data);
+          obj.customerName  = obj.customer.name;
+          obj.state = this.statusOptions[obj.status];
+          this.orderTableData.push(obj);
         }else {
           this.$message({
             message: res.data.message,
@@ -262,6 +282,9 @@ export default {
       }).catch(error => {
         console.log('失败原因:' + error);
       });
+    },
+    // 获取生产计划列表
+    getPlanData(orderId) {
       // 根据订单查询生产
       this.$http.get('/productionController/queryProdByOrder' + '?orderId=' + orderId).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
@@ -283,6 +306,54 @@ export default {
     },
     // 新建计划
     addPlan() {
+      // 获取可用染化剂
+      this.$http.get('/dyeAgentController/queryAvailableDyeAgent').then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.agentOptions = res.data.data.map(item => {
+            return { label: item.name, value: item.name };
+          });
+        }else {
+          this.agentOptions = [];
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+      // 获取可用设备
+      this.$http.get('/machineController/queryAvailableMachine').then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.machineOptions = res.data.data.map(item => {
+            return { label: item.name, value: item.name };
+          });
+        }else {
+          this.machineOptions = [];
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+      // 获取可用色号
+      this.$http.get('/colorController/queryAvailableColor').then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.colorOptions = res.data.data.map(item => {
+            return { label: item.name, value: item.name };
+          });
+        }else {
+          this.colorOptions = [];
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+      // 获取可用原料
+      this.$http.get('/materialController/queryAvailableMaterial').then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.materialOptions = res.data.data.map(item => {
+            return { label: item.name, value: item.name };
+          });
+        }else {
+          this.materialOptions = [];
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
       this.childPageIsShow = true;
     },
     // 保存计划
@@ -298,14 +369,42 @@ export default {
     },
     // 确定创建
     surePlan() {
-      this.planParams.index = this.planTableData.length + 1;
-      let obj = this._.cloneDeep(this.planParams);
-      this.planTableData.push(obj);
-      this.childPageIsShow = false;
-      for (let k in this.planParams) {
-        this.planParams[k] = ''
-      }
-      
+      // this.planParams.index = this.planTableData.length + 1;
+      // let obj = this._.cloneDeep(this.planParams);
+      // this.planTableData.push(obj);
+      // this.childPageIsShow = false;
+      // for (let k in this.planParams) {
+      //   this.planParams[k] = ''
+      // }
+      console.log(this.planParams)
+      // {
+      //   "agentName": "染化剂1",
+      //   "agentUse": 10,
+      //   "colorName": "色号1",
+      //   "createAt": "admin",
+      //   "date": "2020-3-31",
+      //   "machineName": "染缸1",
+      //   "materialName": "原料1",
+      //   "materialUse": 150,
+      //   "orderId": "1244977037068783618"
+      // }
+      let user = JSON.parse(sessionStorage.getItem('user'));
+      this.params.createAt = user.name;
+      this.params.orderId = this.$route.query.orderId || this.orderTableData[0].id;
+      this.$http.get('/productionController/addProduction', this.planParams).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.getPlanData(this.params.orderId);
+        }else {
+          this.$message({
+            message: res.data.message,
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
     },
   }
 };
@@ -512,7 +611,7 @@ export default {
     line-height: 40px;
   }
   .el-date-editor.el-input {
-    width: 190px;
+    width: 140px;
   }
 }
 </style>
