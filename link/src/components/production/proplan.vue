@@ -59,12 +59,13 @@
           <div class="title-label">新建计划</div>
           <!-- <div class="export">导出</div> -->
         </div>
-        <el-form 
-          :inline="true"
+        <el-form
           class="demo-form-inline"
-          ref="form" 
-          :model="planParams" 
+          :inline="true"
+          ref="form"
+          :model="planParams"
           label-width="80px"
+          status-icon
           >
           <el-form-item label="生产日期">
             <el-date-picker
@@ -112,7 +113,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="原料用量">
-            <el-input v-model="planParams.materialUse" placeholder="请填写原料数量"></el-input>
+            <el-input v-model="planParams.materialUse" :disabled="!materialMaxStock" @blur="blurInput($event,'material')" placeholder="请填写原料数量"></el-input>
           </el-form-item>
           <el-form-item label="染化剂">
             <el-select v-model="planParams.agentName" placeholder="请选择染化剂">
@@ -126,7 +127,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="染化剂用量">
-            <el-input v-model="planParams.agentUse" placeholder="请填写染化剂数量"></el-input>
+            <el-input v-model="planParams.agentUse" :disabled="!agentMaxStock" @blur="blurInput($event,'agent')" placeholder="请填写染化剂数量"></el-input>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="surePlan">确定</el-button>
@@ -177,7 +178,8 @@ export default {
         materialName: '',
         materialUse:'',
         agentName: '',
-        agentUse: ''
+        agentUse: '',
+        createAt: ''
       },
       statusOptions: {
         '1': '打开',
@@ -198,6 +200,8 @@ export default {
       materialOptions: [],
       agentOptions: [],
       machineOptions: [],
+      agentMaxStock: 50,
+      materialMaxStock: 50,
     };
   },
   created() {
@@ -262,6 +266,27 @@ export default {
         path: '/production',
       });
     },
+    // 获取原料库存
+    getMaterialStock() {
+      this.$http.get('/materialStockController/getStockByMaterial' + '？materialName=' + '').then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.materialMaxStock = res.data.data.stock;
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+      
+    },
+    // 获取染化剂库存
+    getAgentStock() {
+      this.$http.get('/agentStockController/getStockByAgent' + '？materialName=' + '').then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.agentMaxStock = res.data.data.stock;
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+    },
     // 获取订单信息
     getOrderData(orderId) {
       // 根据订单编号查订单信息
@@ -307,53 +332,53 @@ export default {
     // 新建计划
     addPlan() {
       // 获取可用染化剂
-      this.$http.get('/dyeAgentController/queryAvailableDyeAgent').then(res => {
-        if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.agentOptions = res.data.data.map(item => {
-            return { label: item.name, value: item.name };
-          });
-        }else {
-          this.agentOptions = [];
-        }
-      }).catch(error => {
-        console.log('失败原因:' + error);
-      });
-      // 获取可用设备
-      this.$http.get('/machineController/queryAvailableMachine').then(res => {
-        if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.machineOptions = res.data.data.map(item => {
-            return { label: item.name, value: item.name };
-          });
-        }else {
-          this.machineOptions = [];
-        }
-      }).catch(error => {
-        console.log('失败原因:' + error);
-      });
-      // 获取可用色号
-      this.$http.get('/colorController/queryAvailableColor').then(res => {
-        if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.colorOptions = res.data.data.map(item => {
-            return { label: item.name, value: item.name };
-          });
-        }else {
-          this.colorOptions = [];
-        }
-      }).catch(error => {
-        console.log('失败原因:' + error);
-      });
-      // 获取可用原料
-      this.$http.get('/materialController/queryAvailableMaterial').then(res => {
-        if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.materialOptions = res.data.data.map(item => {
-            return { label: item.name, value: item.name };
-          });
-        }else {
-          this.materialOptions = [];
-        }
-      }).catch(error => {
-        console.log('失败原因:' + error);
-      });
+      // this.$http.get('/dyeAgentController/queryAvailableDyeAgent').then(res => {
+      //   if (res.data.code == 0 && res.data.message == '操作成功') {
+      //     this.agentOptions = res.data.data.map(item => {
+      //       return { label: item.name, value: item.name };
+      //     });
+      //   }else {
+      //     this.agentOptions = [];
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // });
+      // // 获取可用设备
+      // this.$http.get('/machineController/queryAvailableMachine').then(res => {
+      //   if (res.data.code == 0 && res.data.message == '操作成功') {
+      //     this.machineOptions = res.data.data.map(item => {
+      //       return { label: item.name, value: item.name };
+      //     });
+      //   }else {
+      //     this.machineOptions = [];
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // });
+      // // 获取可用色号
+      // this.$http.get('/colorController/queryAvailableColor').then(res => {
+      //   if (res.data.code == 0 && res.data.message == '操作成功') {
+      //     this.colorOptions = res.data.data.map(item => {
+      //       return { label: item.name, value: item.name };
+      //     });
+      //   }else {
+      //     this.colorOptions = [];
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // });
+      // // 获取可用原料
+      // this.$http.get('/materialController/queryAvailableMaterial').then(res => {
+      //   if (res.data.code == 0 && res.data.message == '操作成功') {
+      //     this.materialOptions = res.data.data.map(item => {
+      //       return { label: item.name, value: item.name };
+      //     });
+      //   }else {
+      //     this.materialOptions = [];
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // });
       this.childPageIsShow = true;
     },
     // 保存计划
@@ -406,6 +431,14 @@ export default {
         console.log('失败原因:' + error);
       });
     },
+    blurInput(event,str) {
+      console.log(111,event.target.value)
+      if (str === 'material' && event.target.value > this.materialMaxStock) {
+        console.log(11111)
+      }else if (str === 'agent' && event.target.value > this.agentMaxStock) {
+        
+      }
+    }
   }
 };
 </script>
