@@ -4,14 +4,11 @@
       <div class="title">
         <div>{{this.$route.meta.til || '染化剂库存'}}</div>
       </div>
-      <div class="func-bar">
-        <my-search style="float:left" @searchContent="searchContent"></my-search>
-        <!-- <div class="add btn" @click="addOrder">新建订单</div> -->
-      </div>
     </div>
+    <my-search style="float:left" @searchContent="searchContent" :formParams="formParams"></my-search>
     <el-table
       :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
-      :height="browserAttr.height - 200"
+      :height="browserAttr.height - 260"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%"
     >
@@ -96,7 +93,7 @@
 </template>
 
 <script>
-import search from '@/components/common/search.vue';
+import search from '@/components/common/advancedSearch.vue';
 import utils from '@/lib/utils.js';
 export default {
   components: {
@@ -128,26 +125,35 @@ export default {
         increaseType: '',
         variation: ''
       },
-      roleOptions: []
+      roleOptions: [],
+      formParams: {
+        namePlaceholder: '请输入搜索内容',
+        statusOptions: [
+          { label: '打开', value: '1' },
+          { label: '正在生产中', value: '2' },
+          { label: '完成', value: '0' },
+          { label: '暂停', value: '99' }
+        ]
+      },
     }
   },
   created() {
-    // this.getStockList();
+    this.getStockList();
   },
   mounted() {
     this.browserResize();
-    for (let i = 0; i < 100; i++) {
-      let obj = JSON.parse(JSON.stringify({
-        no: '00X1',
-        name: '蓝色染化剂',
-        stock: '40',
-        state: '可用',
-        lastUpdateTime: '2019-05-03 08:08:08',
-        isEditor: false
-      }));
-      obj.index = i + 1;
-      this.tableData.push(obj);
-    }
+    // for (let i = 0; i < 100; i++) {
+    //   let obj = JSON.parse(JSON.stringify({
+    //     no: '00X1',
+    //     name: '蓝色染化剂',
+    //     stock: '40',
+    //     state: '可用',
+    //     lastUpdateTime: '2019-05-03 08:08:08',
+    //     isEditor: false
+    //   }));
+    //   obj.index = i + 1;
+    //   this.tableData.push(obj);
+    // }
   },
   beforeDestroy() {
     window.onresize = null;
@@ -171,17 +177,13 @@ export default {
       this.currentPage = nowPage;
     },
     // 获取库存信息列表
-    getStockList(text) {
+    getStockList(options) {
       let params = {
         pageNo: this.currentPage,
         size: this.pageSize
       };
-      if (text !== undefined) {
-        params.search = text;
-        // params.search = {
-        //   name: '染化剂1',
-        //   status: 0
-        // }
+      if (options) {
+        params.search = JSON.parse(JSON.stringify(options));
       }
       this.$http.post('/agentStockController/queryByCondition', params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
@@ -198,7 +200,7 @@ export default {
             return item;
           });
         }else {
-          if (text !== undefined) {
+          if (options !== undefined) {
             this.$message({
               message: res.data.message || "查询失败",
               type: 'error',
@@ -253,7 +255,6 @@ export default {
         this.params.reduceType = '';
       }
       console.log('确定库存',JSON.parse(JSON.stringify(this.params)));
-
       // 添加库存操作请求
       let params = this._.cloneDeep(this.params);
       // 添加库存操作请求
@@ -274,25 +275,8 @@ export default {
 
     },
     // 搜索
-    searchContent(searchText) {
-      this.$http.get('/agentStockController/getStockByAgent' + '?agentName=' + searchText).then(res => {
-        if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.tableData = res.data.data.map((item,index) => {
-            item.index = index + 1;
-            return item;
-          });
-        }else {
-          this.$message({
-            message: res.data.message || "查询失败",
-            type: 'error',
-            duration: 3000,
-            showClose: true
-          });
-          // this.tableData = [];
-        }
-      }).catch(error => {
-        console.log('失败原因:' + error);
-      });
+    searchContent(options) {
+      this.getStockList(options);
     }
   }
 };
@@ -326,39 +310,6 @@ export default {
           color: #74797f;
           border-left: 1px solid #90959a;
         }
-      }
-    }
-    .func-bar {
-      position: absolute;
-      top: 15px;
-      right: 0;
-      width: 280px;
-      overflow: hidden;
-      .add {
-        float: right;
-        width: 35px;
-        height: 35px;
-        margin-right: 10px;
-        box-sizing: border-box;
-        background-image: url("../../assets/image/add-icon.png");
-        background-repeat: no-repeat;
-        background-position: center center;
-        background-size: 25px 25px;
-      }
-      .btn {
-        float: right;
-        width: 70px;
-        height: 30px;
-        line-height: 30px;
-        text-align: center;
-        margin: 0 0 0 10px;
-        font-family: Microsoft Yahei;
-        font-size: 12px;
-        color: #f3f3f3;
-        background: #1e79eb;
-        // background: #009AFE;
-        border-radius: 4px;
-        cursor: pointer;
       }
     }
   }
