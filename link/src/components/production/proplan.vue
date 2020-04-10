@@ -224,6 +224,10 @@ export default {
       },
       colorOptions: [],
       materialOptions: [],
+      // materialOptions: [
+      //   {label: '1', value: 1},
+      //   {label: '2', value: 2},
+      // ],
       agentOptions: [],
       machineOptions: [],
       agentMaxStock: 50,
@@ -270,6 +274,19 @@ export default {
   beforeDestroy() {
     window.onresize = null;
   },
+  watch: {
+    planParams: {
+      handler(newVal,oldVal) {
+        if (newVal.materialName !== oldVal.materialName) {
+          this.getMaterialStock(newVal.materialName);
+        }
+        if (newVal.agentName !== oldVal.agentName) {
+          this.getAgentStock(newVal.agentName);
+        }
+      },
+      deep: true
+    }
+  },
   methods: {
     // 表格 行的样式
     tableRowClassName({ rowIndex }) {
@@ -294,32 +311,28 @@ export default {
       });
     },
     // 获取原料库存
-    getMaterialStock() {
-      this.$http
-        .get(
-          "/materialStockController/getStockByMaterial" + "？materialName=" + ""
-        )
-        .then(res => {
-          if (res.data.code == 0 && res.data.message == "操作成功") {
-            this.materialMaxStock = res.data.data.stock;
-          }
-        })
-        .catch(error => {
-          console.log("失败原因:" + error);
-        });
+    getMaterialStock(materialName) {
+      this.$http.get("/materialStockController/getStockByMaterial?materialName=" + materialName).then(res => {
+        if (res.data.code == 0 && res.data.message == "操作成功") {
+          this.materialMaxStock = res.data.data.stock;
+        }else {
+          this.materialMaxStock = 0;
+        }
+      }).catch(error => {
+        console.log("失败原因:" + error);
+      });
     },
     // 获取染化剂库存
-    getAgentStock() {
-      this.$http
-        .get("/agentStockController/getStockByAgent" + "？materialName=" + "")
-        .then(res => {
-          if (res.data.code == 0 && res.data.message == "操作成功") {
-            this.agentMaxStock = res.data.data.stock;
-          }
-        })
-        .catch(error => {
-          console.log("失败原因:" + error);
-        });
+    getAgentStock(agentName) {
+      this.$http.get("/agentStockController/getStockByAgent?agentName=" + agentName).then(res => {
+        if (res.data.code == 0 && res.data.message == "操作成功") {
+          this.agentMaxStock = res.data.data.stock;
+        }else {
+          this.agentMaxStock = 0;
+        }
+      }).catch(error => {
+        console.log("失败原因:" + error);
+      });
     },
     // 获取订单信息
     getOrderData(orderId) {
@@ -456,30 +469,14 @@ export default {
     },
     // 确定创建
     surePlan() {
-      // this.planParams.index = this.planTableData.length + 1;
-      // let obj = this._.cloneDeep(this.planParams);
-      // this.planTableData.push(obj);
-      // this.childPageIsShow = false;
-      // for (let k in this.planParams) {
-      //   this.planParams[k] = ''
-      // }
-      console.log(this.planParams);
-      // {
-      //   "agentName": "染化剂1",
-      //   "agentUse": 10,
-      //   "colorName": "色号1",
-      //   "createAt": "admin",
-      //   "date": "2020-3-31",
-      //   "machineName": "染缸1",
-      //   "materialName": "原料1",
-      //   "materialUse": 150,
-      //   "orderId": "1244977037068783618"
-      // }
       let user = JSON.parse(sessionStorage.getItem("user"));
-      this.params.createAt = user.name;
+      this.planParams.materialUse = Number(this.planParams.materialUse)
+      this.planParams.agentUse = Number(this.planParams.agentUse)
+      this.planParams.createAt = user.name;
       this.params.orderId = this.$route.query.orderId || this.orderTableData[0].id;
       this.$http.post("/productionController/addProduction", this.planParams).then(res => {
         if (res.data.code == 0 && res.data.message == "操作成功") {
+          this.childPageIsShow = false;
           this.getPlanData(this.params.orderId);
         } else {
           this.$message({
