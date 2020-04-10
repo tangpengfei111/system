@@ -496,8 +496,9 @@ export default {
     blurInput(event, str) {
       console.log(111, event.target.value);
       if (str === "material" && event.target.value > this.materialMaxStock) {
-        console.log(11111);
+        return this.materialMaxStock;
       } else if (str === "agent" && event.target.value > this.agentMaxStock) {
+        return this.agentMaxStock;
       }
     },
     // 打印计划
