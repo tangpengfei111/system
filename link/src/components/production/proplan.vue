@@ -6,7 +6,7 @@
         <!-- <div>总计 {{totalNum}} 条数据</div> -->
       </div>
       <div class="func-bar">
-        <div class="add btn" @click="addPlan">新建计划</div>
+        <div class="add btn" @click="modifyPlan('add')">新建计划</div>
         <div class="return btn" @click="returnPage">返回</div>
       </div>
     </div>
@@ -48,21 +48,22 @@
           align="center"
         >
           <template slot-scope="scope">
-            <div v-show="!scope.row.isEditor">{{scope.row[item.prop]}}</div>
-            <div v-show="scope.row.isEditor && item.label == '合格品量'">
+            <div v-if="!scope.row.isWrite">{{scope.row[item.prop]}}</div>
+            <div v-if="scope.row.isWrite && item.label == '合格品量'">
               <input type="text" v-model="scope.row.productionQualified">
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center" fixed="right">
+        <el-table-column label="操作" width="220" align="center" fixed="right">
           <template slot-scope="scope">
-            <div v-if="!scope.row.isEditor">
-              <el-button size="mini" :disabled="scope.row.state !== '0'" @click="editorQualified(scope.row)">填写合格品</el-button>
-              <el-button size="mini" @click="printPlan(scope.row)">打印计划</el-button>
+            <div v-if="!scope.row.isWrite">
+              <el-button size="mini" title="填写合格品" :disabled="scope.row.state !== '0'" @click="writeQualified(scope.row)">填写</el-button>
+              <el-button size="mini" title="编辑成产计划" @click="modifyPlan('editor',scope.row)">编辑</el-button>
+              <el-button size="mini" title="打印生产计划" @click="printPlan(scope.row)">打印</el-button>
             </div>
-            <div v-if="scope.row.isEditor">
-              <el-button size="mini" @click="sureEditor(scope.row)">确定</el-button>
-              <el-button size="mini" @click="cancelEditor(scope.row)">取消</el-button>
+            <div v-if="scope.row.isWrite">
+              <el-button size="mini" @click="sureWrite(scope.row)">确定</el-button>
+              <el-button size="mini" @click="cancelWrite(scope.row)">取消</el-button>
             </div>
           </template>
         </el-table-column>
@@ -194,7 +195,7 @@ export default {
       childPageIsShow: false,
       planParams: {
         // 子页面参数
-        data: "",
+        date: "",
         machineName: "",
         colorName: "",
         materialName: "",
@@ -232,44 +233,44 @@ export default {
       machineOptions: [],
       agentMaxStock: 50,
       materialMaxStock: 50,
-      copyRow: {}
+      copyRow: {},
+      modifyPlanType: 'add',    //修改计划类型  add editor
     };
   },
   created() {
-    console.log(this.$route);
     if (this.$route.query) {
-      this.getOrderData(this.$route.query.orderId);
-      this.getPlanData(this.$route.query.orderId);
+      // this.getOrderData(this.$route.query.orderId);
+      // this.getPlanData(this.$route.query.orderId);
     }
   },
   mounted() {
     this.browserResize();
-    // let obj = {
-    //   orderNumber: "xasdasd1",
-    //   customerName: "客户1",
-    //   goods: "商品1",
-    //   productionSummary: "50",
-    //   productionCurrency: "20",
-    //   state: "完成",
-    //   amount: "3000",
-    //   transactionDate: "2020-05-03"
-    // };
-    // this.orderTableData.push(obj);
-    // for (let i = 0; i < 15; i++) {
-    //   let obj = JSON.parse(JSON.stringify({
-    //     date: '2019-05-03 08:08:08',
-    //     machineName: '设备1',
-    //     colorName: '红色',
-    //     materialName: '原料1',
-    //     materialUse: '50',
-    //     agentName: '染化剂1',
-    //     agentUse: '50',
-    //     productionQualified: 0,
-    //     isEditor: false
-    //   }));
-    //   obj.index = i + 1;
-    //   this.planTableData.push(obj);
-    // }
+    let obj = {
+      orderNumber: "xasdasd1",
+      customerName: "客户1",
+      goods: "商品1",
+      productionSummary: "50",
+      productionCurrency: "20",
+      state: "完成",
+      amount: "3000",
+      transactionDate: "2020-05-03"
+    };
+    this.orderTableData.push(obj);
+    for (let i = 0; i < 15; i++) {
+      let obj = JSON.parse(JSON.stringify({
+        date: '2020-05-03',
+        machineName: '设备1',
+        colorName: '红色',
+        materialName: '原料1',
+        materialUse: '50',
+        agentName: '染化剂1',
+        agentUse: '50',
+        productionQualified: '0',
+        isWrite: false,
+      }));
+      obj.index = i + 1;
+      this.planTableData.push(obj);
+    }
   },
   beforeDestroy() {
     window.onresize = null;
@@ -361,7 +362,7 @@ export default {
       this.$http.get("/productionController/queryProdByOrder" + "?orderId=" + orderId).then(res => {
         if (res.data.code == 0 && res.data.message == "操作成功") {
           this.planTableData = res.data.data.map((item, index) => {
-            item.isEditor = false;
+            item.isWrite = false;
             item.index = index + 1;
             return item;
           });
@@ -377,11 +378,12 @@ export default {
         console.log("失败原因:" + error);
       });
     },
-    // 新建计划
-    addPlan() {
+    // 新建/编辑 计划
+    modifyPlan(type,option) {
+      this.modifyPlanType = type;
       // 检查是否存在编辑状态 生产计划
       let editorFlag = this.planTableData.some(item => {
-        return item.isEditor;
+        return item.isWrite;
       });
       if (editorFlag) {
         this.$message({
@@ -455,7 +457,9 @@ export default {
       // }).catch(error => {
       //   console.log('失败原因:' + error);
       // });
-      
+      if (option) {
+        this.planParams = this._.cloneDeep(option);
+      }
       this.childPageIsShow = true;
     },
     // 保存计划
@@ -469,29 +473,44 @@ export default {
     },
     // 确定创建
     surePlan() {
-      let user = JSON.parse(sessionStorage.getItem("user"));
-      this.planParams.materialUse = Number(this.planParams.materialUse)
-      this.planParams.agentUse = Number(this.planParams.agentUse)
-      this.planParams.createAt = user.name;
-      this.params.orderId = this.$route.query.orderId || this.orderTableData[0].id;
-      this.$http.post("/productionController/addProduction", this.planParams).then(res => {
-        if (res.data.code == 0 && res.data.message == "操作成功") {
-          this.childPageIsShow = false;
-          this.getPlanData(this.params.orderId);
-        } else {
-          this.$message({
-            message: res.data.message,
-            type: "error",
-            duration: 3000,
-            showClose: true
-          });
+      console.log(1111,this.modifyPlanType)
+      if (this.modifyPlanType === 'add') {
+        let user = JSON.parse(sessionStorage.getItem("user"));
+        this.planParams.materialUse = Number(this.planParams.materialUse)
+        this.planParams.agentUse = Number(this.planParams.agentUse)
+        this.planParams.createAt = user.name;
+        this.params.orderId = this.$route.query.orderId || this.orderTableData[0].id;
+        this.$http.post("/productionController/addProduction", this.planParams).then(res => {
+          if (res.data.code == 0 && res.data.message == "操作成功") {
+            this.childPageIsShow = false;
+            this.getPlanData(this.params.orderId);
+          } else {
+            this.$message({
+              message: res.data.message,
+              type: "error",
+              duration: 3000,
+              showClose: true
+            });
+          }
+        }).catch(error => {
+          console.log("失败原因:" + error);
+        });
+      }else if (this.modifyPlanType === 'editor') {
+        let params = {
+          agentName: this.planParams.agentName,
+          colorName: this.planParams.colorName,
+          date: this.planParams.date,
+          machineName: this.planParams.machineName,
+          materialName: this.planParams.materialName,
+          agentUse: Number(this.planParams.agentUse),
+          materialUse: Number(this.planParams.materialUse),
         }
-      }).catch(error => {
-        console.log("失败原因:" + error);
-      });
+        // productionPlan
+      
+        "id": "string",                --E
+      }
     },
     blurInput(event, str) {
-      console.log(111, event.target.value);
       if (str === "material" && event.target.value > this.materialMaxStock) {
         return this.materialMaxStock;
       } else if (str === "agent" && event.target.value > this.agentMaxStock) {
@@ -521,11 +540,11 @@ export default {
         console.log("失败原因:" + error);
       });
     },
-    // 编辑生产计划合格品
-    editorQualified(row) {
-      // 检查是否存在编辑状态 生产计划
+    // 填写生产计划合格品
+    writeQualified(row) {
+      // 检查是否存在填写状态 生产计划
       let editorFlag = this.planTableData.some(item => {
-        return item.isEditor;
+        return item.isWrite;
       });
       if (editorFlag) {
         this.$message({
@@ -535,10 +554,10 @@ export default {
         return;
       }
       this.copyRow = JSON.parse(JSON.stringify(row));
-      row.isEditor = true;
+      row.isWrite = true;
     },
-    // 确定编辑
-    sureEditor(row) {
+    // 确定填写
+    sureWrite(row) {
       if (row.productionQualified.trim() === ''){
         this.$message({
           message: '请填合格品数量'
@@ -561,12 +580,12 @@ export default {
         console.log("失败原因:" + error);
       });
     },
-    // 取消编辑
-    cancelEditor(row) {
+    // 取消填写
+    cancelWrite(row) {
       for (let k in this.copyRow) {
         row[k] = this.copyRow[k];
       }
-    }
+    },
   }
 };
 </script>
