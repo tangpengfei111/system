@@ -57,7 +57,7 @@
         <el-table-column label="操作" width="220" align="center" fixed="right">
           <template slot-scope="scope">
             <div v-if="!scope.row.isWrite">
-              <el-button size="mini" title="填写合格品" :disabled="scope.row.state !== '0'" @click="writeQualified(scope.row)">填写</el-button>
+              <el-button size="mini" title="填写合格品" :disabled="scope.row.status != '0'" @click="writeQualified(scope.row)">填写</el-button>
               <el-button size="mini" title="编辑成产计划" @click="modifyPlan('editor',scope.row)">编辑</el-button>
               <el-button size="mini" title="打印生产计划" @click="printPlan(scope.row)">打印</el-button>
             </div>
@@ -195,6 +195,7 @@ export default {
       childPageIsShow: false,
       planParams: {
         // 子页面参数
+        id: '',
         date: "",
         machineName: "",
         colorName: "",
@@ -462,8 +463,6 @@ export default {
       }
       this.childPageIsShow = true;
     },
-    // 保存计划
-    savePlan() {},
     // 取消创建
     cancelPlan() {
       this.childPageIsShow = false;
@@ -473,13 +472,19 @@ export default {
     },
     // 确定创建
     surePlan() {
-      console.log(1111,this.modifyPlanType)
       if (this.modifyPlanType === 'add') {
         let user = JSON.parse(sessionStorage.getItem("user"));
-        this.planParams.materialUse = Number(this.planParams.materialUse)
-        this.planParams.agentUse = Number(this.planParams.agentUse)
-        this.planParams.createAt = user.name;
-        this.params.orderId = this.$route.query.orderId || this.orderTableData[0].id;
+        let params = {
+          agentName: this.planParams.agentName,
+          colorName: this.planParams.colorName,
+          date: this.planParams.date,
+          machineName: this.planParams.machineName,
+          materialName: this.planParams.materialName,
+          agentUse: Number(this.planParams.agentUse),
+          materialUse: Number(this.planParams.materialUse),
+          createAt: user.name,
+          orderId: this.$route.query.orderId || this.orderTableData[0].id
+        }
         this.$http.post("/productionController/addProduction", this.planParams).then(res => {
           if (res.data.code == 0 && res.data.message == "操作成功") {
             this.childPageIsShow = false;
@@ -497,6 +502,7 @@ export default {
         });
       }else if (this.modifyPlanType === 'editor') {
         let params = {
+          id: this.planParams.id,
           agentName: this.planParams.agentName,
           colorName: this.planParams.colorName,
           date: this.planParams.date,
@@ -505,9 +511,21 @@ export default {
           agentUse: Number(this.planParams.agentUse),
           materialUse: Number(this.planParams.materialUse),
         }
-        // productionPlan
-      
-        "id": "string",                --E
+        this.$http.post("/productionController/editProduction", params).then(res => {
+          if (res.data.code == 0 && res.data.message == "操作成功") {
+            this.childPageIsShow = false;
+            this.getPlanData(this.params.orderId);
+          } else {
+            this.$message({
+              message: res.data.message,
+              type: "error",
+              duration: 3000,
+              showClose: true
+            });
+          }
+        }).catch(error => {
+          console.log("失败原因:" + error);
+        });
       }
     },
     blurInput(event, str) {
