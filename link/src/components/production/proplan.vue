@@ -57,9 +57,9 @@
         <el-table-column label="操作" width="220" align="center" fixed="right">
           <template slot-scope="scope">
             <div v-if="!scope.row.isWrite">
-              <el-button size="mini" title="填写合格品" :disabled="scope.row.status != '0'" @click="writeQualified(scope.row)">填写</el-button>
-              <el-button size="mini" title="编辑成产计划" @click="modifyPlan('editor',scope.row)">编辑</el-button>
-              <el-button size="mini" title="打印生产计划" @click="printPlan(scope.row)">打印</el-button>
+              <el-button size="mini" title="填写合格品" :disabled="scope.row.status == '2'" @click="writeQualified(scope.row)">填写</el-button>
+              <el-button size="mini" title="编辑成产计划" :disabled="scope.row.status == '1'" @click="modifyPlan('editor',scope.row)">编辑</el-button>
+              <el-button size="mini" title="打印生产计划" :disabled="scope.row.status == '1'" @click="printPlan(scope.row)">打印</el-button>
             </div>
             <div v-if="scope.row.isWrite">
               <el-button size="mini" @click="sureWrite(scope.row)">确定</el-button>
