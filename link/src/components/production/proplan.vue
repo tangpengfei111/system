@@ -472,14 +472,29 @@ export default {
     },
     // 确定创建
     surePlan() {
+      let paramsCheckAry = this.planTableHeader.filter(item => {
+        return item.prop !== 'index' && item.prop !== "productionQualified";
+      });
+      let flag = paramsCheckAry.some(item => {
+        return this.planParams[item.prop].trim() === '';
+      });
+      if (flag) {
+        this.$message({
+          message: '请填写完计划数据后，再进行保存操作',
+          type: "warning",
+          duration: 3000,
+          showClose: true
+        })
+        return;
+      }
       if (this.modifyPlanType === 'add') {
         let user = JSON.parse(sessionStorage.getItem("user"));
         let params = {
-          agentName: this.planParams.agentName,
-          colorName: this.planParams.colorName,
+          agentName: this.planParams.agentName.trim(),
+          colorName: this.planParams.colorName.trim(),
           date: this.planParams.date,
-          machineName: this.planParams.machineName,
-          materialName: this.planParams.materialName,
+          machineName: this.planParams.machineName.trim(),
+          materialName: this.planParams.materialName.trim(),
           agentUse: Number(this.planParams.agentUse),
           materialUse: Number(this.planParams.materialUse),
           createAt: user.name,
@@ -540,12 +555,8 @@ export default {
       console.log("打印", row);
       this.$http.get("/productionController/export?id=" + row.id).then(res => {
         if (res.data.code == 0 && res.data.message == "操作成功") {
-          this.$message({
-            message: "打印成功",
-            type: "success",
-            duration: 3000,
-            showClose: true
-          });
+          let url = res.data.url;
+          window.open(url);
         } else {
           this.$message({
             message: "打印失败",

@@ -387,12 +387,20 @@ export default {
     },
     // 确认添加订单
     sureAddOrder() {
+      if (this.params.productionSummary.trim() === '' || this.params.goods.trim() === '' || this.params.customerName.trim() === ''  ||　this.params.amount.trim() === '' ) {
+        this.$message({
+          message: '请填写完订单数据后，再进行保存操作',
+          type: 'warning',
+          duration: 3000,
+          showClose: true
+        });
+        return
+      }
       let user = JSON.parse(sessionStorage.getItem('user'));
       this.params.createAt = user.name;
       this.params.productionSummary = Number(this.params.productionSummary);
       this.params.amount = Number(this.params.amount);
-      console.log(this.params)
-      return
+     
       this.$http.post('/orderController/addOrder', params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
           this.cancelAddOrder();
@@ -462,17 +470,23 @@ export default {
     // 确定编辑（创建）
     sureEditor(row) {
       if (row.isEditor) {
-        if (row.customerName.trim() === '' || row.goods.trim() === '' || row.productionSummary.trim() === '' || row.amount.trim() === '' || !row.transactionDate){
+        let goods = row.goods.trim();
+        let productionSummary = row.productionSummary.trim();
+        let amount = row.amount.trim();
+        if (goods === '' || productionSummary === '' || amount === '' || !row.transactionDate){
           this.$message({
-            message: '请填写客户、商品、需求量、金额、交货日期等信息'
+            message: '请填写商品、需求量、金额、交货日期等信息',
+            type: 'warning',
+            duration: 3000,
+            showClose: true
           })
           return;
         }
         let params = {
           id: row.id,
-          goods: row.goods,
-          amount: Number(row.amount),                
-          productionSummary: Number(row.productionSummary),        
+          goods: goods,
+          amount: Number(amount),                
+          productionSummary: Number(productionSummary),        
           transactionDate: row.transactionDate
         }
         this.$http.post('/orderController/editOrder', params).then(res => {
@@ -492,7 +506,17 @@ export default {
           console.log('失败原因:' + error);
         });
       }else if (row.stateIsEditor) {
-        this.$http.get('/orderController/changeStatus' + '?id=' + row.id + '?operate=' + row.status).then(res => {
+        let status = row.status.trim();
+        if (status === '') {
+          this.$message({
+            message: '请选择状态后，再进行操作',
+            type: 'warning',
+            duration: 3000,
+            showClose: true
+          })
+          return;
+        }
+        this.$http.get('/orderController/changeStatus' + '?id=' + row.id + '?operate=' + status).then(res => {
           if (res.data.code == 0 && res.data.message == '操作成功') {
             row.stateIsEditor = false;
             // 获取订单数据

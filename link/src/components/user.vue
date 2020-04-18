@@ -260,6 +260,15 @@ export default {
       let name = this.userObj.name.trim();
       let password = this.userObj.password.trim();
       let role = this.userObj.role.trim();
+      if (name === '' || password === '' || role === '') {
+        this.$message({
+          message: '请填写用户名、密码、权限信息',
+          type: 'warning',
+          duration: 3000,
+          showClose: true
+        });
+        return;
+      }
       let type = 0;
       if(role != 'superAdmin'){
         type = 1;
