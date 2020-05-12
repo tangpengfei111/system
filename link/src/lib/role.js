@@ -2,25 +2,25 @@ var role = {
     define: {
         superAdmin: [
             'color','customer','dyeAgent','machine','material','supplier',  // 基础数据维护
-            'dayproduction','yieldrate','stocklist','stockdetails',         // 报表管理
+            'dailyproduction','stockdetails',                               // 报表管理
             'production', 'proplan',                                        // 生产管理
             'dyestock','materialstock','stocklog',                          // 库存管理
             'user'
         ],
         // generalAdmin: [
         //     'color','customer','dyeAgent','machine','material','supplier',
-        //     'dayproduction','yieldrate','stocklist','stockdetails',
+        //     'dailyproduction','stockdetails',
         //     'production',
         //     'stock'
         // ],
         prodUser: [
             'color','customer','dyeAgent','machine','material','supplier',
-            'dayproduction','yieldrate','stocklist','stockdetails',
+            'dailyproduction','stockdetails',
             'production', 'proplan'
         ],
         stockUser: [
             'color','customer','dyeAgent','machine','material','supplier',
-            'dayproduction','yieldrate','stocklist','stockdetails',
+            'dailyproduction','stockdetails',
             'dyestock','materialstock','stocklog',
         ],
     },
