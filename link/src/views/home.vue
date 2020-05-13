@@ -41,14 +41,14 @@
               <i class="el-icon-box"></i>
               <span slot="title">库存管理</span>
             </el-menu-item> -->
-            <el-submenu index="report" v-if="this.menuItemIsShow.dayproduction">
+            <el-submenu index="report" v-if="this.menuItemIsShow.dailyproduction">
               <template slot="title">
                 <i class="el-icon-document"></i>
                 <span>报表管理</span>
               </template>
-              <el-menu-item index="dayproduction">日生产报表</el-menu-item>
-              <el-menu-item index="yieldrate">良品率报表</el-menu-item>
-              <el-menu-item index="stocklist">库存清单报表</el-menu-item>
+              <el-menu-item index="dailyproduction">设备日常生产记录</el-menu-item>
+              <!-- <el-menu-item index="yieldrate">良品率报表</el-menu-item>
+              <el-menu-item index="stocklist">库存清单报表</el-menu-item> -->
               <el-menu-item index="stockdetails">库存流水详情报表</el-menu-item>
             </el-submenu>
             <el-menu-item index="user" v-if="this.menuItemIsShow.user">
@@ -95,11 +95,10 @@ export default {
     // 左侧菜单每一项是否显示，根据用户权限来控制
     menuItemIsShow() {
       let user = JSON.parse(sessionStorage.getItem('user'));
-      console.log()
       let option = {
         material: true,
         production: true,
-        dayproduction: true,
+        dailyproduction: true,
         dyestock: true,
         user: true
       }

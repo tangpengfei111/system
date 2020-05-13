@@ -84,29 +84,29 @@ const routes = [
         }
       },
       {
-        path: '/dayproduction',
-        name: 'dayproduction',
-        component: () => import('../components/report/dayproduction.vue'),
+        path: '/dailyproduction',
+        name: 'dailyproduction',
+        component: () => import('../components/report/dailyproduction.vue'),
         meta: {
-          til: '日生产报表'
+          til: '设备日常生产记录'
         }
       },
-      {
-        path: '/yieldrate',
-        name: 'yieldrate',
-        component: () => import('../components/report/yieldrate.vue'),
-        meta: {
-          til: '良品率报表'
-        }
-      },
-      {
-        path: '/stocklist',
-        name: 'stocklist',
-        component: () => import('../components/report/stocklist.vue'),
-        meta: {
-          til: '库存清单报表'
-        }
-      },
+      // {
+      //   path: '/yieldrate',
+      //   name: 'yieldrate',
+      //   component: () => import('../components/report/yieldrate.vue'),
+      //   meta: {
+      //     til: '良品率报表'
+      //   }
+      // },
+      // {
+      //   path: '/stocklist',
+      //   name: 'stocklist',
+      //   component: () => import('../components/report/stocklist.vue'),
+      //   meta: {
+      //     til: '库存清单报表'
+      //   }
+      // },
       {
         path: '/stockdetails',
         name: 'stockdetails',
@@ -115,7 +115,7 @@ const routes = [
           til: '库存流水详情报表'
         }
       },
-      
+  
       {
         path: '/dyestock',
         name: 'dyestock',

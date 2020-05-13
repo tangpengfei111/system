@@ -1,13 +1,36 @@
 <template>
   <div class="search-box">
     <el-form :inline="true" class="demo-form-inline" ref="form" :model="form">
-      <el-form-item label="客户名称:">
+      <!-- <el-form-item label="客户名称:">
         <el-input v-model="searchObj.name" :placeholder="form.namePlaceholder"></el-input>
       </el-form-item>
       <el-form-item label="状态:">
         <el-select v-model="searchObj.status" :placeholder="form.statusPlaceholder">
           <el-option
             v-for="(item,index) in form.statusOptions" :key="index"
+            :label="item.label"
+            :value="item.value"
+            >
+          </el-option>
+        </el-select>
+      </el-form-item> -->
+      <el-form-item 
+        v-for="(formItem,index) in form1" :key="'formItem' + index"
+        :label="formItem.name + (formItem.colon ? '：' : null)"
+      >
+        <el-input 
+          v-if="formItem.type === 'input'" 
+          v-model="searchObj[formItem.value]" 
+          :placeholder="formItem.placeholder"
+          >
+        </el-input>
+        <el-select
+          v-if="formItem.type === 'select'" 
+          v-model="searchObj[formItem.value]" 
+          :placeholder="formItem.placeholder"
+          >
+          <el-option
+            v-for="(item,index) in formItem.options" :key="index"
             :label="item.label"
             :value="item.value"
             >
@@ -36,11 +59,35 @@ export default {
             { label: '不可用', value: '1' }
         ]
       },
-      searchObj: {
-        name: null,
-        status: null
-      }
+      form1: [
+        {
+          type: 'input',
+          name: '客户名称',
+          colon: true,
+          value: 'name',
+          placeholder: '请输入搜索内容'
+        },
+        {
+          type: 'select',
+          name: '状态',
+          colon: true,
+          value: 'status',
+          placeholder: '请选择状态',
+          options: [
+            { label: '可用', value: '0' },
+            { label: '不可用', value: '1' }
+          ]
+        }
+      ],
+      searchObj: {}
     };
+  },
+  created() {
+    this.searchObj = {};
+    this.form1.forEach(item => {
+      this.searchObj[item.value] = '';
+    })
+
   },
   methods: {
     searchContent() {
@@ -56,8 +103,8 @@ export default {
   },
   computed: {
     form() {
-        let target = this._.cloneDeep(this.formParams) || {};
-        return Object.assign(this.defaultForm,target);
+      let target = this._.cloneDeep(this.formParams) || {};
+      return Object.assign(this.defaultForm,target);
     }
   },
 };

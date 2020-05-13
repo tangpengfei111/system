@@ -129,7 +129,7 @@
             <el-input
               v-model="planParams.materialUse"
               :disabled="!materialMaxStock"
-              @blur="blurInput($event,'material')"
+              @change="changeInput($event,'material')"
               placeholder="请填写原料数量"
             ></el-input>
           </el-form-item>
@@ -147,7 +147,7 @@
             <el-input
               v-model="planParams.agentUse"
               :disabled="!agentMaxStock"
-              @blur="blurInput($event,'agent')"
+              @change="changeInput($event,'agent')"
               placeholder="请填写染化剂数量"
             ></el-input>
           </el-form-item>
@@ -543,10 +543,18 @@ export default {
         });
       }
     },
-    blurInput(event, str) {
+    changeInput(event, str) {
       if (str === "material" && event.target.value > this.materialMaxStock) {
+        this.$message({
+          message: '原料用量填写超出剩余库存数量',
+          type: "warning",
+        })
         return this.materialMaxStock;
       } else if (str === "agent" && event.target.value > this.agentMaxStock) {
+        this.$message({
+          message: '染化剂用量填写超出剩余库存数量',
+          type: "warning",
+        })
         return this.agentMaxStock;
       }
     },
