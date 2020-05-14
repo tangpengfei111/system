@@ -129,15 +129,30 @@ export default {
         variation: ''
       },
       roleOptions: [],
-      formParams: {
-        namePlaceholder: '请输入搜索内容',
-        statusOptions: [
-          { label: '打开', value: '1' },
-          { label: '正在生产中', value: '2' },
-          { label: '完成', value: '0' },
-          { label: '暂停', value: '99' }
-        ]
-      },
+      formParams: [
+        {
+          type: 'input',
+          name: '客户名称',
+          noColon: true,
+          value: 'name'
+        },
+        {
+          type: 'select',
+          name: '状态',
+          noColon: true,
+          value: 'status',
+          options: [
+            { label: '打开', value: '1' },
+            { label: '正在生产中', value: '2' },
+            { label: '完成', value: '0' },
+            { label: '暂停', value: '99' }
+            //    OPENING(1),//打开
+            //    PRODUCTION(2),//正在生产中
+            //    DONE(0),//完成
+            //    IDLE(99);//暂停
+          ]
+        }
+      ],
     }
   },
   created() {
