@@ -192,14 +192,6 @@ export default {
     }
   },
   methods: {
-    // 表格 行的样式
-    tableRowClassName({rowIndex}) {
-      if (rowIndex % 2 == 0) {
-        return 'odd-number';
-      }else {
-        return 'even-number';
-      }
-    }, 
     // 监听窗口大小改变
     browserResize() {
       window.onresize = () => {
@@ -226,9 +218,6 @@ export default {
       }
       return tableHeader;
     },
-    // 获取表格数据，头部信息
-    // getTbaleData(id) {
-    // },
     // 表格当前页改变
     tableChangePage(nowPage) {
       this.currentPage = nowPage;

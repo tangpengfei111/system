@@ -290,14 +290,6 @@ export default {
     }
   },
   methods: {
-    // 表格 行的样式
-    tableRowClassName({ rowIndex }) {
-      if (rowIndex % 2 == 0) {
-        return "odd-number";
-      } else {
-        return "even-number";
-      }
-    },
     // 监听窗口大小改变
     browserResize() {
       window.onresize = () => {

@@ -2,12 +2,12 @@
   <div class="daily-report">
     <div class="header">
       <div class="title">
-        <div>{{this.$route.meta.til || '染化剂库存'}}</div>
+        <div>{{this.$route.meta.til}}</div>
       </div>
     </div>
     <my-search style="float:left" @searchContent="searchContent" :formParams="formParams"></my-search>
-    <!-- <el-table
-      :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
+    <el-table
+      :data="tableData"
       :height="browserAttr.height - 260"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%"
@@ -20,7 +20,7 @@
         :width="item.width"
         align="center"
       ></el-table-column>
-      <el-table-column label="操作" width="200" align="center" fixed="right">
+      <!-- <el-table-column label="操作" width="200" align="center" fixed="right">
         <template slot-scope="scope">
           <el-button size="mini" @click="stockChange(scope.row)">库存</el-button>
           <el-button size="mini" @click="viewLog(scope.row)">查看</el-button>
@@ -32,9 +32,9 @@
             <el-button slot="reference" size="mini" type="danger">删除</el-button>
           </el-popconfirm>
         </template>
-      </el-table-column>
-    </el-table> -->
-    <!-- <div class="pagination">
+      </el-table-column> -->
+    </el-table>
+    <div class="pagination">
       <el-pagination
         background
         :current-page.sync="currentPage"
@@ -45,7 +45,7 @@
         layout="prev, pager, next, jumper"
       ></el-pagination>
       <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
-    </div> -->
+    </div>
   </div>
 </template>
 
@@ -58,6 +58,10 @@ export default {
   },
   data() {
     return {
+      browserAttr: {
+        width: window.innerWidth,
+        height: window.innerHeight
+      },
       formParams: [
         {
           type: 'input',
@@ -66,28 +70,81 @@ export default {
           value: 'name'
         },
         {
-          type: 'select',
-          name: '状态',
-          noColon: true,
-          value: 'status',
-          options: [
-            { label: '打开', value: '1' },
-            { label: '正在生产中', value: '2' },
-            { label: '完成', value: '0' },
-            { label: '暂停', value: '99' }
-            //    OPENING(1),//打开
-            //    PRODUCTION(2),//正在生产中
-            //    DONE(0),//完成
-            //    IDLE(99);//暂停
-          ]
+          type: 'date',
+          name: '日期',
+          noColon: false,
+          value: 'date'
         }
       ],
+      tableData: [],
+      tableHeader: [
+        { label: "序号", prop: "index", width: 80 },
+        { label: "生产日期", prop: "date", width: 210 },
+        { label: "设备", prop: "machineName" },
+        { label: "色号", prop: "colorName" },
+        { label: "原料", prop: "materialName" },
+        { label: "原料用量", prop: "materialUse" },
+        { label: "染化剂", prop: "agentName" },
+        { label: "染化剂用量", prop: "agentUse" },
+        { label: "合格品量", prop: "productionQualified" }
+      ],
+      currentPage: 1,  // 表格当前页码
+      pageSize: 50,   // 表格每一页展示数据的数量
     };
+  },
+  computed: {
+    // 数据总条数
+    totalNum() {
+      return this.tableData.length;
+    }
+  },
+  mounted() {
+    let jump = document.querySelector('.el-pagination__jump');
+    if (jump) {
+      jump.childNodes[0].nodeValue = '跳至';
+    }
+    this.browserResize();
   },
   methods: {
     // 搜索
     searchContent(options) {
       console.log(111111)
+    },
+    // 监听窗口大小改变
+    browserResize() {
+      window.onresize = () => {
+        this.browserAttr.width = window.innerWidth;
+        this.browserAttr.height = window.innerHeight;
+        console.log("监听窗口改变111");
+      };
+    },
+    tableChangePage() {
+
+    },
+    getTableData() {
+      let params = {
+        pageNo: this.currentPage,
+        size: this.pageSize
+      }
+      // this.$http.post('/materialController/pageList',params).then(res => {
+      //   if (res.data.code == 0 && res.data.message == '操作成功') {
+      //     this.tableData = res.data.data.records.map(item => {
+      //       return item;
+      //     });
+      //   }else {
+      //     if (text !== undefined) {
+      //       this.$message({
+      //         message: res.data.message || "查询失败",
+      //         type: 'error',
+      //         duration: 3000,
+      //         showClose: true
+      //       });
+      //     }
+      //     // this.tableData = [];
+      //   }
+      // }).catch(error => {
+      //   console.log('失败原因:' + error);
+      // });
     }
   }
 };

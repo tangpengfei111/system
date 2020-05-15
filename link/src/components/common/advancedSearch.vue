@@ -1,22 +1,9 @@
 <template>
   <div class="search-box">
-    <el-form :inline="true" class="demo-form-inline" ref="form" :model="formParams">
-      <!-- <el-form-item label="客户名称:">
-        <el-input v-model="searchObj.name" :placeholder="form.namePlaceholder"></el-input>
-      </el-form-item>
-      <el-form-item label="状态:">
-        <el-select v-model="searchObj.status" :placeholder="form.statusPlaceholder">
-          <el-option
-            v-for="(item,index) in form.statusOptions" :key="index"
-            :label="item.label"
-            :value="item.value"
-            >
-          </el-option>
-        </el-select>
-      </el-form-item> -->
+    <el-form :inline="true" class="demo-form-inline" ref="form">
       <el-form-item 
         v-for="(formItem,index) in formParams" :key="'formItem' + index"
-        :label="formItem.name + (formItem.noColon ? null : '：')"
+        :label="formItem.noColon ? formItem.name : formItem.name + '：'"
       >
         <el-input 
           v-if="formItem.type === 'input'" 
@@ -37,6 +24,16 @@
           </el-option>
         </el-select>
         <el-date-picker
+          v-if="formItem.type === 'date'"
+          v-model="searchObj[formItem.value]"
+          type="date"
+          format="yyyy-MM-dd"
+          value-format="yyyy-MM-dd"
+          placeholder="选择日期"
+          :editable="false"
+        >
+        </el-date-picker>
+        <!-- <el-date-picker
           v-if="formItem.type === 'date'" 
           v-model="searchObj[formItem.value]"
           type="daterange"
@@ -46,7 +43,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :picker-options="pickerOptions">
-        </el-date-picker>
+        </el-date-picker> -->
       </el-form-item>
       <el-form-item>
         <div class="search btn" @click="searchContent">搜索</div>
@@ -62,14 +59,6 @@ export default {
   props: ["placeholder",'formParams'],
   data() {
     return {
-      // defaultForm: {
-      //   namePlaceholder: '请输入搜索内容',
-      //   statusPlaceholder: '请选择状态',
-      //   statusOptions: [
-      //       { label: '可用', value: '0' },
-      //       { label: '不可用', value: '1' }
-      //   ]
-      // },
       pickerOptions: {
         shortcuts: [
           {
@@ -132,7 +121,7 @@ export default {
   },
   created() {
     this.searchObj = {};
-    this.form1.forEach(item => {
+    this.formParams.forEach(item => {
       this.searchObj[item.value] = '';
     })
 
@@ -149,12 +138,6 @@ export default {
       }
     }
   },
-  // computed: {
-  //   form() {
-  //     let target = this._.cloneDeep(this.formParams) || {};
-  //     return Object.assign(this.defaultForm,target);
-  //   }
-  // },
 };
 </script>
 
@@ -171,9 +154,6 @@ export default {
     .el-form-item {
       margin: 10px 0 10px 40px;
     }
-    // /deep/.el-form-item__label {
-    //     width: 100px;
-    // }
     /deep/.el-input__inner {
       width: 150px;
       height: 30px;
@@ -181,6 +161,13 @@ export default {
       border-radius: 0;
       border: 1px solid #b6b6b6;
       outline: none;
+    }
+    /deep/.el-date-editor .el-input__inner {
+      height: 30px;
+      line-height: 30px;
+    }
+    .el-date-editor.el-input {
+      width: 150px;
     }
   }
   .btn {

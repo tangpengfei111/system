@@ -124,10 +124,20 @@ export default {
           value: 'name'
         },
         {
-          type: 'date',
-          name: '日期',
-          noColon: false,
-          value: 'date'
+          type: 'select',
+          name: '状态',
+          noColon: true,
+          value: 'status',
+          options: [
+            { label: '打开', value: '1' },
+            { label: '正在生产中', value: '2' },
+            { label: '完成', value: '0' },
+            { label: '暂停', value: '99' }
+            //    OPENING(1),//打开
+            //    PRODUCTION(2),//正在生产中
+            //    DONE(0),//完成
+            //    IDLE(99);//暂停
+          ]
         }
       ],
     }
