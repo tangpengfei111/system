@@ -116,15 +116,20 @@ export default {
         variation: ''
       },
       roleOptions: [],
-      formParams: {
-        namePlaceholder: '请输入搜索内容',
-        statusOptions: [
-          { label: '打开', value: '1' },
-          { label: '正在生产中', value: '2' },
-          { label: '完成', value: '0' },
-          { label: '暂停', value: '99' }
-        ]
-      },
+      formParams: [
+        {
+          type: 'input',
+          name: '客户名称',
+          noColon: true,
+          value: 'name'
+        },
+        {
+          type: 'date',
+          name: '日期',
+          noColon: false,
+          value: 'date'
+        }
+      ],
     }
   },
   created() {

@@ -201,19 +201,39 @@ export default {
         { label: '打开', value: 'active' },
         { label: '暂停', value: 'idle' }
       ],
-      formParams: {
-        namePlaceholder: '请输入搜索内容',
-        statusOptions: [
-          { label: '打开', value: '1' },
-          { label: '正在生产中', value: '2' },
-          { label: '完成', value: '0' },
-          { label: '暂停', value: '99' }
-        ]
-        //    OPENING(1),//打开
-        //    PRODUCTION(2),//正在生产中
-        //    DONE(0),//完成
-        //    IDLE(99);//暂停
-      },
+      formParams: [
+        {
+          type: 'input',
+          name: '客户名称',
+          noColon: true,
+          value: 'name'
+        },
+        {
+          type: 'select',
+          name: '状态',
+          noColon: true,
+          value: 'status',
+          options: [
+            { label: '打开', value: '1' },
+            { label: '正在生产中', value: '2' },
+            { label: '完成', value: '0' },
+            { label: '暂停', value: '99' }
+            //    OPENING(1),//打开
+            //    PRODUCTION(2),//正在生产中
+            //    DONE(0),//完成
+            //    IDLE(99);//暂停
+          ]
+        }
+      ],
+      // formParams: {
+      //   namePlaceholder: '请输入搜索内容',
+      //   statusOptions: [
+      //     { label: '打开', value: '1' },
+      //     { label: '正在生产中', value: '2' },
+      //     { label: '完成', value: '0' },
+      //     { label: '暂停', value: '99' }
+      //   ] 
+      // },
       childPageIsShow: false,  // 子页面是否显示
       params: {                 // 子页面用到的参数对象                
         createAt: "",           
@@ -317,7 +337,7 @@ export default {
       this.$http.post('/orderController/queryOrder', params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
           let options = {};
-          this.formParams.statusOptions.forEach(item => {
+          this.formParams[1].options.forEach(item => {
             options[item.value] = item.label;
           });
           this.tableData = res.data.data.records.map((item,index) => {

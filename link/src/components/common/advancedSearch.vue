@@ -1,6 +1,6 @@
 <template>
   <div class="search-box">
-    <el-form :inline="true" class="demo-form-inline" ref="form" :model="form">
+    <el-form :inline="true" class="demo-form-inline" ref="form" :model="formParams">
       <!-- <el-form-item label="客户名称:">
         <el-input v-model="searchObj.name" :placeholder="form.namePlaceholder"></el-input>
       </el-form-item>
@@ -15,19 +15,19 @@
         </el-select>
       </el-form-item> -->
       <el-form-item 
-        v-for="(formItem,index) in form1" :key="'formItem' + index"
-        :label="formItem.name + (formItem.colon ? '：' : null)"
+        v-for="(formItem,index) in formParams" :key="'formItem' + index"
+        :label="formItem.name + (formItem.noColon ? null : '：')"
       >
         <el-input 
           v-if="formItem.type === 'input'" 
           v-model="searchObj[formItem.value]" 
-          :placeholder="formItem.placeholder"
+          :placeholder="formItem.placeholder ? formItem.placeholder : '请输入搜索内容'"
           >
         </el-input>
         <el-select
           v-if="formItem.type === 'select'" 
           v-model="searchObj[formItem.value]" 
-          :placeholder="formItem.placeholder"
+          :placeholder="formItem.placeholder ? formItem.placeholder : '请选择状态'"
           >
           <el-option
             v-for="(item,index) in formItem.options" :key="index"
@@ -36,6 +36,17 @@
             >
           </el-option>
         </el-select>
+        <el-date-picker
+          v-if="formItem.type === 'date'" 
+          v-model="searchObj[formItem.value]"
+          type="daterange"
+          align="right"
+          unlink-panels
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :picker-options="pickerOptions">
+        </el-date-picker>
       </el-form-item>
       <el-form-item>
         <div class="search btn" @click="searchContent">搜索</div>
@@ -51,34 +62,71 @@ export default {
   props: ["placeholder",'formParams'],
   data() {
     return {
-      defaultForm: {
-        namePlaceholder: '请输入搜索内容',
-        statusPlaceholder: '请选择状态',
-        statusOptions: [
-            { label: '可用', value: '0' },
-            { label: '不可用', value: '1' }
+      // defaultForm: {
+      //   namePlaceholder: '请输入搜索内容',
+      //   statusPlaceholder: '请选择状态',
+      //   statusOptions: [
+      //       { label: '可用', value: '0' },
+      //       { label: '不可用', value: '1' }
+      //   ]
+      // },
+      pickerOptions: {
+        shortcuts: [
+          {
+            text: '最近一周',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', [start, end]);
+            }
+          }, 
+          {
+            text: '最近一个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30);
+              picker.$emit('pick', [start, end]);
+            }
+          }, 
+          {
+            text: '最近三个月',
+            onClick(picker) {
+              const end = new Date();
+              const start = new Date();
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
+              picker.$emit('pick', [start, end]);
+            }
+          }
         ]
       },
-      form1: [
-        {
-          type: 'input',
-          name: '客户名称',
-          colon: true,
-          value: 'name',
-          placeholder: '请输入搜索内容'
-        },
-        {
-          type: 'select',
-          name: '状态',
-          colon: true,
-          value: 'status',
-          placeholder: '请选择状态',
-          options: [
-            { label: '可用', value: '0' },
-            { label: '不可用', value: '1' }
-          ]
-        }
-      ],
+      // form1: [
+      //   {
+      //     type: 'input',
+      //     name: '客户名称',
+      //     noColon: false,
+      //     value: 'name',
+      //     placeholder: '请输入搜索内容'
+      //   },
+      //   {
+      //     type: 'select',
+      //     name: '状态',
+      //     noColon: false,
+      //     value: 'status',
+      //     placeholder: '请选择状态',
+      //     options: [
+      //       { label: '可用', value: '0' },
+      //       { label: '不可用', value: '1' }
+      //     ]
+      //   },
+      //   {
+      //     type: 'date',
+      //     name: '日期',
+      //     noColon: false,
+      //     value: 'date',
+      //   }
+      // ],
       searchObj: {}
     };
   },
@@ -101,12 +149,12 @@ export default {
       }
     }
   },
-  computed: {
-    form() {
-      let target = this._.cloneDeep(this.formParams) || {};
-      return Object.assign(this.defaultForm,target);
-    }
-  },
+  // computed: {
+  //   form() {
+  //     let target = this._.cloneDeep(this.formParams) || {};
+  //     return Object.assign(this.defaultForm,target);
+  //   }
+  // },
 };
 </script>
 
