@@ -34,6 +34,18 @@ var utils = {
         return `${y}-${M}-${d} ${h}:${m}:${s}`;
     },
     /**
+     * 获取当前日期，返回yyyy-MM-dd格式
+     */
+    getNowDate() {
+        var date = new Date();
+        var y = date.getFullYear();
+        var M = date.getMonth() + 1;
+        var d = date.getDate();
+        M = M < 10 ? '0' + M : M;
+        d = d < 10 ? '0' + d : d;
+        return `${y}-${M}-${d}`;
+    },
+    /**
      * 获取用户信息，返回用户对象，name,role
      */
     getUserInfo() {

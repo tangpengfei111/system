@@ -69,9 +69,17 @@
         <div class="content-item">
           <div class="item-label reason">原因</div>
           <el-input 
+            v-if="params.type === '0'"
             type="textarea"
             placeholder="请填写变化原因"
-            v-model="params.reason"
+            v-model="params.increaseType"
+            >
+          </el-input>
+          <el-input
+            v-if="params.type === '1'"
+            type="textarea"
+            placeholder="请填写变化原因"
+            v-model="params.reduceType"
             >
           </el-input>
         </div>
@@ -95,7 +103,7 @@ export default {
     return {
       childPageIsShow: false,
       tableHeader: [
-        { label: '序号', prop: 'index', editor: false, width: 80 },
+        // { label: '序号', prop: 'index', editor: false, width: 80 },
         { label: '染化剂编号', prop: 'no', editor: false },
         { label: '染化剂名称', prop: 'name', editor: false },
         { label: '库存数量', prop: 'stock', editor: false },
@@ -111,35 +119,37 @@ export default {
       },
       copyRow: {},
       params: {
+        createAt: '',
         type: '0',
-        reason: '',
+        reduceType: '',
+        increaseType: '',
         variation: ''
       },
       roleOptions: [],
-      formParams: [
-        {
-          type: 'input',
-          name: '客户名称',
-          noColon: true,
-          value: 'name'
-        },
-        {
-          type: 'select',
-          name: '状态',
-          noColon: true,
-          value: 'status',
-          options: [
-            { label: '打开', value: '1' },
-            { label: '正在生产中', value: '2' },
-            { label: '完成', value: '0' },
-            { label: '暂停', value: '99' }
-            //    OPENING(1),//打开
-            //    PRODUCTION(2),//正在生产中
-            //    DONE(0),//完成
-            //    IDLE(99);//暂停
-          ]
-        }
-      ],
+        formParams: [
+            {
+                type: 'input',
+                name: '客户名称',
+                noColon: true,
+                value: 'name'
+            },
+            {
+                type: 'select',
+                name: '状态',
+                noColon: true,
+                value: 'status',
+                options: [
+                    { label: '打开', value: '1' },
+                    { label: '正在生产中', value: '2' },
+                    { label: '完成', value: '0' },
+                    { label: '暂停', value: '99' }
+                    //    OPENING(1),//打开
+                    //    PRODUCTION(2),//正在生产中
+                    //    DONE(0),//完成
+                    //    IDLE(99);//暂停
+                ]
+            }
+        ],
     }
   },
   created() {
@@ -188,7 +198,7 @@ export default {
         size: this.pageSize
       };
       if (options) {
-        params.search = JSON.parse(JSON.stringify(options));
+        params.search = JSON.stringify(options);
       }
       this.$http.post('/agentStockController/queryByCondition', params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
@@ -222,6 +232,7 @@ export default {
     // 库存变化
     stockChange(row) {
       this.copyRow = row;
+      console.log(this.copyRow.name)
       this.childPageIsShow = true;
     },
     // 查看日志
@@ -250,34 +261,23 @@ export default {
     },
     // 确定库存操作
     sureStockOperation() {
-      let reason = this.params.reason.trim();
-      let variation = this.params.variation.trim();
-      if (reason === '' || variation === '') {
-        this.$message({
-          message: '请填写调整量和原因后，再进行操作',
-          type: 'warning',
-          duration: 3000,
-          showClose: true
-        });
-        return
-      }
-      let createAt = utils.getUserInfo().name;
-      let params = {
-        variation: Number(variation),
-        agentName: this.copyRow.name,
-        createAt: createAt,
-        type: this.params.type
-      }
+      let userInfo = utils.getUserInfo();
+      this.params.createAt = userInfo.name;
+      this.params.variation = parseFloat(this.params.variation);
       if (this.params.type === '1') {
-        params.reduceType = reason;
+        this.params.increaseType = '';
       }else {
-        params.increaseType = reason;
+        this.params.reduceType = '';
       }
-      // console.log('确定库存',params);
+      console.log('确定库存',JSON.parse(JSON.stringify(this.params)));
+      // 添加库存操作请求
+      let params = this._.cloneDeep(this.params);
+      params.agentName = this.copyRow.name;
       // 添加库存操作请求
       this.$http.post('/agentStockLogController/addAgentStockLog', params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
           this.cancelStockOperation();
+          this.getStockList();
         }else {
           this.$message({
             message: res.data.message || "操作失败",

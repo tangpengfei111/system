@@ -10,9 +10,8 @@
       </div>
     </div>
     <my-search style="float:left" @searchContent="searchContent" :formParams="formParams"></my-search>
-    <!-- :row-class-name="tableRowClassName" -->
     <el-table
-      :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
+      :data="tableData"
       :height="browserAttr.height - 265"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%"
@@ -52,8 +51,8 @@
               <input type="text" v-model="scope.row[item.prop]">
             </div>
             <div v-if="item.label == '金额' || item.label == '需求量'">
-              <input type="text" 
-                v-model="scope.row[item.prop]" 
+              <input type="text"
+                v-model="scope.row[item.prop]"
                 @keyup="checkNumber"
                 @blur="blurInput"
                 >
@@ -100,7 +99,7 @@
         layout="prev, pager, next, jumper"
         >
       </el-pagination>
-      <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
+      <div class="data-show">共{{Math.ceil(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
     </div>
     <div class="loading dialog-box" v-if="childPageIsShow">
       <div class="dialog">
@@ -124,16 +123,16 @@
         </div>
         <div class="content-item">
           <div>需求量</div>
-          <input type="text" 
+          <input type="text"
             v-model="params.productionSummary"
             placeholder="请填写需求量"
-            @keyup="checkNumber" 
+            @keyup="checkNumber"
             @blur="blurInput"
             />
         </div>
         <div class="content-item">
           <div>金额</div>
-          <input type="text" 
+          <input type="text"
             v-model="params.amount"
             placeholder="请填写金额"
             @keyup="checkNumber"
@@ -201,45 +200,43 @@ export default {
         { label: '打开', value: 'active' },
         { label: '暂停', value: 'idle' }
       ],
-      formParams: [
-        {
-          type: 'input',
-          name: '客户名称',
-          noColon: true,
-          value: 'name'
+        totalNum: 0,
+        formParams: [
+            {
+                type: 'input',
+                name: '客户名称',
+                noColon: false,
+                value: 'name'
+            },
+            {
+                type: 'select',
+                name: '状态',
+                noColon: false,
+                value: 'status',
+                options: [
+                    { label: '打开', value: '1' },
+                    { label: '正在生产中', value: '2' },
+                    { label: '完成', value: '0' },
+                    { label: '暂停', value: '99' }
+                    //    OPENING(1),//打开
+                    //    PRODUCTION(2),//正在生产中
+                    //    DONE(0),//完成
+                    //    IDLE(99);//暂停
+                ]
+            }
+        ],
+        orderStatusOptions: {
+            0: "完成",
+            1: "打开",
+            2: "正在生产中",
+            99: "暂停"
         },
-        {
-          type: 'select',
-          name: '状态',
-          noColon: true,
-          value: 'status',
-          options: [
-            { label: '打开', value: '1' },
-            { label: '正在生产中', value: '2' },
-            { label: '完成', value: '0' },
-            { label: '暂停', value: '99' }
-            //    OPENING(1),//打开
-            //    PRODUCTION(2),//正在生产中
-            //    DONE(0),//完成
-            //    IDLE(99);//暂停
-          ]
-        }
-      ],
-      // formParams: {
-      //   namePlaceholder: '请输入搜索内容',
-      //   statusOptions: [
-      //     { label: '打开', value: '1' },
-      //     { label: '正在生产中', value: '2' },
-      //     { label: '完成', value: '0' },
-      //     { label: '暂停', value: '99' }
-      //   ] 
-      // },
       childPageIsShow: false,  // 子页面是否显示
-      params: {                 // 子页面用到的参数对象                
-        createAt: "",           
-        customerName: "",       
+      params: {                 // 子页面用到的参数对象
+        createAt: "",
+        customerName: "",
         goods: "",
-        productionSummary: '',   
+        productionSummary: '',
         amount: '',
         transactionDate: ""
       },
@@ -255,34 +252,14 @@ export default {
       },
     };
   },
+  created() {
+    this.getOrderData();
+  },
   mounted() {
     this.browserResize();
-    for (let i = 0; i < 100; i++) {
-      let obj = JSON.parse(JSON.stringify({
-        id: 'xasdasd1',
-        customerName: '客户1',
-        goods: '商品1',
-        productionSummary: '50',
-        amount: '3000',
-        state: '打开',
-        status: '1',
-        transactionDate: '2020-05-03',
-        qualityNum: '0',
-        productionPlan: 1,
-        isEditor: false,
-        stateIsEditor: false
-      }));
-      obj.index = i + 1;
-      this.tableData.push(obj);
-    }
   },
   beforeDestroy() {
     window.onresize = null;
-  },
-  computed: {
-    totalNum() {
-      return this.tableData.length;
-    },
   },
   methods: {
     // 表格 行的样式
@@ -332,33 +309,19 @@ export default {
         size: this.pageSize
       };
       if (options) {
-        params.search = JSON.parse(JSON.stringify(options));
+        params.search = JSON.stringify(options);
       }
       this.$http.post('/orderController/queryOrder', params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
-          let options = {};
-          this.formParams[1].options.forEach(item => {
-            options[item.value] = item.label;
-          });
           this.tableData = res.data.data.records.map((item,index) => {
             //  将status码 转成 state 汉语标签
-            item.state = options[item.status];
+            item.state = this.orderStatusOptions[item.status];
             item.index = index + 1;
             item.stateIsEditor = false;     // 编辑状态
             item.isEditor = false;          // 编辑除状态外数据
             return item;
           });
-
-          // "createAt": "admin",
-					// "customerName": "客户1",
-					// "goods": "商品1",
-					// "productionSummary": 1000,
-					// "amount": 100000,
-					// "transactionDate": "2020-5-9",
-					// "extend": null,
-					// "payAmount": null,
-					// "lastUpdateTime": "2020-03-31 21:24:41",
-					// "status": 99
+            this.totalNum =  res.data.data.total;
         }else {
           if (options !== undefined) {
             this.$message({
@@ -368,6 +331,8 @@ export default {
               showClose: true
             });
           }
+          this.tableData = [];
+          this.totalNum = 0;
         }
       }).catch(error => {
         console.log('失败原因:' + error);
@@ -375,7 +340,11 @@ export default {
     },
     // 搜索
     searchContent(options) {
-      this.getOrderData(options);
+        let option = {
+            name: options?.name || '',
+            status: options?.status || ''
+        }
+        this.getOrderData(option);
     },
     // 添加订单
     addOrder() {
@@ -401,31 +370,37 @@ export default {
         });
         return;
       }
-      this.params.transactionDate = new Date();
+      //this.params.transactionDate = new Date();
       this.queryCustomList();
       this.childPageIsShow = true;
     },
     // 确认添加订单
     sureAddOrder() {
-      if (this.params.productionSummary.trim() === '' || this.params.goods.trim() === '' || this.params.customerName.trim() === ''  ||　this.params.amount.trim() === '' ) {
+      let paramsCheckAry = this.tableHeader.filter(item => {
+        return item.prop !== 'index' && item.prop !== "productionQualified";
+      });
+      let flag = paramsCheckAry.some(item => {
+        return this.params[item.prop] === '';
+      });
+      if (flag) {
         this.$message({
-          message: '请填写完订单数据后，再进行保存操作',
-          type: 'warning',
+          message: '订单填写完成后，再进行保存操作',
+          type: "waring",
           duration: 3000,
           showClose: true
-        });
-        return
+        })
+        return;
       }
       let user = JSON.parse(sessionStorage.getItem('user'));
       this.params.createAt = user.name;
       this.params.productionSummary = Number(this.params.productionSummary);
       this.params.amount = Number(this.params.amount);
-     
-      this.$http.post('/orderController/addOrder', params).then(res => {
+      console.log(this.params);
+      this.$http.post('/orderController/addOrder', this.params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
           this.cancelAddOrder();
           // 获取订单数据
-          this.getOrderData(); 
+          this.getOrderData();
         }else {
           this.cancelAddOrder();
           this.$message({
@@ -445,10 +420,10 @@ export default {
       // 子页面不显示，且初始化params对象
       this.childPageIsShow = false;
       this.params = {
-        createAt: "",           
-        customerName: "",       
+        createAt: "",
+        customerName: "",
         goods: "",
-        productionSummary: '',   
+        productionSummary: '',
         amount: '',
         transactionDate: ""
       }
@@ -490,25 +465,20 @@ export default {
     // 确定编辑（创建）
     sureEditor(row) {
       if (row.isEditor) {
-        let goods = row.goods.trim();
-        let productionSummary = row.productionSummary.trim();
-        let amount = row.amount.trim();
-        if (goods === '' || productionSummary === '' || amount === '' || !row.transactionDate){
+        if (row.customerName.trim() === '' || row.goods.trim() === '' || row.productionSummary === 0 || row.amount === 0 || !row.transactionDate){
           this.$message({
-            message: '请填写商品、需求量、金额、交货日期等信息',
-            type: 'warning',
-            duration: 3000,
-            showClose: true
+            message: '请填写客户、商品、需求量、金额、交货日期等信息'
           })
           return;
         }
         let params = {
           id: row.id,
-          goods: goods,
-          amount: Number(amount),                
-          productionSummary: Number(productionSummary),        
+          goods: row.goods,
+          amount: Number(row.amount),
+          productionSummary: Number(row.productionSummary),
           transactionDate: row.transactionDate
         }
+        console.log(params);
         this.$http.post('/orderController/editOrder', params).then(res => {
           if (res.data.code == 0 && res.data.message == '操作成功') {
             row.isEditor = false;
@@ -526,17 +496,7 @@ export default {
           console.log('失败原因:' + error);
         });
       }else if (row.stateIsEditor) {
-        let status = row.status.trim();
-        if (status === '') {
-          this.$message({
-            message: '请选择状态后，再进行操作',
-            type: 'warning',
-            duration: 3000,
-            showClose: true
-          })
-          return;
-        }
-        this.$http.get('/orderController/changeStatus' + '?id=' + row.id + '?operate=' + status).then(res => {
+        this.$http.get('/orderController/changeStatus' + '?id=' + row.id + '&operate=' + row.status).then(res => {
           if (res.data.code == 0 && res.data.message == '操作成功') {
             row.stateIsEditor = false;
             // 获取订单数据
@@ -563,9 +523,10 @@ export default {
     // 查看计划
     viewPlan(row) {
       this.$router.push({
-        path: '/proplan', 
+        path: '/proplan',
         query: {
-          orderId: row.id
+          orderId: row.id,
+            type: 'order'
         }
       });
     },

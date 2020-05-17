@@ -5,12 +5,191 @@
                 <div>{{this.$route.meta.til}}</div>
             </div>
         </div>
+        <my-search style="float:left" @searchContent="searchContent" :formParams="formParams"></my-search>
+        <el-table
+                :data="tableData"
+                :height="browserAttr.height - 265"
+                :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
+                style="width: 100%"
+        >
+            <el-table-column
+                    v-for="(item,index) in tableHeader"
+                    :key="'row' + index"
+                    :prop="item.prop"
+                    :label="item.label"
+                    :width="item.width"
+                    align="center"
+            >
+                <template slot-scope="scope">
+                    <div v-if="scope.row.isEditor && item.editor">
+                        <div v-if="item.label == '交货日期'">
+                            <el-date-picker
+                                    v-model="scope.row.transactionDate"
+                                    type="date"
+                                    format="yyyy-MM-dd"
+                                    value-format="yyyy-MM-dd"
+                                    placeholder="选择日期"
+                                    :editable="false"
+                                    :picker-options="pickerOptions">
+                            </el-date-picker>
+                        </div>
+                        <div v-if="item.label == '客户'">
+                            <el-select v-model="scope.row[item.prop]" placeholder="请选择客户">
+                                <el-option
+                                        v-for="item in customList"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                        <div v-if="item.label == '商品'">
+                            <input type="text" v-model="scope.row[item.prop]">
+                        </div>
+                        <div v-if="item.label == '金额' || item.label == '需求量'">
+                            <input type="text"
+                                   v-model="scope.row[item.prop]"
+                                   @keyup="checkNumber"
+                                   @blur="blurInput"
+                            >
+                        </div>
+                    </div>
+                    <div v-if="!scope.row.isEditor || !item.editor">
+                        <div v-if="item.label !== '状态'">{{scope.row[item.prop]}}</div>
+                        <div v-if="item.label == '状态' && !scope.row.stateIsEditor">{{scope.row[item.prop]}}</div>
+                        <div v-if="item.label == '状态' && scope.row.stateIsEditor">
+                            <el-select v-model="scope.row.status" placeholder="请选择状态">
+                                <el-option
+                                        v-for="item in statusOptions"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </div>
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column label="操作" width="80" align="center" fixed="right">
+                <template slot-scope="scope">
+                    <el-button size="mini" @click="viewPlan(scope.row)">查看</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
     </div>
 </template>
 
 <script>
+    import search from '@/components/common/advancedSearch.vue';
 export default {
-    
+    components: {
+        'my-search': search
+    },
+    data() {
+        return {
+            browserAttr: {
+                width: window.innerWidth,
+                height: window.innerHeight
+            },
+            tableData: [],
+            tableHeader: [
+                // {label: '订单编号', prop: 'orderNumber', editor: false},
+                {label: '客户', prop: 'customerName', editor: false },
+                {label: '商品', prop: 'goods', editor: true },
+                {label: '需求量', prop: 'productionSummary', editor: true },
+                {label: '金额', prop: 'amount', editor: true },
+                {label: '状态', prop: 'state', editor: false },
+                {label: '交货日期', prop: 'transactionDate', editor: true, width: 180}
+            ],
+            orderStatusOptions: {
+                0: "完成",
+                1: "打开",
+                2: "正在生产中",
+                99: "暂停"
+            },
+            formParams: [
+                {
+                    type: 'input',
+                    name: '客户名称',
+                    noColon: false,
+                    value: 'name'
+                },
+                {
+                    type: 'select',
+                    name: '状态',
+                    noColon: false,
+                    value: 'status',
+                    options: [
+                        { label: '打开', value: '1' },
+                        { label: '正在生产中', value: '2' },
+                        { label: '完成', value: '0' },
+                        { label: '暂停', value: '99' }
+                        //    OPENING(1),//打开
+                        //    PRODUCTION(2),//正在生产中
+                        //    DONE(0),//完成
+                        //    IDLE(99);//暂停
+                    ]
+                }
+            ],
+        };
+    },
+    created() {
+        this.getTableData();
+    },
+    mounted() {
+        this.browserResize();
+    },
+    methods: {
+        // 监听窗口大小改变
+        browserResize() {
+            window.onresize = () => {
+                this.browserAttr.width = window.innerWidth;
+                this.browserAttr.height = window.innerHeight;
+            };
+        },
+        searchContent(options) {
+            let option = {
+                name: options?.name || '',
+                status: options?.status || ''
+            }
+            this.getTableData(option);
+        },
+        // 获取表格数据
+        getTableData(options) {
+            let params = {
+                pageNo: 1,
+                size: 1000,
+            };
+            if (options) {
+                params.search = JSON.stringify(options);
+            }
+            this.$http.post('/orderController/queryOrder',params).then(res => {
+                if (res.data.code == 0 && res.data.message == '操作成功') {
+                    this.tableData = res.data.data.records.map((item,index) => {
+                        //  将status码 转成 state 汉语标签
+                        item.state = this.orderStatusOptions[item.status];
+                        item.index = index + 1;
+                        return item;
+                    });
+                }else {
+                    this.tableData = [];
+                }
+            }).catch(error => {
+                console.log('失败原因:' + error);
+            });
+        },
+        // 查看计划
+        viewPlan(row) {
+            this.$router.push({
+                path: '/proplan',
+                query: {
+                    orderId: row.id,
+                    type: 'report'
+                }
+            });
+        },
+    }
+
 }
 </script>
 
@@ -67,7 +246,6 @@ export default {
     }
     .el-button {
       padding: 4px 8px;
-      margin: 0 8px 0 0;
     }
   }
   .dialog-box {

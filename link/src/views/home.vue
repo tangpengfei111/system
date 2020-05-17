@@ -46,10 +46,8 @@
                 <i class="el-icon-document"></i>
                 <span>报表管理</span>
               </template>
-              <el-menu-item index="dailyproduction">设备日常生产记录</el-menu-item>
-              <!-- <el-menu-item index="yieldrate">良品率报表</el-menu-item>
-              <el-menu-item index="stocklist">库存清单报表</el-menu-item> -->
-              <el-menu-item index="stockdetails">库存流水详情报表</el-menu-item>
+              <el-menu-item index="dailyproduction">设备生产记录</el-menu-item>
+              <el-menu-item index="stockdetails">订单详情记录</el-menu-item>
             </el-submenu>
             <el-menu-item index="user" v-if="this.menuItemIsShow.user">
               <i class="el-icon-user"></i>

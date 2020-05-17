@@ -64,74 +64,74 @@ export default {
         return;
       }
 
-      let option = {};
-      let flag = this.userInfo.some(item => {
-        return item.name === this.username;
-      });
-      if (flag) {
-        this.userInfo.forEach(item => {
-          if (item.name === this.username) {
-            if (item.password === this.password) {
-              option.name = item.name;
-              option.role = item.role;
-            }else {
-              this.$message({
-                message: '密码输入错误',
-                type: 'error'
-              });
-            }
-          }
-        });
-      }else {
-        this.$message({
-          message: '该用户未注册',
-          type: 'error'
-        });
-      }
-      if (option.name && option.role) {
-        sessionStorage.setItem('user',JSON.stringify(option))
-        this.$router.push({
-          name:'home',
-          params:{
-            option
-          }
-        });
-      }
+      // let option = {};
+      // let flag = this.userInfo.some(item => {
+      //   return item.name === this.username;
+      // });
+      // if (flag) {
+      //   this.userInfo.forEach(item => {
+      //     if (item.name === this.username) {
+      //       if (item.password === this.password) {
+      //         option.name = item.name;
+      //         option.role = item.role;
+      //       }else {
+      //         this.$message({
+      //           message: '密码输入错误',
+      //           type: 'error'
+      //         });
+      //       }
+      //     }
+      //   });
+      // }else {
+      //   this.$message({
+      //     message: '该用户未注册',
+      //     type: 'error'
+      //   });
+      // }
+      // if (option.name && option.role) {
+      //   sessionStorage.setItem('user',JSON.stringify(option))
+      //   this.$router.push({
+      //     name:'home',
+      //     params:{
+      //       option
+      //     }
+      //   });
+      // }
 
       // 用户登录
-      // let params = {
-      //   password: this.password,
-      //   username: this.username
-      // }
-      // this.$http.get('/userController/login', params = {
-      //   params
-      // }).then(res => {
-      //   if (res.data.code == 0 && res.data.message == '操作成功') {
-      //     this.$message({
-      //       message: '登陆成功',
-      //       type: 'success',
-      //       duration: 3000,
-      //       showClose: true
-      //     });
-      //     let option = {
-      //       name: res.data.data.user.name,
-      //       role: res.data.data.user.role
-      //     };
-      //     sessionStorage.setItem('user',JSON.stringify(option));
-      //     this.$router.push({
-      //       name:'home'
-      //     });
-      //   }else {
-      //     this.$message({
-      //       message: res.data.message || '登陆失败',
-      //       type: 'error',
-      //       duration: 3000,
-      //       showClose: true
-      //     });
-      //   }
-      // }).catch(error => {
-      //    console.log('失败原因:' + error);
-      // })
+      let params = {
+        password: this.password,
+        username: this.username
+      }
+      this.$http.get('/userController/login', params = {
+        params
+      }).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.$message({
+            message: '登陆成功',
+            type: 'success',
+            duration: 3000,
+            showClose: true
+          });
+          let option = {
+            name: res.data.data.user.name,
+            role: res.data.data.user.role
+          };
+          sessionStorage.setItem('user',JSON.stringify(option));
+          this.$router.push({
+            name:'home'
+          });
+        }else {
+          this.$message({
+            message: res.data.message || '登陆失败',
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+         console.log('失败原因:' + error);
+      })
     },
   }
 };

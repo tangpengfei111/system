@@ -20,32 +20,7 @@
         :width="item.width"
         align="center"
       ></el-table-column>
-      <!-- <el-table-column label="操作" width="200" align="center" fixed="right">
-        <template slot-scope="scope">
-          <el-button size="mini" @click="stockChange(scope.row)">库存</el-button>
-          <el-button size="mini" @click="viewLog(scope.row)">查看</el-button>
-          <el-popconfirm
-            title="确定要删除吗?"
-            cancelButtonType="plain"
-            @onConfirm="deleteRow(scope.$index, scope.row)"
-          >
-            <el-button slot="reference" size="mini" type="danger">删除</el-button>
-          </el-popconfirm>
-        </template>
-      </el-table-column> -->
     </el-table>
-    <div class="pagination">
-      <el-pagination
-        background
-        :current-page.sync="currentPage"
-        :total="totalNum"
-        :page-size="pageSize"
-        :page-count="5"
-        @current-change="tableChangePage"
-        layout="prev, pager, next, jumper"
-      ></el-pagination>
-      <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
-    </div>
   </div>
 </template>
 
@@ -63,12 +38,14 @@ export default {
         height: window.innerHeight
       },
       formParams: [
-        {
-          type: 'input',
-          name: '客户名称',
-          noColon: true,
-          value: 'name'
-        },
+          {
+              type: 'select',
+              name: '设备',
+              noColon: false,
+              value: 'machineName',
+              placeholder: '请选择设备',
+              options: []
+          },
         {
           type: 'date',
           name: '日期',
@@ -88,63 +65,65 @@ export default {
         { label: "染化剂用量", prop: "agentUse" },
         { label: "合格品量", prop: "productionQualified" }
       ],
-      currentPage: 1,  // 表格当前页码
-      pageSize: 50,   // 表格每一页展示数据的数量
     };
   },
-  computed: {
-    // 数据总条数
-    totalNum() {
-      return this.tableData.length;
-    }
-  },
+    created() {
+      this.getMachineName();
+      this.searchContent();
+    },
   mounted() {
-    let jump = document.querySelector('.el-pagination__jump');
-    if (jump) {
-      jump.childNodes[0].nodeValue = '跳至';
-    }
     this.browserResize();
   },
   methods: {
     // 搜索
     searchContent(options) {
-      console.log(111111)
+        let params = {
+            date: utils.getNowDate(),
+            machineName: ''
+        }
+        if (options) {
+            params = {
+                date: options.date,
+                machineName: options.machineName
+            }
+        }
+        this.getTableData(params);
     },
     // 监听窗口大小改变
     browserResize() {
       window.onresize = () => {
         this.browserAttr.width = window.innerWidth;
         this.browserAttr.height = window.innerHeight;
-        console.log("监听窗口改变111");
       };
     },
-    tableChangePage() {
-
+    // 获取设备名称
+    getMachineName() {
+      this.$http.get('/machineController/queryAvailableMachine').then(res => {
+          if (res.data.code == 0 && res.data.message == '操作成功') {
+              this.formParams[0].options = res.data.data.map(item => {
+                  return { label: item.name, value: item.name };
+              });
+          }else {
+              this.formParams[0].options = [];
+          }
+      }).catch(error => {
+          console.log('失败原因:' + error);
+      });
     },
-    getTableData() {
-      let params = {
-        pageNo: this.currentPage,
-        size: this.pageSize
-      }
-      // this.$http.post('/materialController/pageList',params).then(res => {
-      //   if (res.data.code == 0 && res.data.message == '操作成功') {
-      //     this.tableData = res.data.data.records.map(item => {
-      //       return item;
-      //     });
-      //   }else {
-      //     if (text !== undefined) {
-      //       this.$message({
-      //         message: res.data.message || "查询失败",
-      //         type: 'error',
-      //         duration: 3000,
-      //         showClose: true
-      //       });
-      //     }
-      //     // this.tableData = [];
-      //   }
-      // }).catch(error => {
-      //   console.log('失败原因:' + error);
-      // });
+    // 获取表格数据
+    getTableData(params) {
+      this.$http.get('/reportController/dailyProduction',{params}).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.tableData = res.data.data.map((item,number) => {
+              item.index = number + 1;
+              return item;
+          });
+        }else {
+          this.tableData = [];
+        }
+      }).catch(error => {
+            console.log('失败原因:' + error);
+      });
     }
   }
 };

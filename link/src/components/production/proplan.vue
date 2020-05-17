@@ -6,7 +6,7 @@
         <!-- <div>总计 {{totalNum}} 条数据</div> -->
       </div>
       <div class="func-bar">
-        <div class="add btn" @click="modifyPlan('add')">新建计划</div>
+        <div class="add btn" v-if="this.pageType === 'order'" @click="modifyPlan('add')">新建计划</div>
         <div class="return btn" @click="returnPage">返回</div>
       </div>
     </div>
@@ -54,12 +54,12 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" align="center" fixed="right">
+        <el-table-column v-if="this.pageType === 'order'" label="操作" width="220" align="center" fixed="right">
           <template slot-scope="scope">
             <div v-if="!scope.row.isWrite">
-              <el-button size="mini" title="填写合格品" :disabled="scope.row.status == '2'" @click="writeQualified(scope.row)">填写</el-button>
-              <el-button size="mini" title="编辑成产计划" :disabled="scope.row.status == '1'" @click="modifyPlan('editor',scope.row)">编辑</el-button>
-              <el-button size="mini" title="打印生产计划" :disabled="scope.row.status == '1'" @click="printPlan(scope.row)">打印</el-button>
+              <el-button size="mini" title="填写合格品" :disabled="scope.row.status != '2'" @click="writeQualified(scope.row)">填写</el-button>
+              <el-button size="mini" title="编辑成产计划" :disabled="scope.row.status != '1'" @click="modifyPlan('editor',scope.row)">编辑</el-button>
+              <el-button size="mini" title="打印生产计划" :disabled="scope.row.status != '1'" @click="printPlan(scope.row)">打印</el-button>
             </div>
             <div v-if="scope.row.isWrite">
               <el-button size="mini" @click="sureWrite(scope.row)">确定</el-button>
@@ -129,7 +129,7 @@
             <el-input
               v-model="planParams.materialUse"
               :disabled="!materialMaxStock"
-              @change="changeInput($event,'material')"
+              @blur="blurInput($event,'material')"
               placeholder="请填写原料数量"
             ></el-input>
           </el-form-item>
@@ -147,7 +147,7 @@
             <el-input
               v-model="planParams.agentUse"
               :disabled="!agentMaxStock"
-              @change="changeInput($event,'agent')"
+              @blur="blurInput($event,'agent')"
               placeholder="请填写染化剂数量"
             ></el-input>
           </el-form-item>
@@ -236,42 +236,18 @@ export default {
       materialMaxStock: 50,
       copyRow: {},
       modifyPlanType: 'add',    //修改计划类型  add editor
+        pageType: 'order'
     };
   },
   created() {
     if (this.$route.query) {
-      // this.getOrderData(this.$route.query.orderId);
-      // this.getPlanData(this.$route.query.orderId);
+      this.getOrderData(this.$route.query.orderId);
+      this.getPlanData(this.$route.query.orderId);
+      this.pageType = this.$route.query.type;
     }
   },
   mounted() {
     this.browserResize();
-    let obj = {
-      orderNumber: "xasdasd1",
-      customerName: "客户1",
-      goods: "商品1",
-      productionSummary: "50",
-      productionCurrency: "20",
-      state: "完成",
-      amount: "3000",
-      transactionDate: "2020-05-03"
-    };
-    this.orderTableData.push(obj);
-    for (let i = 0; i < 15; i++) {
-      let obj = JSON.parse(JSON.stringify({
-        date: '2020-05-03',
-        machineName: '设备1',
-        colorName: '红色',
-        materialName: '原料1',
-        materialUse: '50',
-        agentName: '染化剂1',
-        agentUse: '50',
-        productionQualified: '0',
-        isWrite: false,
-      }));
-      obj.index = i + 1;
-      this.planTableData.push(obj);
-    }
   },
   beforeDestroy() {
     window.onresize = null;
@@ -290,6 +266,14 @@ export default {
     }
   },
   methods: {
+    // 表格 行的样式
+    tableRowClassName({ rowIndex }) {
+      if (rowIndex % 2 == 0) {
+        return "odd-number";
+      } else {
+        return "even-number";
+      }
+    },
     // 监听窗口大小改变
     browserResize() {
       window.onresize = () => {
@@ -300,9 +284,15 @@ export default {
     },
     // 返回上一页面
     returnPage() {
-      this.$router.push({
-        path: "/production"
-      });
+        if (this.pageType === 'order') {
+            this.$router.push({
+                path: "/production"
+            });
+        }else {
+            this.$router.push({
+                path: "/stockdetails"
+            });
+        }
     },
     // 获取原料库存
     getMaterialStock(materialName) {
@@ -472,8 +462,8 @@ export default {
       });
       if (flag) {
         this.$message({
-          message: '请填写完计划数据后，再进行保存操作',
-          type: "warning",
+          message: '计划填写完成后，再进行保存操作',
+          type: "waring",
           duration: 3000,
           showClose: true
         })
@@ -482,20 +472,20 @@ export default {
       if (this.modifyPlanType === 'add') {
         let user = JSON.parse(sessionStorage.getItem("user"));
         let params = {
-          agentName: this.planParams.agentName.trim(),
-          colorName: this.planParams.colorName.trim(),
+          agentName: this.planParams.agentName,
+          colorName: this.planParams.colorName,
           date: this.planParams.date,
-          machineName: this.planParams.machineName.trim(),
-          materialName: this.planParams.materialName.trim(),
+          machineName: this.planParams.machineName,
+          materialName: this.planParams.materialName,
           agentUse: Number(this.planParams.agentUse),
           materialUse: Number(this.planParams.materialUse),
           createAt: user.name,
           orderId: this.$route.query.orderId || this.orderTableData[0].id
         }
-        this.$http.post("/productionController/addProduction", this.planParams).then(res => {
+        this.$http.post("/productionController/addProduction", params).then(res => {
           if (res.data.code == 0 && res.data.message == "操作成功") {
             this.childPageIsShow = false;
-            this.getPlanData(this.params.orderId);
+            this.getPlanData(params.orderId);
           } else {
             this.$message({
               message: res.data.message,
@@ -521,7 +511,8 @@ export default {
         this.$http.post("/productionController/editProduction", params).then(res => {
           if (res.data.code == 0 && res.data.message == "操作成功") {
             this.childPageIsShow = false;
-            this.getPlanData(this.params.orderId);
+            let orderId = this.$route.query.orderId || this.orderTableData[0].id;
+            this.getPlanData(orderId);
           } else {
             this.$message({
               message: res.data.message,
@@ -535,18 +526,10 @@ export default {
         });
       }
     },
-    changeInput(event, str) {
+    blurInput(event, str) {
       if (str === "material" && event.target.value > this.materialMaxStock) {
-        this.$message({
-          message: '原料用量填写超出剩余库存数量',
-          type: "warning",
-        })
         return this.materialMaxStock;
       } else if (str === "agent" && event.target.value > this.agentMaxStock) {
-        this.$message({
-          message: '染化剂用量填写超出剩余库存数量',
-          type: "warning",
-        })
         return this.agentMaxStock;
       }
     },
@@ -555,8 +538,12 @@ export default {
       console.log("打印", row);
       this.$http.get("/productionController/export?id=" + row.id).then(res => {
         if (res.data.code == 0 && res.data.message == "操作成功") {
-          let url = res.data.url;
-          window.open(url);
+          this.$message({
+            message: "打印成功",
+            type: "success",
+            duration: 3000,
+            showClose: true
+          });
         } else {
           this.$message({
             message: "打印失败",

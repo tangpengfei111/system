@@ -140,25 +140,6 @@ export default {
     },
     // 获取用户列表
     getUserList() {
-      /*
-      let roleAry = userRole.options.map(item => item.label);
-      for (let i = 0; i < 100; i++) {
-        let obj = JSON.parse(
-          JSON.stringify({
-            id: Math.round(Math.random() * 1000000),
-            name: "123123",
-            password: "sssss",
-            role: roleAry[Math.round(Math.random() * 2)],
-            type: 1,
-            lastUpdateTime: "2018-08-09",
-            isEditor: false
-          })
-        );
-        this.userList.push(obj);
-      }
-      this.copyUserList = this._.cloneDeep(this.userList);
-      */
-
       // 查询所有用户
       let params = {
         pageNo: this.currentPage,
@@ -260,15 +241,6 @@ export default {
       let name = this.userObj.name.trim();
       let password = this.userObj.password.trim();
       let role = this.userObj.role.trim();
-      if (name === '' || password === '' || role === '') {
-        this.$message({
-          message: '请填写用户名、密码、权限信息',
-          type: 'warning',
-          duration: 3000,
-          showClose: true
-        });
-        return;
-      }
       let type = 0;
       if(role != 'superAdmin'){
         type = 1;

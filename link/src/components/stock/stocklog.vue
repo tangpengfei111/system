@@ -5,8 +5,9 @@
         <div>{{title}}</div>
       </div>
       <div class="func-bar">
-        <my-search style="float:left" @searchContent="searchContent"></my-search>
+        <!--<my-search style="float:left" @searchContent="searchContent"></my-search>-->
         <!-- <div class="add btn" @click="addOrder">新建订单</div> -->
+        <div class="return btn" @click="returnPage">返回</div>
       </div>
     </div>
     <el-table
@@ -24,17 +25,6 @@
         align="center"
       >
       </el-table-column>
-      <!-- <el-table-column label="操作" width="180" align="center">
-        <template slot-scope="scope">
-          <el-popconfirm
-            title="确定要清除吗?"
-            cancelButtonType="plain"
-            @onConfirm="deleteLogRecord(scope.$index, scope.row)"
-            >
-            <el-button slot="reference" size="mini" type="danger">清除记录</el-button>
-          </el-popconfirm>
-        </template>
-      </el-table-column> -->
     </el-table>
     <div class="pagination">
       <el-pagination
@@ -62,13 +52,11 @@ export default {
     return {
       title: "",
       tableHeader: [
-        { label: '序号', prop: 'index', width: 80 },
-        // { label: '名称', prop: 'name' },
-        { label: '调整类型', prop: 'type' },
+        { label: '调整类型', prop: 'state' },
         { label: '调整量', prop: 'variation' },
         { label: '调整原因', prop: 'reason' },
         { label: '操作用户', prop: 'createAt' },
-        { label: '操作时间', prop: 'time' },
+        { label: '操作时间', prop: 'updateTime' },
       ],
       tableData: [],
       currentPage: 1, // 表格当前页码
@@ -87,7 +75,7 @@ export default {
   created() {
     console.log(this.$route);
     if (this.$route.query) {
-        this.title = this.$route.query.name + '日志';
+        this.title = this.$route.query.name + '库存操作日志';
         this.getLogData(this.$route.query.title, this.$route.query.name);
     }else {
         this.title = this.$route.meta.til;
@@ -95,20 +83,6 @@ export default {
   },
   mounted() {
     this.browserResize();
-    for (let i = 0; i < 100; i++) {
-      let obj = JSON.parse(JSON.stringify({
-        name: 'xxxx',
-        type: '增加',
-        variation: '5',
-        createAt: 'admin1',
-        reason: '1111',
-        time: '2019-05-03 08:08:08',
-        isEditor: false
-      }));
-      obj.index = i + 1;
-      this.tableData.push(obj);
-      // reson = increaseType || reduceType
-    }
   },
   beforeDestroy() {
     window.onresize = null;
@@ -127,8 +101,20 @@ export default {
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
     },
+      //返回上一页
+      returnPage(){
+        if(this.$route.query.title === '染化剂'){
+            this.$router.push({
+                path: '/dyestock',
+            });
+        }else if(this.$route.query.title === '原料'){
+            this.$router.push({
+                path: '/materialstock',
+            });
+        }
+      },
     // 获取日志数据
-    getLogData(title,earchText) {
+    getLogData(title,searchText) {
       let params = {
 			  pageNo: this.currentPage,
 			  search: searchText,
@@ -137,9 +123,14 @@ export default {
       if (title === '染化剂') {
         this.$http.post('/agentStockLogController/queryLogsByName', params).then(res => {
           if (res.data.code == 0 && res.data.message == '操作成功') {
-            this.tableData = res.data.data.agentStockLogList.map(item => {
+            this.tableData = res.data.data.records.map(item => {
               item.reason = item.increaseType || item.reduceType;
               item.name = item.agentName;
+              if (item.type === 0) {
+                  item.state = '增加';
+              }else if (item.type === 1) {
+                  item.state = '减少';
+              }
               return item;
             });
           }else {
@@ -159,6 +150,11 @@ export default {
             this.tableData = res.data.data.materialStockLogList.map(item => {
               item.reason = item.increaseType || item.reduceType;
               item.name = item.materialName;
+              if (item.type === 0) {
+                  item.state = '增加';
+              }else if (item.type === 1) {
+                  item.state = '减少';
+              }
               return item;
             });
           }else {
@@ -173,13 +169,13 @@ export default {
           console.log('失败原因:' + error);
         });
       }
-      
+
     },
     // 删除库存日志记录
     deleteLogRecord(index,row) {
         this.tableData.splice(index,1);
     },
-    
+
   }
 };
 </script>

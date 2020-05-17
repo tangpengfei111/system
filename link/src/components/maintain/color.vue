@@ -3,10 +3,9 @@
     <div class="header">
       <div class="title">
         <div>{{this.$route.meta.til || '色号管理'}}</div>
-        <!-- <div>总计 {{totalNum}} 条数据</div> -->
       </div>
       <div class="func-bar">
-        <my-search style="float:left" @searchContent="searchContent"></my-search>
+        <my-search style="float:left" @searchContent="searchContent" :placeholder="searchPlaceholder"></my-search>
         <div class="add btn" @click="addRow">添加</div>
       </div>
     </div>
@@ -15,7 +14,7 @@
       :height="browserAttr.height - 200"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%" 
-     >
+      >
       <el-table-column
         v-for="(item,index) in tableHeader"
         :key="'row' + index"
@@ -23,10 +22,22 @@
         :label="item.label"
         align="center">
         <template slot-scope="scope">
-          <div v-if="scope.row.isEditor">
-            <input type="text" v-model="scope.row[item.prop]">
+          <div v-if="scope.row.isEditor && item.editor">
+            <div v-if="item.label == '状态'">
+              <el-select v-model="scope.row.status" placeholder="请选择状态">
+                <el-option
+                  v-for="item in stateOption"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </div>
+            <div v-if="item.label !== '状态'">
+              <input type="text" v-model="scope.row[item.prop]">
+            </div>
           </div>
-          <div v-if="!scope.row.isEditor">{{scope.row[item.prop]}}</div>
+          <div v-if="!scope.row.isEditor || !item.editor">{{scope.row[item.prop]}}</div>
         </template>
       </el-table-column>
       <el-table-column
@@ -67,11 +78,11 @@
     <div class="loading dialog-box" v-if="childPageIsShow">
       <div class="dialog">
         <div class="content-item">
-          <div>色号</div>
+          <div>色号名</div>
           <input v-model="params.name" placeholder="请填写色号名称">
         </div>
         <div class="content-item">
-          <div>编号</div>
+          <div>色号编号</div>
           <input v-model="params.no" placeholder="请填写色号编号">
         </div>
         <div class="footer">
@@ -93,13 +104,11 @@ export default {
   data() {
     return {
       tableHeader: [              // 表格头部信息
-        {label: '序号', prop: 'index'},
-        {label: '色号编号', prop: 'color_no'},
-        {label: '色号名称', prop: 'color_name'},
-        {label: '状态', prop: 'state'},
-        {label: '用户id', prop: 'user_id'},
-        {label: '用户名', prop: 'user_name'},
-        {label: '最后操作时间', prop: 'last_update_time'}
+        { label: '色号编号', prop: 'no', editor: false },
+        { label: '色号名称', prop: 'name', editor: false },
+        { label: '状态', prop: 'state', editor: true },
+        { label: '用户名', prop: 'createAt', editor: false },
+        { label: '最后操作时间', prop: 'lastUpdateTime', editor: false }
       ],
       tableData: [],   // 表格数据
       copyRow: {},     // 当前行副本
@@ -114,7 +123,15 @@ export default {
         name: '', 
         no: '',
       },
+      stateOption: [           // 状态数组
+        { label: '可用', value: 0 },
+        { label: '不可用', value: 1 }
+      ],
+      searchPlaceholder: '请输入搜索的色号名称'
     };
+  },
+  created() {
+    this.getAllColors();
   },
   mounted() {
     // 修改分页器 jump 文字内容
@@ -123,19 +140,6 @@ export default {
       jump.childNodes[0].nodeValue = '跳至';
     }
     this.browserResize();
-    for (let i = 0; i < 100; i++) {
-      let obj = JSON.parse(JSON.stringify({
-        color_no: 1,
-        color_name: 2,
-        state: 5,
-        user_id: 111111,
-        user_name: 'xxxal12',
-        last_update_time: '2019-03-03',
-        isEditor: false
-      }));
-      obj.index = i + 1;
-      this.tableData.push(obj);
-    }
   },
   beforeDestroy() {
     window.onresize = null;
@@ -188,28 +192,52 @@ export default {
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
     },
-    // 获取所有颜色数据
-    getAllColors(type) {
-      // 两种类型，一是所有颜色，二是可用颜色
-      // let url = '';
-      // if (type === 'all') {
-      //   url = '/colorController/queryAllColors';
-      // }else if (type === 'available') {
-      //   url = '/colorController/queryAvailableColor';
-      // }
-      // 查询所有颜色
-      // this.$http.get(url).then(res => {
-      //   console.log('res',res);
-      //   if (res.data.code == 0 && res.data.message == 'success') {
-
-      //   }
-      // }).catch(error => {
-      //   console.log('失败原因:' + error);
-      // })
+    // 获取可用色号列表
+    // 获取所有色号数据
+    getAllColors(text) {
+      let params = {
+        pageNo: this.currentPage,
+        size: this.pageSize
+      }
+      if (text !== undefined) {
+        params.search = text;
+      }
+      this.$http.post('/colorController/pageList',params).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.tableData = res.data.data.records.map(item => {
+            if (item.status === 0) {
+              item.state = '可用';
+            }else if (item.status === 1) {
+              item.state = '不可用';
+            }else if (item.status === 2) {
+              item.state = '废弃';
+            }
+            item.isEditor = false;
+            return item;
+          });
+        }else {
+          if (text !== undefined) {
+            this.$message({
+              message: res.data.message || "查询失败",
+              type: 'error',
+              duration: 3000,
+              showClose: true
+            });
+          }
+          // this.tableData = [];
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
     },
     // 文本搜索
     searchContent(text) {
-      console.log(text);
+      text = text.trim();
+      if (text !== '') {
+        this.getAllColors(text);
+      }else if (text == ''){
+        this.getAllColors();
+      }
     },
     // 添加新数据
     addRow() {
@@ -236,32 +264,26 @@ export default {
     },
     // 确定创建
     sureCreate() {
-      let obj = {};
-      this.tableHeader.forEach(item => {
-        obj[item.prop] = '';
-      });
-      obj.isEditor = true;
-      this.tableData.unshift(obj);
       let user = JSON.parse(sessionStorage.getItem('user'));
-      let createAt = user.name;
-      console.log(createAt)
-      // 添加色号请求
-      // this.$http.post('/colorController/addColor',{
-
-      // }).then(res => {
-      //   console.log('res',res);
-      //   if (res.data.code == 0 && res.data.message == 'success') {
-
-      //   }
-      // }).catch(error => {
-      //   console.log('失败原因:' + error);
-      // })
-      
-      this.childPageIsShow = false;
-      this.params = {
-        name: '',
-        no: '',
-      }
+      this.params.createAt = user.name;
+      // 添加色号
+      this.$http.post('/colorController/addColor',this.params).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.getAllColors();
+          this.cancelCreate();
+        }else {
+          this.cancelCreate();
+          this.$message({
+            message: res.data.message || "添加失败",
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+        this.cancelCreate();
+        console.log('失败原因:' + error);
+      })
     },
     // 编辑行
     editorRow(row) {
@@ -271,38 +293,57 @@ export default {
       if (flag) {
         this.$message({
           showClose: true,
-          message: '已经存在编辑项，请完成后再继续操作'
+          message: '已存在编辑项，请完成后再进行操作'
         });
       }else {
         this.copyRow = JSON.parse(JSON.stringify(row));
         row.isEditor = true;
-        // 编辑色号请求
-        // this.$http.post('/colorController/removeColor',{
-
-        // }).then(res => {
-        //   console.log('res',res);
-        //   if (res.data.code == 0 && res.data.message == 'success') {
-
-        //   }
-        // }).catch(error => {
-        //   console.log('失败原因:' + error);
-        // })
       }
     },
     // 删除行
-    deleteRow(index) {
-      this.tableData.splice(index,1);
+    deleteRow(index,row) {
+      // this.tableData.splice(index,1);
+      // 删除色号
+      this.$http.get('/colorController/removeColor' + '?colorNo=' + row.no).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.getAllColors();
+        }else {
+          this.$message({
+            message: res.data.message || "删除失败",
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      })
     },
     // 确定编辑
     sureEditor(row) {
-      row.isEditor = false;
+      //请求参数
+      let option = {
+        createAt: row.createAt,
+        name: row.name,
+        no: row.no,
+        status: row.status
+      }
+      this.$http.post('/colorController/modifyColor',option).then(res => {
+        console.log('res',res);
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+           this.getAllColors();
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      })
     },
     // 取消编辑
     cancelEditor(row) {
       for (let k in this.copyRow) {
         row[k] = this.copyRow[k]
       }
-    }
+    },
+   
   },
 };
 </script>
@@ -340,7 +381,7 @@ export default {
       position: absolute;
       top: 15px;
       right: 0;
-      width: 330px;
+      // width: 330px;
       overflow: hidden;
       .add {
         float: right;
@@ -369,6 +410,7 @@ export default {
       }
     }
   }
+  
   .el-table {
     input {
       width: 80%;
@@ -377,10 +419,22 @@ export default {
       outline: none;
       padding: 0 5px;
       box-sizing: border-box;
+      text-align: center;
     }
     .el-button {
       padding: 4px 8px;
       margin: 0 8px 0 0;
+    }
+    /deep/ .el-input__inner {
+      height: 25px;
+      line-height: 25px;
+      text-align: center;
+    }
+    /deep/ .el-select {
+      width: 80%;
+      .el-input__icon {
+        line-height: 25px;
+      }
     }
   }
   .dialog-box {
@@ -406,6 +460,13 @@ export default {
           color: #606266;
           font-size: 14px;
         }
+        .el-select {
+          width: 160px;
+          margin-left: 10px;
+        }
+        .el-input__inner {
+          width: 160px;
+        }
         input {
           width: 160px;
           margin-left: 10px;
@@ -415,6 +476,9 @@ export default {
             font-weight: 500;
             color: #a9adb3;
           }
+        }
+        input:focus {
+          border-color: #409EFF;
         }
       }
     }

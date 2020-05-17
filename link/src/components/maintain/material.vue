@@ -2,8 +2,7 @@
   <div class="maintain-child">
     <div class="header">
       <div class="title">
-        <div>{{this.$route.meta.til || '原料管理'}}</div>
-        <!-- <div>总计 {{totalNum}} 条数据</div> -->
+        <div>{{this.$route.meta.til}}</div>
       </div>
       <div class="func-bar">
         <my-search style="float:left" @searchContent="searchContent" :placeholder="searchPlaceholder"></my-search>
@@ -84,7 +83,7 @@
         layout="prev, pager, next, jumper"
         >
       </el-pagination>
-      <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
+      <div class="data-show">共{{Math.ceil(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
     </div>
     <div class="loading dialog-box" v-if="childPageIsShow">
       <div class="dialog">
@@ -135,6 +134,7 @@ export default {
       ],
       tableData: [],   // 表格数据
       copyRow: {},     // 当前行副本
+        totalNum: 0,
       currentPage: 1,  // 表格当前页码
       pageSize: 50,   // 表格每一页展示数据的数量
       browserAttr: {
@@ -150,8 +150,7 @@ export default {
       supplierOption: [],      // 供应商列表 用于编辑中供应商选择
       stateOption: [           // 状态数组
         { label: '可用', value: 0 },
-        { label: '不可用', value: 1 },
-        { label: '废弃', value: 2 }
+        { label: '不可用', value: 1 }
       ],
       searchPlaceholder: '请输入搜索的原料名称'
     };
@@ -166,32 +165,19 @@ export default {
       jump.childNodes[0].nodeValue = '跳至';
     }
     this.browserResize();
-    // for (let i = 0; i < 100; i++) {
-    //   let obj = JSON.parse(JSON.stringify({
-    //     no: 1,
-    //     name: 2,
-    //     supplierName: 3,
-    //     supplier_no: 4,
-    //     state: '停用',
-    //     user_id: 111111,
-    //     user_name: 'xxxal12',
-    //     last_update_time: '2019-03-03',
-    //     isEditor: false
-    //   }));
-    //   obj.index = i + 1;
-    //   this.tableData.push(obj);
-    // }
   },
   beforeDestroy() {
     window.onresize = null;
   },
-  computed: {
-    // 数据总条数
-    totalNum() {
-      return this.tableData.length;
-    }
-  },
   methods: {
+    // 表格 行的样式
+    tableRowClassName({rowIndex}) {
+      if (rowIndex % 2 == 0) {
+        return 'odd-number';
+      }else {
+        return 'even-number';
+      }
+    }, 
     // 监听窗口大小改变
     browserResize() {
       window.onresize = () => {
@@ -249,16 +235,17 @@ export default {
       this.$http.post('/materialController/pageList',params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
           this.tableData = res.data.data.records.map(item => {
-            if (item.status == '0') {
+            if (item.status === 0) {
               item.state = '可用';
-            }else if (item.status == '1') {
+            }else if (item.status === 1) {
               item.state = '不可用';
-            }else if (item.status == '2') {
+            }else if (item.status === 2) {
               item.state = '废弃';
             }
             item.isEditor = false;
             return item;
           });
+          this.totalNum = res.data.data.total;
         }else {
           if (text !== undefined) {
             this.$message({
@@ -268,7 +255,8 @@ export default {
               showClose: true
             });
           }
-          // this.tableData = [];
+          this.tableData = [];
+          this.totalNum = 0;
         }
       }).catch(error => {
         console.log('失败原因:' + error);
@@ -310,25 +298,10 @@ export default {
     },
     // 确定创建
     sureCreate() {
-      
-      let params = {
-        name: this.params.name.trim(),
-        no: this.params.no.trim(),
-        supplierName: this.params.supplierName.trim()
-      }
-      if (params.name === '' || params.no === '' || params.supplierName === '') {
-        this.$message({
-          message: '请填写完数据后，再进行操作',
-          type: 'warning',
-          duration: 3000,
-          showClose: true
-        });
-        return;
-      }
       let user = JSON.parse(sessionStorage.getItem('user'));
-      params.createAt = user.name;
+      this.params.createAt = user.name;
       // 添加原料
-      this.$http.post('/materialController/addMaterial',params).then(res => {
+      this.$http.post('/materialController/addMaterial',this.params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
           this.getAllMaterials();
           this.cancelCreate();
@@ -384,23 +357,14 @@ export default {
     // 确定编辑
     sureEditor(row) {
       //请求参数
-      let params = {
+      let option = {
         createAt: row.createAt,
-        name: row.name.trim(),
-        no: row.no.trim(),
+        name: row.name,
+        no: row.no,
         status: row.status,
-        supplierNo: row.supplierNo.trim()
+        supplierName: row.supplierName
       }
-      if (params.name === '' || params.no === '' || params.supplierName === '') {
-        this.$message({
-          message: '请填写完数据后，再进行操作',
-          type: 'warning',
-          duration: 3000,
-          showClose: true
-        });
-        return;
-      }
-      this.$http.post('/materialController/modifyMaterial',params).then(res => {
+      this.$http.post('/materialController/modifyMaterial',option).then(res => {
         console.log('res',res);
         if (res.data.code == 0 && res.data.message == '操作成功') {
            this.getAllMaterials();
