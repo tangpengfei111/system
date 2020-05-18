@@ -7,7 +7,7 @@
     </div>
     <my-search style="float:left" @searchContent="searchContent" :formParams="formParams"></my-search>
     <el-table
-      :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
+      :data="tableData"
       :height="browserAttr.height - 260"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%"
@@ -49,7 +49,7 @@
         layout="prev, pager, next, jumper"
         >
       </el-pagination>
-      <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
+      <div class="data-show">共{{Math.ceil(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
     </div>
     <div class="loading dialog-box" v-if="childPageIsShow">
       <div class="dialog">
@@ -116,6 +116,7 @@ export default {
       tableData: [],
       currentPage: 1, // 表格当前页码
       pageSize: 50, // 表格每一页展示数据的数量
+      totalNum: 0,
       browserAttr: {
         width: window.innerWidth,
         height: window.innerHeight
@@ -128,6 +129,7 @@ export default {
         increaseType: '',
         variation: ''
       },
+      searchObj: {},
       roleOptions: [],
         formParams: [
             {
@@ -156,7 +158,7 @@ export default {
     }
   },
   created() {
-    this.getStockList();
+    this.getStockList(1);
   },
   mounted() {
     this.browserResize();
@@ -164,28 +166,23 @@ export default {
   beforeDestroy() {
     window.onresize = null;
   },
-  computed: {
-    totalNum() {
-      return this.tableData.length;
-    }
-  },
   methods: {
     // 监听窗口大小改变
     browserResize() {
       window.onresize = () => {
         this.browserAttr.width = window.innerWidth;
         this.browserAttr.height = window.innerHeight;
-        console.log("监听窗口改变111");
       };
     },
     // 表格当前页改变
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
+      this.getStockList(nowPage,this.searchObj);
     },
     // 获取库存信息列表
-    getStockList(options) {
+    getStockList(currentPage, options) {
       let params = {
-        pageNo: this.currentPage,
+        pageNo: currentPage || this.currentPage,
         size: this.pageSize
       };
       if (options) {
@@ -205,6 +202,7 @@ export default {
             item.index = index + 1;
             return item;
           });
+          this.totalNum = res.data.data.total;
         }else {
           if (options !== undefined) {
             this.$message({
@@ -214,7 +212,8 @@ export default {
               showClose: true
             });
           }
-          // this.tableData = [];
+          this.tableData = [];
+          this.totalNum = 0;
         }
       }).catch(error => {
         console.log('失败原因:' + error);
@@ -223,12 +222,10 @@ export default {
     // 库存变化
     stockChange(row) {
       this.copyRow = row;
-      console.log(this.copyRow.name)
       this.childPageIsShow = true;
     },
     // 查看日志
     viewLog(row) {
-      console.log(111)
       this.$router.push({
         path: '/stocklog', 
         query: {
@@ -267,7 +264,7 @@ export default {
       this.$http.post('/materialStockLogController/addMaterialStockLog', params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
           this.cancelStockOperation();
-          this.getStockList();
+          this.getStockList(1);
         }else {
           this.$message({
             message: res.data.message || "操作失败",
@@ -282,7 +279,12 @@ export default {
     },
     // 搜索
     searchContent(options) {
-      this.getStockList(options);
+      let option = {
+        name: options.name || '',
+        status: options.status || '',
+      }
+      this.searchObj = JSON.parse(JSON.stringify(option));
+      this.getStockList(1, option);
     }
   }
 };

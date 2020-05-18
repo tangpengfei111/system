@@ -3,7 +3,6 @@
     <div class="header">
       <div class="title">
         <div>{{this.$route.meta.til || '订单管理'}}</div>
-        <!-- <div>总计 {{totalNum}} 条数据</div> -->
       </div>
       <div class="func-bar">
         <div class="add btn" @click="addOrder">新建订单</div>
@@ -200,8 +199,8 @@ export default {
         { label: '打开', value: 'active' },
         { label: '暂停', value: 'idle' }
       ],
-        totalNum: 0,
-        formParams: [
+      totalNum: 0,
+      formParams: [
             {
                 type: 'input',
                 name: '客户名称',

@@ -123,14 +123,6 @@ export default {
     window.onresize = null;
   },
   methods: {
-    // 表格 行的样式
-    tableRowClassName({ rowIndex }) {
-      if (rowIndex % 2 == 0) {
-        return "odd-number";
-      } else {
-        return "even-number";
-      }
-    },
     // 监听窗口大小改变
     browserResize() {
       window.onresize = () => {
@@ -139,10 +131,10 @@ export default {
       };
     },
     // 获取用户列表
-    getUserList() {
+    getUserList(currentPage = 1) {
       // 查询所有用户
       let params = {
-        pageNo: this.currentPage,
+        pageNo: currentPage,
         size: this.pageSize
       };
       this.$http.post('/userController/pageList', params).then(res => {
@@ -168,10 +160,6 @@ export default {
         console.log('失败原因:' + error);
       })
     },
-    // 点击页面page
-    currentChange(val) {
-      this.currentPage = val;
-    },
     // 标签页改变
     tabsChange(tab) {
       if (tab.name === 'all') {
@@ -189,6 +177,7 @@ export default {
     // 表格当前页改变
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
+      this.getUserList(nowPage);
     },
     // 编辑行
     editorRow(row) {
@@ -198,15 +187,8 @@ export default {
     },
     // 删除行
     deleteRow(row) {
-      /*
-      this.userList = this.userList.filter(item => {
-        return item.id !== row.id;
-      });
-      */
-
       // 删除用户
       this.$http.get('/userController/removeUser' + '?userId=' + row.id ).then(res => {
-        console.log('res',res);
         if (res.data.code == 0 && res.data.message == '操作成功') {
           this.getUserList();
         }else {
