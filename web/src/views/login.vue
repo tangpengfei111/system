@@ -97,18 +97,6 @@ export default {
           }
         });
       }
-      // 用户登录
-      // this.$http.post('/userController/loginIn', {
-      //   name: this.username,
-      //   password: this.password
-      // }).then(res => {
-      //   console.log('res',res);
-      //   if (res.data.code == 0 && res.data.message == 'success') {
-
-      //   }
-      // }).catch(error => {
-      //   console.log('失败原因:' + error);
-      // })
     },
   }
 };

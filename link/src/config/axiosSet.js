@@ -1,7 +1,7 @@
 import axios from 'axios'
 
-axios.defaults.baseURL = 'http://localhost:8888/factory';
-
+// axios.defaults.baseURL = 'http://localhost:8888/factory'; 
+axios.defaults.baseURL = 'http://36.148.11.166:8888/factory';  // 云端
 var instance = axios.create({});
 
 // instance.interceptors.request.use(config => {

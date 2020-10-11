@@ -10,7 +10,7 @@
       </div>
     </div>
     <el-table 
-      :data="tableData"
+      :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       :height="browserAttr.height - 200"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%" 
@@ -73,7 +73,7 @@
         layout="prev, pager, next, jumper"
         >
       </el-pagination>
-      <div class="data-show">共{{Math.ceil(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
+      <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
     </div>
     <div class="loading dialog-box" v-if="childPageIsShow">
       <div class="dialog">
@@ -114,7 +114,6 @@ export default {
       copyRow: {},     // 当前行副本
       currentPage: 1,  // 表格当前页码
       pageSize: 50,   // 表格每一页展示数据的数量
-      totalNum: 0,
       browserAttr: {
         width: window.innerWidth,
         height: window.innerHeight
@@ -128,12 +127,11 @@ export default {
         { label: '可用', value: 0 },
         { label: '不可用', value: 1 }
       ],
-      searchPlaceholder: '请输入搜索的设备名称',
-      searchText: ''
+      searchPlaceholder: '请输入搜索的设备名称'
     };
   },
   created() {
-    this.getAllMachines(1);
+    this.getAllMachines();
   },
   mounted() {
     // 修改分页器 jump 文字内容
@@ -145,6 +143,12 @@ export default {
   },
   beforeDestroy() {
     window.onresize = null;
+  },
+  computed: {
+    // 数据总条数
+    totalNum() {
+      return this.tableData.length;
+    }
   },
   methods: {
     // 表格 行的样式
@@ -160,6 +164,7 @@ export default {
       window.onresize = () => {
         this.browserAttr.width = window.innerWidth;
         this.browserAttr.height = window.innerHeight;
+        console.log('监听窗口改变111');
       };
     },
     // 表格列宽自适应
@@ -186,12 +191,12 @@ export default {
     // 表格当前页改变
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
-      this.searchContent(this.searchText,nowPage);
     },
+    // 获取可用设备列表
     // 获取所有设备数据
-    getAllMachines(currentPage,text) {
+    getAllMachines(text) {
       let params = {
-        pageNo: currentPage || this.currentPage,
+        pageNo: this.currentPage,
         size: this.pageSize
       }
       if (text !== undefined) {
@@ -210,7 +215,6 @@ export default {
             item.isEditor = false;
             return item;
           });
-          this.totalNum = res.data.data.total;
         }else {
           if (text !== undefined) {
             this.$message({
@@ -220,21 +224,19 @@ export default {
               showClose: true
             });
           }
-          this.tableData = [];
-          this.totalNum = 0;
+          // this.tableData = [];
         }
       }).catch(error => {
         console.log('失败原因:' + error);
       });
     },
     // 文本搜索
-    searchContent(text,page = 1) {
+    searchContent(text) {
       text = text.trim();
       if (text !== '') {
-        this.getAllMachines(page,text);
-        this.searchText = text;
+        this.getAllMachines(text);
       }else if (text == ''){
-        this.getAllMachines(page);
+        this.getAllMachines();
       }
     },
     // 添加新数据
@@ -264,10 +266,27 @@ export default {
     sureCreate() {
       let user = JSON.parse(sessionStorage.getItem('user'));
       this.params.createAt = user.name;
+      if (!this.params.name) {
+        this.$message({
+          showClose: true,
+          type: 'error',
+          message: '请填写设备名称'
+        });
+        return
+      }
+      if (!this.params.no) {
+        this.$message({
+          showClose: true,
+          type: 'error',
+          message: '请填写设备编号'
+        });
+        return
+      }
+      
       // 添加设备
       this.$http.post('/machineController/addMachine',this.params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.getAllMachines(1);
+          this.getAllMachines();
           this.cancelCreate();
         }else {
           this.cancelCreate();
@@ -304,7 +323,7 @@ export default {
       // 删除设备
       this.$http.get('/machineController/removeMachine' + '?machineNo=' + row.no).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.getAllMachines(1);
+          this.getAllMachines();
         }else {
           this.$message({
             message: res.data.message || "删除失败",
@@ -329,7 +348,7 @@ export default {
       this.$http.post('/machineController/modifyMachine',option).then(res => {
         console.log('res',res);
         if (res.data.code == 0 && res.data.message == '操作成功') {
-           this.getAllMachines(1);
+           this.getAllMachines();
         }
       }).catch(error => {
         console.log('失败原因:' + error);

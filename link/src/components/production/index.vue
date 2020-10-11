@@ -3,6 +3,7 @@
     <div class="header">
       <div class="title">
         <div>{{this.$route.meta.til || '订单管理'}}</div>
+        <!-- <div>总计 {{totalNum}} 条数据</div> -->
       </div>
       <div class="func-bar">
         <div class="add btn" @click="addOrder">新建订单</div>
@@ -129,7 +130,7 @@
             @blur="blurInput"
             />
         </div>
-        <div class="content-item">
+        <!-- <div class="content-item">
           <div>金额</div>
           <input type="text"
             v-model="params.amount"
@@ -149,7 +150,7 @@
             :editable="false"
             :picker-options="pickerOptions">
           </el-date-picker>
-        </div>
+        </div> -->
         <div class="footer">
           <el-button @click="cancelAddOrder">取消</el-button>
           <el-button type="primary" @click="sureAddOrder">确定</el-button>
@@ -181,9 +182,9 @@ export default {
         {label: '客户', prop: 'customerName', editor: false },
         {label: '商品', prop: 'goods', editor: true },
         {label: '需求量', prop: 'productionSummary', editor: true },
-        {label: '金额', prop: 'amount', editor: true },
+        // {label: '金额', prop: 'amount', editor: true },
         {label: '状态', prop: 'state', editor: false },
-        {label: '交货日期', prop: 'transactionDate', editor: true, width: 180}
+        // {label: '交货日期', prop: 'transactionDate', editor: true, width: 180}
       ],
       customList: [            // 客户列表
         { label: '客户1', value: '客户1' },
@@ -199,8 +200,8 @@ export default {
         { label: '打开', value: 'active' },
         { label: '暂停', value: 'idle' }
       ],
-      totalNum: 0,
-      formParams: [
+        totalNum: 0,
+        formParams: [
             {
                 type: 'input',
                 name: '客户名称',
@@ -384,7 +385,7 @@ export default {
       if (flag) {
         this.$message({
           message: '订单填写完成后，再进行保存操作',
-          type: "waring",
+          type: "error",
           duration: 3000,
           showClose: true
         })
@@ -651,7 +652,7 @@ export default {
       padding: 20px 35px;
       box-sizing: border-box;
       width: 400px;
-      height: 450px;
+      height: 330px;
       background-color: #ffffff;
       .title {
         overflow: hidden;

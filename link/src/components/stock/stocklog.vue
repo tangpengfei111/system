@@ -5,11 +5,13 @@
         <div>{{title}}</div>
       </div>
       <div class="func-bar">
+        <!--<my-search style="float:left" @searchContent="searchContent"></my-search>-->
+        <!-- <div class="add btn" @click="addOrder">新建订单</div> -->
         <div class="return btn" @click="returnPage">返回</div>
       </div>
     </div>
     <el-table
-      :data="tableData"
+      :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       :height="browserAttr.height - 200"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%"
@@ -35,13 +37,17 @@
         layout="prev, pager, next, jumper"
         >
       </el-pagination>
-      <div class="data-show">共{{Math.ceil(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
+      <div class="data-show">共{{Math.floor(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
     </div>
   </div>
 </template>
 
 <script>
+import search from "@/components/common/search.vue";
 export default {
+  components: {
+    "my-search": search
+  },
   data() {
     return {
       title: "",
@@ -55,14 +61,19 @@ export default {
       tableData: [],
       currentPage: 1, // 表格当前页码
       pageSize: 50, // 表格每一页展示数据的数量
-      totalNum: 0,
       browserAttr: {
         width: window.innerWidth,
         height: window.innerHeight
       },
     };
   },
+  computed: {
+    totalNum() {
+      return this.tableData.length;
+    }
+  },
   created() {
+    console.log(this.$route);
     if (this.$route.query) {
         this.title = this.$route.query.name + '库存操作日志';
         this.getLogData(this.$route.query.title, this.$route.query.name);
@@ -77,6 +88,7 @@ export default {
     window.onresize = null;
   },
   methods: {
+    searchContent() {},
     // 监听窗口大小改变
     browserResize() {
       window.onresize = () => {
@@ -88,7 +100,6 @@ export default {
     // 表格当前页改变
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
-      this.getLogData(this.$route.query.title, this.$route.query.name);
     },
       //返回上一页
       returnPage(){
@@ -122,7 +133,6 @@ export default {
               }
               return item;
             });
-            this.totalNum = res.data.data.total;
           }else {
             this.$message({
               message: res.data.message || "请求失败",
@@ -130,8 +140,6 @@ export default {
               duration: 3000,
               showClose: true
             });
-            this.tableData = [];
-            this.totalNum = 0;
           }
         }).catch(error => {
           console.log('失败原因:' + error);
@@ -149,7 +157,6 @@ export default {
               }
               return item;
             });
-            this.totalNum = res.data.data.total;
           }else {
             this.$message({
               message: res.data.message || "请求失败",
@@ -157,8 +164,6 @@ export default {
               duration: 3000,
               showClose: true
             });
-            this.tableData = [];
-            this.totalNum = 0;
           }
         }).catch(error => {
           console.log('失败原因:' + error);

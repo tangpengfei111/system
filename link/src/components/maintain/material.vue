@@ -10,7 +10,7 @@
       </div>
     </div>
     <el-table 
-      :data="tableData"
+      :data="tableData.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       :height="browserAttr.height - 200"
       :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
       style="width: 100%" 
@@ -97,7 +97,7 @@
         </div>
         <div class="content-item">
           <div>供应商编号</div>
-          <el-select v-model="params.supplierName" placeholder="请填写供应商编号">
+          <el-select v-model="params.supplierName" placeholder="请选择供应商编号">
              <el-option
                v-for="item in supplierOption"
                :key="item.value"
@@ -134,7 +134,7 @@ export default {
       ],
       tableData: [],   // 表格数据
       copyRow: {},     // 当前行副本
-      totalNum: 0,
+        totalNum: 0,
       currentPage: 1,  // 表格当前页码
       pageSize: 50,   // 表格每一页展示数据的数量
       browserAttr: {
@@ -152,12 +152,11 @@ export default {
         { label: '可用', value: 0 },
         { label: '不可用', value: 1 }
       ],
-      searchPlaceholder: '请输入搜索的原料名称',
-      searchText: ''
+      searchPlaceholder: '请输入搜索的原料名称'
     };
   },
   created() {
-    this.getAllMaterials(1);
+    this.getAllMaterials();
   },
   mounted() {
     // 修改分页器 jump 文字内容
@@ -184,6 +183,7 @@ export default {
       window.onresize = () => {
         this.browserAttr.width = window.innerWidth;
         this.browserAttr.height = window.innerHeight;
+        console.log('监听窗口改变111');
       };
     },
     // 表格列宽自适应
@@ -207,7 +207,6 @@ export default {
     // 表格当前页改变
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
-      this.searchContent(this.searchText,nowPage);
     },
     // 获取可用供应商列表
     getAvailableSupplier() {
@@ -225,9 +224,9 @@ export default {
       });
     },
     // 获取所有原料数据
-    getAllMaterials(currentPage,text) {
+    getAllMaterials(text) {
       let params = {
-        pageNo: currentPage || this.currentPage,
+        pageNo: this.currentPage,
         size: this.pageSize
       }
       if (text !== undefined) {
@@ -264,13 +263,12 @@ export default {
       });
     },
     // 文本搜索
-    searchContent(text,page = 1) {
+    searchContent(text) {
       text = text.trim();
       if (text !== '') {
-        this.getAllMaterials(page,text);
-        this.searchText = text;
+        this.getAllMaterials(text);
       }else if (text == ''){
-        this.getAllMaterials(page);
+        this.getAllMaterials();
       }
     },
     // 添加新数据
@@ -302,10 +300,27 @@ export default {
     sureCreate() {
       let user = JSON.parse(sessionStorage.getItem('user'));
       this.params.createAt = user.name;
+
+      if (!this.params.name) {
+        this.$message({
+          showClose: true,
+          type: 'error',
+          message: '请填写原料名称'
+        });
+        return
+      }
+      if (!this.params.no) {
+        this.$message({
+          showClose: true,
+          type: 'error',
+          message: '请填写原料编号'
+        });
+        return
+      }
       // 添加原料
       this.$http.post('/materialController/addMaterial',this.params).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.getAllMaterials(1);
+          this.getAllMaterials();
           this.cancelCreate();
         }else {
           this.cancelCreate();
@@ -343,7 +358,7 @@ export default {
       // 删除原料
       this.$http.get('/materialController/removeMaterial' + '?materialNo=' + row.no).then(res => {
         if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.getAllMaterials(1);
+          this.getAllMaterials();
         }else {
           this.$message({
             message: res.data.message || "删除失败",
@@ -367,8 +382,9 @@ export default {
         supplierName: row.supplierName
       }
       this.$http.post('/materialController/modifyMaterial',option).then(res => {
+        console.log('res',res);
         if (res.data.code == 0 && res.data.message == '操作成功') {
-           this.getAllMaterials(1);
+           this.getAllMaterials();
         }
       }).catch(error => {
         console.log('失败原因:' + error);
