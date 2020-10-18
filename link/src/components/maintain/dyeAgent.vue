@@ -33,8 +33,15 @@
                 </el-option>
               </el-select>
             </div>
-            <div v-if="item.label !== '状态'">
-              <input type="text" v-model="scope.row[item.prop]">
+            <div v-if="item.label == '供应商'">
+              <el-select v-model="scope.row[item.prop]" placeholder="请选择供应商">
+                <el-option
+                  v-for="item in supplierOption"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
             </div>
           </div>
           <div v-if="!scope.row.isEditor || !item.editor">{{scope.row[item.prop]}}</div>
@@ -85,6 +92,17 @@
           <div>染化剂编号</div>
           <input v-model="params.no" placeholder="请填写染化剂编号">
         </div>
+        <div class="content-item">
+          <div>供应商</div>
+          <el-select v-model="params.supplierName" placeholder="请选择供应商">
+             <el-option
+               v-for="item in supplierOption"
+               :key="item.value"
+               :label="item.label"
+               :value="item.value">
+             </el-option>
+          </el-select>
+        </div>
         <div class="footer">
           <el-button @click="cancelCreate">取消</el-button>
           <el-button type="primary" @click="sureCreate">确定</el-button>
@@ -106,6 +124,7 @@ export default {
       tableHeader: [              // 表格头部信息
         { label: '染化剂编号', prop: 'no', editor: false },
         { label: '染化剂名称', prop: 'name', editor: false },
+        { label: '供应商', prop: 'supplierName', editor: true },
         { label: '状态', prop: 'state', editor: true },
         { label: '用户名', prop: 'createAt', editor: false },
         { label: '最后操作时间', prop: 'lastUpdateTime', editor: false }
@@ -122,7 +141,9 @@ export default {
       params: {                 // 子页面用到的参数对象 
         name: '', 
         no: '',
+        supplierName: ''
       },
+      supplierOption: [],      // 供应商列表 用于编辑中供应商选择
       stateOption: [           // 状态数组
         { label: '可用', value: 0 },
         { label: '不可用', value: 1 }
@@ -185,9 +206,20 @@ export default {
       }
       return tableHeader;
     },
-    // 获取表格数据，头部信息
-    // getTbaleData(id) {
-    // },
+    // 获取可用供应商列表
+    getAvailableSupplier() {
+      this.$http.get('/supplierController/queryAvailableSupplier').then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.supplierOption = res.data.data.map(item => {
+            return { label: item.name, value: item.name };
+          });
+        }else {
+          this.supplierOption = [];
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+    },
     // 表格当前页改变
     tableChangePage(nowPage) {
       this.currentPage = nowPage;
@@ -250,8 +282,8 @@ export default {
           message: '已经存在编辑项，请完成后再进行添加操作'
         });
       }else {
+        this.getAvailableSupplier();
         this.childPageIsShow = true;
-        console.log(this.params);
       }
     },
     // 取消创建
@@ -313,6 +345,7 @@ export default {
         });
       }else {
         this.copyRow = JSON.parse(JSON.stringify(row));
+        this.getAvailableSupplier()
         row.isEditor = true;
       }
     },
@@ -342,10 +375,10 @@ export default {
         createAt: row.createAt,
         name: row.name,
         no: row.no,
+        supplierName: row.supplierName,
         status: row.status
       }
       this.$http.post('/dyeAgentController/modifyDyeAgent',option).then(res => {
-        console.log('res',res);
         if (res.data.code == 0 && res.data.message == '操作成功') {
            this.getAllDyeAgents();
         }

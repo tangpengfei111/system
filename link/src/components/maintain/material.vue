@@ -96,8 +96,8 @@
           <input v-model="params.no" placeholder="请填写原料编号">
         </div>
         <div class="content-item">
-          <div>供应商编号</div>
-          <el-select v-model="params.supplierName" placeholder="请选择供应商编号">
+          <div>供应商</div>
+          <el-select v-model="params.supplierName" placeholder="请选择供应商">
              <el-option
                v-for="item in supplierOption"
                :key="item.value"

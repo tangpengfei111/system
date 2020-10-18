@@ -170,14 +170,14 @@ export default {
         height: window.innerHeight
       },
       orderTableHeader: [
-        // {label: '订单编号', prop: 'orderNumber', editor: false},
+        {label: '订单编号', prop: 'id', editor: false},
         { label: "客户", prop: "customerName" },
         { label: "商品", prop: "goods" },
-        { label: "需求量", prop: "productionSummary" },
+        { label: "数量", prop: "productionSummary" },
         { label: "当前生产量", prop: "productionCurrency" },
-        { label: "金额", prop: "amount" },
+        // { label: "金额", prop: "amount" },
         { label: "状态", prop: "state" },
-        { label: "交货日期", prop: "transactionDate", width: 180 }
+        { label: "订单日期", prop: "transactionDate", width: 180 }
       ],
       orderTableData: [], // 订单数据
       planTableData: [], // 计划数据

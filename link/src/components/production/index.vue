@@ -2,22 +2,26 @@
   <div class="production">
     <div class="header">
       <div class="title">
-        <div>{{this.$route.meta.til || '订单管理'}}</div>
+        <div>{{ this.$route.meta.til || "订单管理" }}</div>
         <!-- <div>总计 {{totalNum}} 条数据</div> -->
       </div>
       <div class="func-bar">
         <div class="add btn" @click="addOrder">新建订单</div>
       </div>
     </div>
-    <my-search style="float:left" @searchContent="searchContent" :formParams="formParams"></my-search>
+    <my-search
+      style="float: left"
+      @searchContent="searchContent"
+      :formParams="formParams"
+    ></my-search>
     <el-table
       :data="tableData"
       :height="browserAttr.height - 265"
-      :header-cell-style="{background: '#EFF3F6', color: '#354053'}"
+      :header-cell-style="{ background: '#EFF3F6', color: '#354053' }"
       style="width: 100%"
     >
       <el-table-column
-        v-for="(item,index) in tableHeader"
+        v-for="(item, index) in tableHeader"
         :key="'row' + index"
         :prop="item.prop"
         :label="item.label"
@@ -25,49 +29,18 @@
         align="center"
       >
         <template slot-scope="scope">
-          <div v-if="scope.row.isEditor && item.editor">
-            <div v-if="item.label == '交货日期'">
-              <el-date-picker
-                v-model="scope.row.transactionDate"
-                type="date"
-                format="yyyy-MM-dd"
-                value-format="yyyy-MM-dd"
-                placeholder="选择日期"
-                :editable="false"
-                :picker-options="pickerOptions">
-              </el-date-picker>
-            </div>
-            <div v-if="item.label == '客户'">
-              <el-select v-model="scope.row[item.prop]" placeholder="请选择客户">
-                <el-option
-                  v-for="item in customList"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value">
-                </el-option>
-              </el-select>
-            </div>
-            <div v-if="item.label == '商品'">
-              <input type="text" v-model="scope.row[item.prop]">
-            </div>
-            <div v-if="item.label == '金额' || item.label == '需求量'">
-              <input type="text"
-                v-model="scope.row[item.prop]"
-                @keyup="checkNumber"
-                @blur="blurInput"
-                >
-            </div>
+          <div v-if="!scope.row.stateIsEditor || item.label != '状态'">
+            {{scope.row[item.prop] }}
           </div>
-          <div v-if="!scope.row.isEditor || !item.editor">
-            <div v-if="item.label !== '状态'">{{scope.row[item.prop]}}</div>
-            <div v-if="item.label == '状态' && !scope.row.stateIsEditor">{{scope.row[item.prop]}}</div>
-            <div v-if="item.label == '状态' && scope.row.stateIsEditor">
+          <div v-if="scope.row.stateIsEditor">
+            <div v-if="item.label == '状态'">
               <el-select v-model="scope.row.status" placeholder="请选择状态">
                 <el-option
                   v-for="item in statusOptions"
                   :key="item.value"
                   :label="item.label"
-                  :value="item.value">
+                  :value="item.value"
+                >
                 </el-option>
               </el-select>
             </div>
@@ -76,14 +49,21 @@
       </el-table-column>
       <el-table-column label="操作" width="180" align="center" fixed="right">
         <template slot-scope="scope">
-          <div v-if="!scope.row.isEditor && !scope.row.stateIsEditor">
+          <div v-if="!scope.row.stateIsEditor">
             <el-button size="mini" @click="viewPlan(scope.row)">查看</el-button>
-            <el-button size="mini" @click="editorRow(scope.row, 'editor')">编辑</el-button>
-            <el-button v-if="scope.row.state === '打开' || scope.row.state === '暂停'" size="mini" @click="editorRow(scope.row, 'status')">状态</el-button>
+            <el-button size="mini" @click="editorRow(scope.row)"
+              >编辑</el-button
+            >
+            <el-button
+              v-if="scope.row.state === '打开' || scope.row.state === '暂停'"
+              size="mini"
+              @click="modifyOrderStatus(scope.row)"
+              >状态</el-button
+            >
           </div>
-          <div v-if="scope.row.isEditor || scope.row.stateIsEditor">
-            <el-button size="mini" @click="sureEditor(scope.row)">确定</el-button>
-            <el-button size="mini" @click="cancelEditor(scope.row)">取消</el-button>
+          <div v-if="scope.row.stateIsEditor">
+            <el-button size="mini" @click="sureModifyOrderStatus(scope.row)">确定</el-button>
+            <el-button size="mini" @click="cancelModify(scope.row)">取消</el-button>
           </div>
         </template>
       </el-table-column>
@@ -97,38 +77,65 @@
         :page-count="5"
         @current-change="tableChangePage"
         layout="prev, pager, next, jumper"
-        >
+      >
       </el-pagination>
-      <div class="data-show">共{{Math.ceil(totalNum/pageSize)}}页，每页{{pageSize}}条数据</div>
+      <div class="data-show">
+        共{{ Math.ceil(totalNum / pageSize) }}页，每页{{ pageSize }}条数据
+      </div>
     </div>
     <div class="loading dialog-box" v-if="childPageIsShow">
       <div class="dialog">
         <div class="title">
-          <div class="title-label">新建订单</div>
+          <div class="title-label">{{this.model == 'add' ? '新建订单' : '编辑订单'}}</div>
         </div>
         <div class="content-item">
           <div>客户</div>
           <el-select v-model="params.customerName" placeholder="请填选择客户">
-             <el-option
-               v-for="item in customList"
-               :key="item.value"
-               :label="item.label"
-               :value="item.value">
-             </el-option>
+            <el-option
+              v-for="item in customList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
           </el-select>
         </div>
         <div class="content-item">
-          <div>商品</div>
-          <input type="text" v-model="params.goods" placeholder="请填写商品">
+          <div>原料</div>
+          <el-select
+            v-model="params.extend.material"
+            placeholder="请填选择原料"
+          >
+            <el-option
+              v-for="item in materialList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
         </div>
         <div class="content-item">
-          <div>需求量</div>
-          <input type="text"
+          <div>色号</div>
+          <el-select v-model="params.extend.color" placeholder="请填选择色号">
+            <el-option
+              v-for="item in colorList"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            >
+            </el-option>
+          </el-select>
+        </div>
+        <div class="content-item">
+          <div>数量</div>
+          <input
+            type="text"
             v-model="params.productionSummary"
-            placeholder="请填写需求量"
+            placeholder="请填写数量"
             @keyup="checkNumber"
             @blur="blurInput"
-            />
+          />
         </div>
         <!-- <div class="content-item">
           <div>金额</div>
@@ -138,9 +145,9 @@
             @keyup="checkNumber"
             @blur="blurInput"
             />
-        </div>
+        </div> -->
         <div class="content-item">
-          <div>交货日期</div>
+          <div>订单日期</div>
           <el-date-picker
             v-model="params.transactionDate"
             type="date"
@@ -148,11 +155,16 @@
             value-format="yyyy-MM-dd"
             placeholder="选择日期"
             :editable="false"
-            :picker-options="pickerOptions">
+            :picker-options="pickerOptions"
+          >
           </el-date-picker>
-        </div> -->
+        </div>
+        <div class="content-item">
+          <div>订单号</div>
+          <input v-model="params.id" :disabled="model === 'editor'"  placeholder="请填写订单号" />
+        </div>
         <div class="footer">
-          <el-button @click="cancelAddOrder">取消</el-button>
+          <el-button @click="initParams">取消</el-button>
           <el-button type="primary" @click="sureAddOrder">确定</el-button>
         </div>
       </div>
@@ -169,6 +181,7 @@ export default {
   },
   data() {
     return {
+      model: 'add', // 模式 add 新建， editor 编辑
       currentPage: 1, // 表格当前页码
       pageSize: 50, // 表格每一页展示数据的数量
       browserAttr: {
@@ -178,24 +191,17 @@ export default {
       copyRow: {},
       tableData: [],
       tableHeader: [
-        // {label: '订单编号', prop: 'orderNumber', editor: false},
-        {label: '客户', prop: 'customerName', editor: false },
-        {label: '商品', prop: 'goods', editor: true },
-        {label: '需求量', prop: 'productionSummary', editor: true },
-        // {label: '金额', prop: 'amount', editor: true },
-        {label: '状态', prop: 'state', editor: false },
-        // {label: '交货日期', prop: 'transactionDate', editor: true, width: 180}
+        {label: '订单编号', prop: 'id'},
+        {label: '客户', prop: 'customerName'},
+        {label: '商品', prop: 'goods'},
+        {label: '数量', prop: 'productionSummary'},
+        // {label: '金额', prop: 'amount'},
+        {label: '状态', prop: 'state'},
+        {label: '订单日期', prop: 'transactionDate', width: 180}
       ],
-      customList: [            // 客户列表
-        { label: '客户1', value: '客户1' },
-        { label: '客户2', value: '客户2' },
-        { label: '客户3', value: '客户3' },
-      ],
-      goodsList: [             // 商品列表
-        { label: '商品1', value: '商品1' },
-        { label: '商品2', value: '商品2' },
-        { label: '商品3', value: '商品3' },
-      ],
+      customList: [], // 客户列表,
+      materialList: [], // 原料列表
+      colorList: [],  // 色号列表
       statusOptions: [
         { label: '打开', value: 'active' },
         { label: '暂停', value: 'idle' }
@@ -232,14 +238,7 @@ export default {
             99: "暂停"
         },
       childPageIsShow: false,  // 子页面是否显示
-      params: {                 // 子页面用到的参数对象
-        createAt: "",
-        customerName: "",
-        goods: "",
-        productionSummary: '',
-        amount: '',
-        transactionDate: ""
-      },
+      params: {},  // 子页面用到的参数对象
       pickerOptions: {
         disabledDate: (time) => {
           // 禁止选择今天之前的时间，可以选择今天
@@ -253,7 +252,9 @@ export default {
     };
   },
   created() {
-    this.getOrderData();
+    // 初始化参数对象，请求获取订单列表数据
+    this.initParams()
+    this.getOrderData()
   },
   mounted() {
     this.browserResize();
@@ -302,6 +303,46 @@ export default {
         console.log('失败原因:' + error);
       });
     },
+    // 查询可用原料
+    queryMaterialList() {
+      this.$http.get('/materialController/queryAvailableMaterial').then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.materialList = res.data.data.map(item => {
+            return { label: item.name, value: item.name };
+          });
+        }else {
+          this.materialList = [];
+          this.$message({
+            message: res.data.message || "获取原料信息失败",
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+    },
+    // 查询可用色号
+    queryColorList() {
+      this.$http.get('/colorController/queryAvailableColor').then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          this.colorList = res.data.data.map(item => {
+            return { label: item.name, value: item.name };
+          });
+        }else {
+          this.colorList = [];
+          this.$message({
+            message: res.data.message || "获取色号信息失败",
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
+    },
     // 获取订单数据
     getOrderData(options) {
       let params = {
@@ -318,7 +359,6 @@ export default {
             item.state = this.orderStatusOptions[item.status];
             item.index = index + 1;
             item.stateIsEditor = false;     // 编辑状态
-            item.isEditor = false;          // 编辑除状态外数据
             return item;
           });
             this.totalNum =  res.data.data.total;
@@ -348,17 +388,6 @@ export default {
     },
     // 添加订单
     addOrder() {
-      // 验证是否有编辑项
-      let editorFlag = this.tableData.some(item => {
-        return item.isEditor;
-      });
-      if (editorFlag) {
-        this.$message({
-          showClose: true,
-          message: '当前有订单正在编辑，请完成后再继续操作'
-        });
-        return;
-      }
       // 验证是否有修改状态项
       let statusFlag = this.tableData.some(item => {
         return item.stateIsEditor;
@@ -371,77 +400,125 @@ export default {
         return;
       }
       //this.params.transactionDate = new Date();
-      this.queryCustomList();
-      this.childPageIsShow = true;
+      this.queryCustomList()
+      this.queryMaterialList()
+      this.queryColorList()
+      this.childPageIsShow = true
     },
     // 确认添加订单
     sureAddOrder() {
-      let paramsCheckAry = this.tableHeader.filter(item => {
-        return item.prop !== 'index' && item.prop !== "productionQualified";
-      });
-      let flag = paramsCheckAry.some(item => {
-        return this.params[item.prop] === '';
-      });
-      if (flag) {
+      if (
+        this.params.customerName == '' || 
+        this.params.id == '' || 
+        this.params.productionSummary == '' || 
+        !this.params.transactionDate ||
+        this.params.extend.material == '' ||
+        this.params.extend.color == ''
+      ){
         this.$message({
-          message: '订单填写完成后，再进行保存操作',
-          type: "error",
-          duration: 3000,
-          showClose: true
-        })
-        return;
-      }
-      let user = JSON.parse(sessionStorage.getItem('user'));
-      this.params.createAt = user.name;
-      this.params.productionSummary = Number(this.params.productionSummary);
-      this.params.amount = Number(this.params.amount);
-      console.log(this.params);
-      this.$http.post('/orderController/addOrder', this.params).then(res => {
-        if (res.data.code == 0 && res.data.message == '操作成功') {
-          this.cancelAddOrder();
-          // 获取订单数据
-          this.getOrderData();
-        }else {
-          this.cancelAddOrder();
-          this.$message({
-            message: res.data.message || "添加订单失败",
-            type: 'error',
+            message: '订单填写完成后，再进行保存操作',
+            type: "error",
             duration: 3000,
             showClose: true
-          });
-        }
-      }).catch(error => {
-        this.cancelAddOrder();
-        console.log('失败原因:' + error);
-      });
-    },
-    // 取消添加订单
-    cancelAddOrder() {
-      // 子页面不显示，且初始化params对象
-      this.childPageIsShow = false;
-      this.params = {
-        createAt: "",
-        customerName: "",
-        goods: "",
-        productionSummary: '',
-        amount: '',
-        transactionDate: ""
+        })
+        return
+      }
+      this.params.goods = this.params.extend.material + this.params.extend.color
+      this.params.extend = JSON.stringify(this.params.extend)
+      // 新建订单
+      if (this.modal == 'add') {
+        let user = JSON.parse(sessionStorage.getItem('user'));
+        this.params.createAt = user.name;
+        this.$http.post('/orderController/addOrder', this.params).then(res => {
+          if (res.data.code == 0 && res.data.message == '操作成功') {
+            this.initParams();
+            // 获取订单数据
+            this.getOrderData();
+          }else {
+            this.initParams();
+            this.$message({
+              message: res.data.message || "添加订单失败",
+              type: 'error',
+              duration: 3000,
+              showClose: true
+            });
+          }
+        }).catch(error => {
+          this.initParams();
+          console.log('失败原因:' + error);
+        });
+      }else {
+        // 编辑订单
+        this.$http.post('/orderController/editOrder', this.params).then(res => {
+          if (res.data.code == 0 && res.data.message == '操作成功') {
+            this.initParams();
+            // 获取订单数据
+            this.getOrderData();
+          }else {
+            this.initParams();
+            this.$message({
+              message: res.data.message || "编辑订单失败",
+              type: 'error',
+              duration: 3000,
+              showClose: true
+            });
+          }
+        }).catch(error => {
+          this.initParams();
+          console.log('失败原因:' + error);
+        });
       }
     },
-
-    // 编辑订单
-    editorRow(row,str) {
-      // 验证是否有编辑项
-      let editorFlag = this.tableData.some(item => {
-        return item.isEditor;
+    // 初始化参数对象
+    initParams() {
+      // 子页面不显示，且初始化params对象
+      this.childPageIsShow = false;
+      this.params = { 
+        createAt: "",
+        amount: '0',      // 金额
+        customerName: "",   // 客户
+        goods: "",   // 商品
+        productionSummary: '',  // 数量
+        transactionDate: "",  // 订单日期
+        id: '',     // 订单号
+        extend: {
+          material: '',  // 原料
+          color: ''   // 色号
+        }
+      }
+    },
+    //编辑订单
+    editorRow(row) {
+      // 验证是否有修改状态项
+      let statusFlag = this.tableData.some(item => {
+        return item.stateIsEditor;
       });
-      if (editorFlag) {
+      if (statusFlag) {
         this.$message({
           showClose: true,
-          message: '当前有订单正在编辑，请完成后再继续操作'
+          message: '当前有订单正在修改状态，请完成后再继续操作'
         });
         return;
       }
+      this.model = 'editor'
+      this.params = {
+        createAt: row.createAt,
+        amount: row.amount,
+        customerName: row.customerName,
+        goods: row.goods,
+        productionSummary: row.productionSummary,
+        transactionDate: row.transactionDate,
+        id: row.id,
+        extend: row.extend ? row.extend : JSON.stringify({'material': '','color': ''})
+      }
+      this.params.extend = JSON.parse(this.params.extend)
+      this.queryCustomList()
+      this.queryMaterialList()
+      this.queryColorList()
+      this.childPageIsShow = true;
+    },
+    // 修改订单状态
+    modifyOrderStatus(row) {
       // 验证是否有修改状态项
       let statusFlag = this.tableData.some(item => {
         return item.stateIsEditor;
@@ -454,68 +531,38 @@ export default {
         return;
       }
       this.copyRow = JSON.parse(JSON.stringify(row));
-      if (str === 'editor') {
-        row.isEditor = true;
-      }else if (str === 'status') {
-        // 编辑订单状态
-        row.stateIsEditor = true;
-        row.status = '';
-      }
+      row.stateIsEditor = true;
+      row.status = '';
     },
-    // 确定编辑（创建）
-    sureEditor(row) {
-      if (row.isEditor) {
-        if (row.customerName.trim() === '' || row.goods.trim() === '' || row.productionSummary === 0 || row.amount === 0 || !row.transactionDate){
-          this.$message({
-            message: '请填写客户、商品、需求量、金额、交货日期等信息'
-          })
-          return;
-        }
-        let params = {
-          id: row.id,
-          goods: row.goods,
-          amount: Number(row.amount),
-          productionSummary: Number(row.productionSummary),
-          transactionDate: row.transactionDate
-        }
-        console.log(params);
-        this.$http.post('/orderController/editOrder', params).then(res => {
-          if (res.data.code == 0 && res.data.message == '操作成功') {
-            row.isEditor = false;
-            // 获取订单数据
-            this.getOrderData();
-          }else {
-            this.$message({
-              message: res.data.message || "编辑订单失败",
-              type: 'error',
-              duration: 3000,
-              showClose: true
-            });
-          }
-        }).catch(error => {
-          console.log('失败原因:' + error);
-        });
-      }else if (row.stateIsEditor) {
-        this.$http.get('/orderController/changeStatus' + '?id=' + row.id + '&operate=' + row.status).then(res => {
-          if (res.data.code == 0 && res.data.message == '操作成功') {
-            row.stateIsEditor = false;
-            // 获取订单数据
-            this.getOrderData();
-          }else {
-            this.$message({
-              message: res.data.message || "编辑订单失败",
-              type: 'error',
-              duration: 3000,
-              showClose: true
-            });
-          }
-        }).catch(error => {
-          console.log('失败原因:' + error);
-        });
+
+    // 确定修改订单状态
+    sureModifyOrderStatus(row) {
+      if (!row.status){
+        this.$message({
+          showClose: true,
+          message: '请选择当前订单状态',
+          type: 'error'
+        })
+        return
       }
+      this.$http.get('/orderController/changeStatus' + '?id=' + row.id + '&operate=' + row.status).then(res => {
+        if (res.data.code == 0 && res.data.message == '操作成功') {
+          // 获取订单数据
+          this.getOrderData();
+        }else {
+          this.$message({
+            message: res.data.message || "编辑订单失败",
+            type: 'error',
+            duration: 3000,
+            showClose: true
+          });
+        }
+      }).catch(error => {
+        console.log('失败原因:' + error);
+      });
     },
     // 取消编辑（创建）
-    cancelEditor(row) {
+    cancelModify(row) {
       for (let k in this.copyRow) {
         row[k] = this.copyRow[k]
       }
@@ -651,8 +698,8 @@ export default {
       transform: translate(-50%, -50%);
       padding: 20px 35px;
       box-sizing: border-box;
-      width: 400px;
-      height: 330px;
+      width: 440px;
+      height: 500px;
       background-color: #ffffff;
       .title {
         overflow: hidden;
@@ -678,7 +725,7 @@ export default {
         }
         /deep/.el-date-editor.el-input,
         .el-date-editor.el-input__inner {
-          width: 170px;
+          width: 190px;
           margin-left: 10px;
           .el-input__inner {
             height: 40px;
@@ -689,14 +736,14 @@ export default {
           line-height: 40px;
         }
         .el-select {
-          width: 170px;
+          width: 190px;
           margin-left: 10px;
         }
         .el-input__inner {
           width: 170px;
         }
         input {
-          width: 170px;
+          width: 190px;
           margin-left: 10px;
           &::-webkit-input-placeholder {
             font-family: Microsoft YaHei;
@@ -706,7 +753,7 @@ export default {
           }
         }
         input:focus {
-          border-color: #409EFF;
+          border-color: #409eff;
         }
       }
     }
