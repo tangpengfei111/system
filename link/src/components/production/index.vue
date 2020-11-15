@@ -90,7 +90,8 @@
         </div>
         <div class="content-item">
           <div>客户</div>
-          <el-select v-model="params.customerName" placeholder="请填选择客户">
+          <!-- 注释 允许选择框中输入 filterable  clearable 清空当前数据 -->
+          <el-select v-model="params.customerName" filterable clearable="true" placeholder="请填选择客户">
             <el-option
               v-for="item in customList"
               :key="item.value"
@@ -102,10 +103,8 @@
         </div>
         <div class="content-item">
           <div>原料</div>
-          <el-select
-            v-model="params.extend.material"
-            placeholder="请填选择原料"
-          >
+          <!-- 注释 允许选择框中输入 filterable  clearable 清空当前数据 -->
+          <el-select v-model="params.extend.material" filterable clearable="true" placeholder="请填选择原料">
             <el-option
               v-for="item in materialList"
               :key="item.value"
@@ -117,7 +116,8 @@
         </div>
         <div class="content-item">
           <div>色号</div>
-          <el-select v-model="params.extend.color" placeholder="请填选择色号">
+          <!-- 注释 允许选择框中输入 filterable  clearable 清空当前数据 -->
+          <el-select v-model="params.extend.color" filterable clearable="true" placeholder="请填选择色号">
             <el-option
               v-for="item in colorList"
               :key="item.value"
@@ -137,15 +137,6 @@
             @blur="blurInput"
           />
         </div>
-        <!-- <div class="content-item">
-          <div>金额</div>
-          <input type="text"
-            v-model="params.amount"
-            placeholder="请填写金额"
-            @keyup="checkNumber"
-            @blur="blurInput"
-            />
-        </div> -->
         <div class="content-item">
           <div>订单日期</div>
           <el-date-picker
@@ -403,6 +394,7 @@ export default {
       this.queryCustomList()
       this.queryMaterialList()
       this.queryColorList()
+      this.model = 'add'
       this.childPageIsShow = true
     },
     // 确认添加订单
@@ -426,7 +418,7 @@ export default {
       this.params.goods = this.params.extend.material + this.params.extend.color
       this.params.extend = JSON.stringify(this.params.extend)
       // 新建订单
-      if (this.modal == 'add') {
+      if (this.model == 'add') {
         let user = JSON.parse(sessionStorage.getItem('user'));
         this.params.createAt = user.name;
         this.$http.post('/orderController/addOrder', this.params).then(res => {
@@ -500,7 +492,7 @@ export default {
         });
         return;
       }
-      this.model = 'editor'
+    
       this.params = {
         createAt: row.createAt,
         amount: row.amount,
@@ -515,6 +507,7 @@ export default {
       this.queryCustomList()
       this.queryMaterialList()
       this.queryColorList()
+      this.model = 'editor'
       this.childPageIsShow = true;
     },
     // 修改订单状态

@@ -44,6 +44,8 @@ export default {
               noColon: false,
               value: 'machineName',
               placeholder: '请选择设备',
+              filterable: true,
+              clearable: true,
               options: []
           },
         {

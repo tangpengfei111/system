@@ -73,7 +73,6 @@
       <div class="dialog">
         <div class="title">
           <div class="title-label">新建计划</div>
-          <!-- <div class="export">导出</div> -->
         </div>
         <el-form
           class="demo-form-inline"
@@ -96,7 +95,8 @@
           </el-form-item>
           <el-form-item></el-form-item>
           <el-form-item label="设备">
-            <el-select v-model="planParams.machineName" placeholder="请选择设备">
+            <!-- 注释 允许选择框中输入 filterable  clearable 清空当前数据 -->
+            <el-select v-model="planParams.machineName" filterable clearable="true" placeholder="请选择设备">
               <el-option
                 v-for="(item,index) in machineOptions"
                 :key="index"
@@ -106,7 +106,8 @@
             </el-select>
           </el-form-item>
           <el-form-item label="色号">
-            <el-select v-model="planParams.colorName" placeholder="请选择色号">
+            <!-- 注释 允许选择框中输入 filterable  clearable 清空当前数据 -->
+            <el-select v-model="planParams.colorName" filterable clearable="true" placeholder="请选择色号">
               <el-option
                 v-for="(item,index) in colorOptions"
                 :key="index"
@@ -116,7 +117,8 @@
             </el-select>
           </el-form-item>
           <el-form-item label="原料">
-            <el-select v-model="planParams.materialName" placeholder="请选择原料">
+            <!-- 注释 允许选择框中输入 filterable  clearable 清空当前数据 -->
+            <el-select v-model="planParams.materialName" filterable clearable="true" placeholder="请选择原料">
               <el-option
                 v-for="(item,index) in materialOptions"
                 :key="index"
@@ -134,7 +136,8 @@
             ></el-input>
           </el-form-item>
           <el-form-item label="染化剂">
-            <el-select v-model="planParams.agentName" placeholder="请选择染化剂">
+            <!-- 注释 允许选择框中输入 filterable  clearable 清空当前数据 -->
+            <el-select v-model="planParams.agentName" filterable clearable="true" placeholder="请选择染化剂">
               <el-option
                 v-for="(item,index) in agentOptions"
                 :key="index"
@@ -714,8 +717,6 @@ export default {
       transform: translate(-50%, -50%);
       padding: 20px 20px;
       box-sizing: border-box;
-      // width: 400px;
-      // height: 300px;
       background-color: #ffffff;
       .title {
         overflow: hidden;
@@ -769,33 +770,13 @@ export default {
         /deep/.el-form-item__content {
           width: calc(100% - 100px);
           margin-left: 0px !important;
+          vertical-align: middle;
         }
         .el-form-item:nth-last-child(1) {
           width: 100%;
           margin: 20px 0 10px 0;
         }
       }
-      // .content-item {
-      //   width: 100%;
-      //   margin: 20px auto;
-      //   box-sizing: border-box;
-      //   div {
-      //     display: inline-block;
-      //     width: 80px;
-      //     color: #606266;
-      //     font-size: 14px;
-      //   }
-      //   input {
-      //     width: 160px;
-      //     margin-left: 10px;
-      //     &::-webkit-input-placeholder {
-      //       font-family: Microsoft YaHei;
-      //       font-size: 14px;
-      //       font-weight: 500;
-      //       color: #a9adb3;
-      //     }
-      //   }
-      // }
     }
     .footer {
       position: absolute;

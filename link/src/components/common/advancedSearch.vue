@@ -2,35 +2,38 @@
   <div class="search-box">
     <el-form :inline="true" class="demo-form-inline" ref="form" :model="searchObj">
       <el-form-item
-              v-for="(formItem,index) in formParams" :key="'formItem' + index"
-              :label="formItem.noColon ? formItem.name : formItem.name + ':'"
+        v-for="(formItem,index) in formParams" :key="'formItem' + index"
+        :label="formItem.noColon ? formItem.name : formItem.name + ':'"
       >
         <el-input
-                v-if="formItem.type === 'input'"
-                v-model="searchObj[formItem.value]"
-                :placeholder="formItem.placeholder ? formItem.placeholder : '请输入搜索内容'"
+          v-if="formItem.type === 'input'"
+          v-model="searchObj[formItem.value]"
+          :placeholder="formItem.placeholder ? formItem.placeholder : '请输入搜索内容'"
         >
         </el-input>
+        <!-- 注释 允许选择框中输入 filterable  clearable 清空当前数据 -->
         <el-select
-                v-if="formItem.type === 'select'"
-                v-model="searchObj[formItem.value]"
-                :placeholder="formItem.placeholder ? formItem.placeholder : '请选择状态'"
+          v-if="formItem.type === 'select'"
+          v-model="searchObj[formItem.value]"
+          :placeholder="formItem.placeholder ? formItem.placeholder : '请选择状态'"
+          :filterable="formItem.filterable"
+          :clearable="formItem.clearable"
         >
           <el-option
-                  v-for="(item,index) in formItem.options" :key="index"
-                  :label="item.label"
-                  :value="item.value"
+            v-for="(item,index) in formItem.options" :key="index"
+            :label="item.label"
+            :value="item.value"
           >
           </el-option>
         </el-select>
         <el-date-picker
-                v-if="formItem.type === 'date'"
-                v-model="searchObj[formItem.value]"
-                type="date"
-                format="yyyy-MM-dd"
-                value-format="yyyy-MM-dd"
-                placeholder="选择日期"
-                :editable="false"
+          v-if="formItem.type === 'date'"
+          v-model="searchObj[formItem.value]"
+          type="date"
+          format="yyyy-MM-dd"
+          value-format="yyyy-MM-dd"
+          placeholder="选择日期"
+          :editable="false"
         >
         </el-date-picker>
         <!-- <el-date-picker
@@ -91,32 +94,6 @@
                         }
                     ]
                 },
-                // form1: [
-                //   {
-                //     type: 'input',
-                //     name: '客户名称',
-                //     noColon: false,
-                //     value: 'name',
-                //     placeholder: '请输入搜索内容'
-                //   },
-                //   {
-                //     type: 'select',
-                //     name: '状态',
-                //     noColon: false,
-                //     value: 'status',
-                //     placeholder: '请选择状态',
-                //     options: [
-                //       { label: '可用', value: '0' },
-                //       { label: '不可用', value: '1' }
-                //     ]
-                //   },
-                //   {
-                //     type: 'date',
-                //     name: '日期',
-                //     noColon: false,
-                //     value: 'date',
-                //   }
-                // ],
                 searchObj: {
                     name: '',
                     status: '',

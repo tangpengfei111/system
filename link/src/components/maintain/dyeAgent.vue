@@ -34,7 +34,8 @@
               </el-select>
             </div>
             <div v-if="item.label == '供应商'">
-              <el-select v-model="scope.row[item.prop]" placeholder="请选择供应商">
+              <!-- 注释 允许选择框中输入 filterable  clearable 清空当前数据 -->
+              <el-select v-model="scope.row[item.prop]" filterable clearable='true' placeholder="请选择供应商">
                 <el-option
                   v-for="item in supplierOption"
                   :key="item.value"
