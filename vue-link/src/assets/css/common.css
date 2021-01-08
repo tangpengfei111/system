@@ -1,0 +1,226 @@
+* {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+html,body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+
+input {
+    width: 205px;
+    height: 40px;
+    padding: 0 15px;
+    color: #606266;
+    border: 1px solid #DCDFE6;
+    border-radius: 4px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+/* 禁止textarea拉伸样式 */
+textarea {
+    resize: none !important;
+}
+
+/* 移除input类型为number时上下浮标 */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+input[type="number"]{
+    -moz-appearance: textfield;
+}
+
+
+/* 显示省略号 */
+.ellipsis {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* 遮罩层 */
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    z-index: 1000;
+}
+
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-thumb {
+    background: #bcbeb996;
+    border-radius: 5px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,.2);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #979e9a;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0,0,0,.1);
+    border-radius: 10px;
+    box-shadow: inset 0 0 5px rgba(0,0,0,.2);
+}
+
+/* 全局表格默认样式 */
+.el-table td {
+    height: 60px;
+    padding: 0;
+    font-family: Microsoft Yahei;
+    font-size: 14px;
+    color: #666666;
+    border-bottom: 1px solid #d6e5fa;
+}
+.el-table th {
+    height: 50px;
+    padding: 0;
+    font-family: Microsoft Yahei;
+    font-size: 16px;
+    font-weight: 600;
+    /* color: #253345; */
+}
+.el-table th .cell {
+    padding: 0;
+}
+.el-table .text {
+    height: 30px;
+}
+.el-table .odd-number {
+    background: #fafafa;
+}
+.el-table .even-number {
+    background: #f4f9fe;
+}
+.el-table td span.el-checkbox__inner {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #b7babd;
+    border-radius: 0;
+}
+.el-table th span.el-checkbox__inner {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #91a3ba;
+    border-radius: 0;
+}
+/* .el-table .el-table__header th {
+    background: rgb(57, 140, 237);
+    font-family: Microsoft Yahei;
+    font-size: 14px;
+    color: #fff;
+}
+.el-table th>.cell{
+    font-family: Microsoft Yahei;
+    font-size: 14px;
+    color: #fff;
+    padding: 0;
+}
+.el-table .cell, .el-table--border td:first-child .cell {
+    padding-left: 0;
+}
+.el-table .cell {
+    padding: 0;
+} */
+
+
+
+/* 全局分页器默认样式 */
+.pagination {
+    overflow: hidden;
+}
+.pagination .data-show {
+    float: right;
+    margin: 16px 20px 0 0;
+    height: 30px;
+    line-height: 30px;
+    font-family: Microsoft Yahei;
+    font-size: 14px;
+    color: #666666;
+}
+.el-pagination {
+    float: right;
+    margin-top: 16px;
+}
+.el-pagination.is-background .el-pager li:not(.disabled).active {
+    border: 1px solid #1e87f0;
+    background-color: #1e87f0;
+}
+.el-pagination.is-background .btn-next,
+.el-pagination.is-background .btn-prev,
+.el-pagination.is-background .el-pager li {
+    width: 32px;
+    height: 25px;
+    line-height: 24px;
+    background-color: #ffffff;
+    border: 1px solid #bebebe;
+}
+.el-pagination__jump {
+    margin-left: 70px;
+    color: #666666;
+}
+.el-pagination__editor {
+    margin: 0 7px;
+}
+.el-pagination__editor.el-input .el-input__inner {
+    width: 32px;
+    height: 25px;
+    border: 1px solid #bebebe;
+    border-radius: 2px;
+}
+.el-pagination span:not([class*=suffix]) {
+    height: 100%;
+    line-height: 0;
+    font-family: SimHei;
+    font-size: 16px;
+    color: #666666;
+}
+
+
+/* 全局下拉选择框 选择项样式 */
+.el-select-dropdown__item {
+    text-align: center;
+}
+
+/* 全局气泡确认框 样式 */
+.el-popover {
+    min-width: 0;
+}
+.el-popconfirm {
+    width: 130px;
+    height: 60px;
+}
+.el-popconfirm .el-popconfirm__action {
+    text-align: center;
+    margin-top: 15px;
+}
+.el-popconfirm .el-popconfirm__action .el-button{
+    padding: 5px 10px;
+    border-radius: 0;
+}
+
+/* 全局日期时间选择框 样式 */
+.el-date-editor.el-input, .el-date-editor.el-input__inner {
+    width: 80%;
+}
+.el-date-editor .el-input__inner {
+    height: 30px;
+    line-height: 30px;
+    padding: 0 25px 0 28px;
+}
+.el-date-editor .el-input__icon {
+    line-height: 30px;
+    width: 20px;
+}
+

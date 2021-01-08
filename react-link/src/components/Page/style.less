@@ -1,0 +1,18 @@
+.rPage{
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    :global{
+        .hd{display: flex;margin-bottom: 5px;background-color: #fff;justify-content: space-between;min-height: 42px;padding: 0 15px}
+        .hd .lt .ant-pro-page-header-wrap{margin: 0;}
+        .ant-page-header-heading,.ant-page-header-heading-left{margin: 0;}
+        .hd .rt{align-items: center;display: flex;}
+        .hd .lt .ant-pro-page-container{margin:0 !important}
+        .hd .lt{display: flex;align-items: center;}
+        .hd .lt .ant-page-header.has-breadcrumb{padding: 0}
+
+        .cnt{display: flex;flex-direction: column;flex: 1;width: 100%;background-color: #fff;overflow: auto;}
+    }
+}

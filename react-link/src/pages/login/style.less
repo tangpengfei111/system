@@ -1,0 +1,95 @@
+@import '~antd/lib/style/themes/default.less';
+
+.login {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 1270px;
+  height: 100%;
+  min-height: 860px;
+  background-image: url("../../assets/image/bg.png");
+
+  :global {
+    .login-dialog {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: flex;
+      box-sizing: border-box;
+      width: 980px;
+      height: 600px;
+      padding: 40px;
+      overflow: hidden;
+      background: #fff;
+      border-radius: 30px;
+      box-shadow: 0 0 40px 0 rgba(0, 0, 0, 0.4);
+      transform: translate(-50%, -50%);
+
+      .image {
+        box-sizing: border-box;
+        width: 50%;
+        height: 100%;
+        background-image: url('../../assets/image/dialog-bg.png');
+        background-repeat: no-repeat;
+        background-position: center center;
+        background-size: 80% 70%;
+      }
+
+      .dialog {
+        box-sizing: border-box;
+        width: 50%;
+        height: 100%;
+        padding: 60px 60px 70px 20px;
+
+        .title {
+          width: 100%;
+          max-width: 470px;
+          height: 70px;
+          margin: 10px auto 0 auto;
+          color: #333;
+          font-size: 30px;
+          font-family: Microsoft YaHei;
+          line-height: 70px;
+        }
+        .message {
+          width: 100%;
+          max-width: 470px;
+          height: 30px;
+          margin: 0 auto;
+          color: #a9a9a9;
+          font-size: 18px;
+          font-family: Microsoft YaHei;
+          line-height: 30px;
+        }
+        .ant-form {
+          margin-top: 40px;
+          .ant-form-item-control {
+            margin-top: 10px;
+          }
+        }
+        .ladning {
+          width: 100%;
+          height: 50px;
+          margin: 30px auto 0 auto;
+          color: #fff;
+          font-size: 24px;
+          font-family: Microsoft YaHei;
+          line-height: 40px;
+          text-align: center;
+          text-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.5);
+          background: #2994ff;
+          border-radius: 25px;
+          cursor: pointer;
+        }
+      }
+    }
+
+    .logo {
+      position: absolute;
+      top: 6.5%;
+      left: 7%;
+      width: 400px;
+      height: 50px;
+    }
+  }
+}

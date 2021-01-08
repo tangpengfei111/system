@@ -1,0 +1,23 @@
+.table{
+    :global{
+        .tablelayout table{table-layout: fixed !important}
+        table{line-height: 1;}
+        table thead th{font-weight: bold !important;text-align: center;}
+        table td{text-align: center}
+        .foot{display: flex; justify-content:space-between;background-color: white}
+        .foot .pagin{padding: 15px 0}
+        .foot .ant-affix{width: 100% !important;height: auto!important}
+        .foot .shadow{box-shadow: rgb(229, 229, 229) 0px -2px 4px 0px;background-color: rgb(255, 255, 255)}
+        .foot .affixCont{padding: 10px 10px;display: flex}
+        .affixCont .ant-checkbox-wrapper{display: flex;align-items: center;}
+        // .foot .affixCont .ckeckbox{margin-left: 22px}
+        .foot .ant-pagination-options-size-changer.ant-select{margin-right: 0}
+        .th .ant-table-selection-column,
+        .td .ant-table-selection-column{width: 0 !important;min-width: 0 !important;}
+        td{text-align: center}
+    }
+}
+:global{
+    .ant-table.ant-table-bordered > .ant-table-container{border-color:#ccc !important}
+    .ant-table td,.ant-table th{border-color:#ccc !important}
+}
