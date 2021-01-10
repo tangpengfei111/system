@@ -15,10 +15,10 @@ const noMatch = (
   <Result
     status={403}
     title="403"
-    subTitle="Sorry, you are not authorized to access this page."
+    subTitle="抱歉，您无权访问此页。"
     extra={
       <Button type="primary">
-        <Link to="/user/login">Go Login</Link>
+        <Link to="/login">登录</Link>
       </Button>
     }
   />
@@ -48,19 +48,7 @@ const BasicLayout = (props) => {
   useEffect(() => {
   
   }, []);
-  /**
-   * init variables
-   */
-
-  const handleMenuCollapse = (payload) => {
-    // if (dispatch) {
-    //   dispatch({
-    //     type: 'global/changeLayoutCollapsed',
-    //     payload,
-    //   });
-    // }
-  }; // get children authority
-
+  
   const authorized = useMemo(
     () =>
       getMatchMenu(location.pathname || '/', menuDataRef.current).pop() || {

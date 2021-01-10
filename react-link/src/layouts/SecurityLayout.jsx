@@ -8,12 +8,15 @@ import { getCache } from '@/utils/common'
 export default function SecurityLayout(props) {
   const { children } = props
 
-  const user = getCache('userInfo') || {}
+  const isLogin = getCache('authority')
   const queryString = stringify({
     redirect: window.location.href,
   });
 
-  if (!user && window.location.pathname !== '/login') {
+
+
+
+  if (!isLogin && window.location.pathname !== '/login') {
     return <Redirect to={`/login?${queryString}`} />;
   }
 

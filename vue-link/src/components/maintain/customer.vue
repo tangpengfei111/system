@@ -266,6 +266,8 @@ export default {
     sureCreate() {
       let user = JSON.parse(sessionStorage.getItem('user'));
       this.params.createAt = user.name;
+      console.log('params', this.params)
+      return
       if (!this.params.name) {
         this.$message({
           showClose: true,

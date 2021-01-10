@@ -10,7 +10,7 @@ import modelExtend from 'dva-model-extend'
 import { model } from '@/utils/commonModel'
 
 export default modelExtend(model, {
-    namespace: 'customer',
+    namespace: 'material',
     state: {},
     reducers: {
         save(state, action) {

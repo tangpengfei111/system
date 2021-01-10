@@ -29,16 +29,126 @@ ol {
   list-style: none;
 }
 
+
+.ant-form-item {
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: center;
+
+  .ant-form-item-label {
+    width: 80px;
+    height: 30px;
+    line-height: 30px;
+    text-align: right;
+  }
+
+  .ant-form-item-control {
+    margin-left: 16px;
+    padding-right: 30px;
+  }
+}
+
+
+.ant-pro-page-container {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  height: calc(100% + 48px);
+  .ant-pro-grid-content {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    .ant-pro-grid-content-children {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+    }
+    .ant-pro-grid-content-children>div {
+      display: flex;
+      flex: 1 1 auto;
+      flex-direction: column;
+      .ant-pro-page-container-children-content {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        .ant-pro-table {
+          display: flex;
+          flex: 1 1 auto;
+          flex-direction: column;
+          .ant-card {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            .ant-card-body {
+              display: flex;
+              flex: 1 1 auto;
+              flex-direction: column;
+            }
+            .ant-table-wrapper {
+              display: flex;
+              flex: 1 1 auto;
+              flex-direction: column;
+              .ant-spin-nested-loading {
+                display: flex;
+                flex: 1 1 auto;
+                flex-direction: column;
+                .ant-spin-container {
+                  display: flex;
+                  flex: 1 1 auto;
+                  flex-direction: column;
+                  justify-content: space-between;
+                }
+                .ant-table.ant-table-middle {
+                  display: flex;
+                  flex: 1;
+                  flex-direction: column;
+                  overflow: auto;
+                  .ant-table-container {
+                    height: 1px;
+                    // 后期样式优化
+                    // .ant-table-content {
+                    //   border: 1px solid red;
+                    //   table {
+                    //     position: relative;
+                    //     display: flex;
+                    //     flex: 1 1 auto;
+                    //     flex-direction: column;
+                    //     .ant-table-thead {
+                    //       position: absolute;
+                    //     }
+                    //     .ant-table-tbody {
+                    //       position: absolute;
+                    //       margin-top: 47px;
+                    //     }
+                    //   }
+                    // }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+
 @media (max-width: @screen-xs) {
   .ant-table {
     width: 100%;
     overflow-x: auto;
-    &-thead > tr,
-    &-tbody > tr {
-      > th,
-      > td {
+
+    &-thead>tr,
+    &-tbody>tr {
+
+      >th,
+      >td {
         white-space: pre;
-        > span {
+
+        >span {
           display: block;
         }
       }
@@ -47,8 +157,9 @@ ol {
 }
 
 // 兼容IE11
-@media screen and(-ms-high-contrast: active), (-ms-high-contrast: none) {
-  body .ant-design-pro > .ant-layout {
+@media screen and(-ms-high-contrast: active),
+(-ms-high-contrast: none) {
+  body .ant-design-pro>.ant-layout {
     min-height: 100vh;
   }
 }

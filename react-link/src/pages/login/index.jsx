@@ -16,11 +16,6 @@ export default function List(props) {
     const dispatch = useDispatch()
     // 切换
     const userInfo = getCache('userInfo') || {}
-
-    // useEffect(() => {
-    //     setDDLogin()
-    //     genLink()
-    // }, [])
     /**
      * FunctionName: 请求后端
      * Author: 唐鹏飞
@@ -56,33 +51,18 @@ export default function List(props) {
                             name="username"
                             rules={[{ required: true, message: '请输入用户名' }]}
                         >
-                            <Input size="large" placeholder="用户名" prefix={<UserOutlined />} />
+                            <Input size="large" placeholder="用户名" autoComplete="off" prefix={<UserOutlined />} />
                         </Form.Item>
                         <Form.Item
                             name="password"
                             rules={[{ required: true, message: '请输入密码' }]}
                         >
-                            <Input.Password size="large" placeholder="密码" prefix={<LockOutlined />} />
+                            <Input.Password size="large" placeholder="密码" autoComplete="off" prefix={<LockOutlined />} />
                         </Form.Item>
                         <Button className="ladning" type="primary" htmlType="submit" block size="large">登录</Button>
                     </Form>
-                    {/* <div className="login-info">
-                        <div className="username">
-                            <div className="icon"></div>
-                            <input type="text" placeholder="请输入用户名" />
-                        </div>
-                        <div className="password">
-                            <div className="icon"></div>
-                            <input type="password" placeholder="请输入密码" />
-
-                        </div>
-                        
-                    </div> */}
                 </div>
             </div>
-
-
-
         </div>
     )
 }

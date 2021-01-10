@@ -27,7 +27,27 @@ export default {
         }
     },
     effects: {
-
+        /**
+         * FunctionName: 动态直接调用 detail
+         * Author: 唐鹏飞
+         * Description: apiKey 调用的请求 一般是公共请求 common
+         */
+        *fetchData({ apiKey, payload = {}, ...extra }, { call, put }) {
+            let result = yield call(detail, apiKey, { payload, extra });
+            if (extra.isPaging) {
+                // 是否分页
+                const { list = [], page, pageSize, totalRecords } = result.data || {}
+                return {
+                    list: list,
+                    pagination: {
+                        current: +page,
+                        pageSize: +pageSize,
+                        total: +totalRecords,
+                    }
+                }
+            }
+            return result || {}
+        },
         /**
          * FunctionName: 用户登录
          * Author: 唐鹏飞
@@ -40,14 +60,14 @@ export default {
             yield put({
                 type: "save",
                 payload: {
-                    currentUser: user.role
+                    currentUser: user
                 }
             });
             
             showMsg('登陆成功', 'success')
             setCache('authority', user.role)
-            setCache('userInfo', JSON.stringify(user))
-            history.push('/basicdata/color')
+            setCache('userInfo', user)
+            history.push('/basicdata/material')
         },
         /**
          * FunctionName: 用户退出

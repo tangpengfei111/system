@@ -7,12 +7,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useDispatch } from "react-redux"
 import { PlusOutlined } from '@ant-design/icons'
-import { ModalForm, ProFormText } from '@ant-design/pro-form'
+import { ModalForm, ProFormText, ProFormSelect } from '@ant-design/pro-form'
 import { Button, Tag } from 'antd'
 import { PageContainer } from '@ant-design/pro-layout'
 import ProTable from '@ant-design/pro-table'
 import MoreButton from '@/components/MoreButton'
-
+import { cloneDeep } from 'lodash'
 
 
 const namespace = 'customer'
@@ -33,8 +33,15 @@ export default function (props) {
     // 搜索文本值
     const [searchValue, setSearchValue] = useState('')
     // 新建窗口的弹窗
-    const [modalVisible, setModalVisible] = useState(false);
-
+    const [modalVisible, setModalVisible] = useState(false)
+    // 修改弹窗类型  默认 add edit
+    const [modalType, setModalType] = useState('add')
+    // 修改状态请求参数
+    const [modifyParams, setModifyParams] = useState({})
+    const stateOption = [           // 状态数组
+        { label: '可用', value: 0 },
+        { label: '不可用', value: 1 }
+    ]
 
     const columns = [
         { title: "客户编号", dataIndex: 'no', align: 'center' },
@@ -64,14 +71,15 @@ export default function (props) {
                             {
                                 name: '编辑',
                                 onClick: () => {
-                                    console.log('编辑')
+                                    setModifyParams(record)
+                                    showModal('edit')
                                 }
                             },
                             {
                                 name: '删除',
                                 isConfirm: true,
                                 commonProps: {
-                                    onConfirm: () => removeCustomer(record)
+                                    onConfirm: () => removeData(record)
                                 }
                             }
                         ]}
@@ -103,26 +111,62 @@ export default function (props) {
         }).then(data => {
             setDataSource(data)
         })
-
     }
     /*
-     * FunctionName: 添加客户
+     * FunctionName: 显示弹窗
      * Author: 唐鹏飞
      * Description: 
      */
-    function addCustomer(value) {
-        // handleModalVisible(false)
+    function showModal(type) {
+        setModalType(type)
+        setModalVisible(true)
+    }
+    /*
+     * FunctionName: 添加数据
+     * Author: 唐鹏飞
+     * Description: 
+     */
+    function addData(value) {
         console.log('value', value)
-        if (actionRef.current) {
-            actionRef.current.reload()
-        }
+        dispatch({
+            type: `${namespace}/add`,
+            payload: {
+                ...value,
+                createAt: 'admin'
+            },
+            method: 'post'
+        }).then(() => {
+            setModalVisible(false)
+            reset()
+        })
     }
     /*
-     * FunctionName: 删除客户信息
+     * FunctionName: 修改数据
      * Author: 唐鹏飞
      * Description: 
      */
-    function removeCustomer(record) {
+    function modifyData(value) {
+        let payload = {
+            ...cloneDeep(modifyParams),
+            ...value
+        }
+        delete payload.lastUpdateTime
+
+        dispatch({
+            type: `${namespace}/modify`,
+            payload,
+            method: 'post'
+        }).then(() => {
+            setModalVisible(false)
+            reset()
+        })
+    }
+    /*
+     * FunctionName: 删除数据
+     * Author: 唐鹏飞
+     * Description: 
+     */
+    function removeData(record) {
         dispatch({
             type: `${namespace}/remove`,
             payload: {
@@ -143,7 +187,6 @@ export default function (props) {
         select({
             search: value ? value : undefined
         })
-        console.log('onSearch', value)
     }
     /*
      * FunctionName: 重置
@@ -180,64 +223,72 @@ export default function (props) {
                     },
                     actions: [
                         <Button type="primary" onClick={reset}>重置</Button>,
-                        <Button type="primary" style={{ marginLeft: 20 }} key="primary" onClick={() => setModalVisible(true)}><PlusOutlined /> 添加</Button>
+                        <Button type="primary" style={{ marginLeft: 20 }} key="primary" onClick={() => showModal('add')}><PlusOutlined /> 添加</Button>
                     ]
                 }}
                 request={(params) => select(params)}
             />
             <ModalForm
-                title={'新建客户'}
+                title={modalType === 'add' ? '新建' : '编辑'}
                 width="400px"
                 visible={modalVisible}
+                modalProps={{
+                    destroyOnClose: true,
+                    maskClosable: false,
+                    forceRender: true,
+                    onCancel: () => setModifyParams({})
+                }}
                 onVisibleChange={setModalVisible}
-                onFinish={addCustomer}
+                onFinish={modalType === 'add' ? addData : modifyData}
             >
-                <ProFormText
-                    label="客户名"
-                    name="name"
-                    placeholder="请填写客户名称"
-                    rules={[
-                        {
-                            required: true,
-                            message: '规则名称为必填项',
-                        },
-                    ]}
-                    width={120}
-
-                />
-                <ProFormText
-                    label="客户编号"
-                    name="no"
-                    placeholder="请填写客户编号"
-                    rules={[
-                        {
-                            required: true,
-                            message: '规则名称为必填项',
-                        },
-                    ]}
-                    width={120}
-                />
-            </ModalForm>
-            <ModalForm
-                title={'修改'}
-                width="400px"
-                visible={modalVisible}
-                onVisibleChange={setModalVisible}
-                onFinish={addCustomer}
-            >
-                <ProFormText
-                    label="状态"
-                    name="name"
-                    placeholder="请填写客户名称"
-                    rules={[
-                        {
-                            required: true,
-                            message: '规则名称为必填项',
-                        },
-                    ]}
-                    width={120}
-
-                />
+                {
+                    modalType === 'add' && <>
+                        <ProFormText
+                            label="客户名"
+                            name="name"
+                            placeholder="请填写客户名称"
+                            fieldProps={{
+                                autoComplete: "off"
+                            }}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请填写客户名称',
+                                },
+                            ]}
+                        />
+                        <ProFormText
+                            label="客户编号"
+                            name="no"
+                            placeholder="请填写客户编号"
+                            fieldProps={{
+                                autoComplete: "off"
+                            }}
+                            rules={[
+                                {
+                                    required: true,
+                                    message: '请填写客户编号',
+                                },
+                            ]}
+                        />
+                    </>
+                }
+                {
+                    modalType === 'edit' && <ProFormSelect
+                        label="状态"
+                        name="status"
+                        placeholder="请选择状态"
+                        initialValue={modifyParams.status}
+                        rules={[
+                            {
+                                required: true,
+                                message: '请选择状态',
+                            },
+                        ]}
+                        width={120}
+                        options={stateOption}
+                    />
+                }
             </ModalForm>
         </PageContainer>
     )

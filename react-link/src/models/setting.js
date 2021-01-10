@@ -1,5 +1,7 @@
 import defaultSettings from '../../config/defaultSettings';
 
+console.log('SettingModel')
+
 const updateColorWeak = (colorWeak) => {
   const root = document.getElementById('root');
 
