@@ -1,5 +1,5 @@
 /*
- * ModelName: 色号管理-公共数据
+ * ModelName: 染化剂管理-公共数据
  * Branch: 0
  * Autor: 唐鹏飞
  * Description:
@@ -10,7 +10,7 @@ import modelExtend from 'dva-model-extend'
 import { model } from '@/utils/commonModel'
 
 export default modelExtend(model, {
-    namespace: 'color',
+    namespace: 'machine',
     state: {},
     reducers: {
         save(state, action) {

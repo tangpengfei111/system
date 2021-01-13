@@ -55,7 +55,7 @@ export default {
          */
         *login({ type, payload = {}, ...extra }, { call, put }) {
             const result = yield call(detail, type, { payload, extra })
-            const { login, user = {} } =  result?.data
+            const { user = {} } =  result?.data || {}
 
             yield put({
                 type: "save",
@@ -76,9 +76,9 @@ export default {
          */
         *logout({ type, payload = {}, method = 'post', must = [], ...extra }, { call }) {
             // const result = yield call(detail, type, { payload, method, must, extra })
-            const userInfo = getCache('userInfo') || ''
+            // const userInfo = getCache('userInfo') || ''
             clearCache()
-            setCache('userInfo', userInfo)
+            // setCache('userInfo', userInfo)
             history.push('/login')
         },
     }

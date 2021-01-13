@@ -5,7 +5,7 @@
  * Description:
  */
 
-import { select, edit, del, detail, add } from '@/utils/service'
+import { select, edit, del, detail } from '@/utils/service'
 import modelExtend from 'dva-model-extend'
 import { model } from '@/utils/commonModel'
 

@@ -12,6 +12,7 @@ import { Button, Tag } from 'antd'
 import { PageContainer } from '@ant-design/pro-layout'
 import ProTable from '@ant-design/pro-table'
 import MoreButton from '@/components/MoreButton'
+import { getCache, showMsg } from '@/utils/common'
 import { cloneDeep } from 'lodash'
 
 
@@ -127,12 +128,13 @@ export default function (props) {
      * Description: 
      */
     function addData(value) {
-        console.log('value', value)
+        // 用户信息
+        const userInfo = getCache('userInfo') || {}
         dispatch({
             type: `${namespace}/add`,
             payload: {
                 ...value,
-                createAt: 'admin'
+                createAt: userInfo.name
             },
             method: 'post'
         }).then(() => {

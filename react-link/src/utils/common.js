@@ -188,7 +188,7 @@ export function looseEqual(a, b) {
  * Description:
  */
 export function getCache(name) {
-    return localStorage[name] && JSON.parse(localStorage[name]);
+    return sessionStorage[name] && JSON.parse(sessionStorage[name]);
 }
 
 /**
@@ -197,7 +197,7 @@ export function getCache(name) {
  * Description:
  */
 export function setCache(name, value) {
-    return localStorage.setItem(name, JSON.stringify(value));
+    return sessionStorage.setItem(name, JSON.stringify(value));
 }
 
 /**
@@ -206,7 +206,8 @@ export function setCache(name, value) {
  * Description:
  */
 export function clearCache() {
-    localStorage.clear();
+    localStorage.clear()
+    sessionStorage.clear()
 }
 
 /**
