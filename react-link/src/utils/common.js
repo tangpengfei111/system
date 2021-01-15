@@ -188,6 +188,8 @@ export function looseEqual(a, b) {
  * Description:
  */
 export function getCache(name) {
+
+    
     return sessionStorage[name] && JSON.parse(sessionStorage[name]);
 }
 
@@ -197,7 +199,7 @@ export function getCache(name) {
  * Description:
  */
 export function setCache(name, value) {
-    return sessionStorage.setItem(name, JSON.stringify(value));
+    return sessionStorage && sessionStorage.setItem(name, JSON.stringify(value));
 }
 
 /**
@@ -288,4 +290,26 @@ export function Calc() {
         chu,
         format,
     };
+}
+
+/**
+ * FunctionName: 校验路由是否是路由数据
+ * Author: 唐鹏飞
+ * Description: 
+ */
+export function checkPathname(pathname, data) {
+    if (!Array.isArray(data) || pathname == '/') {
+        return false
+    }
+    let list = []
+    let flag = data.some(item => {
+        if (item.routes) {
+            list.push(...item.routes)
+        }
+        return item.path && item.path === pathname
+    })
+    if (flag) {
+        return true
+    }
+    return Array.isArray(list) && list.length > 0 && checkPathname(pathname, list)
 }

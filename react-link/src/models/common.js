@@ -6,6 +6,7 @@
 import { detail } from '@/utils/service'
 import { history } from 'umi'
 import { setCache, clearCache, getCache, showMsg } from '@/utils/common'
+import { setAuthority } from '@/utils/authority'
 
 export default {
     namespace: 'common',
@@ -63,9 +64,9 @@ export default {
                     currentUser: user
                 }
             });
-            
-            showMsg('登陆成功', 'success')
-            setCache('authority', user.role)
+        
+            showMsg('🎉 🎉 🎉  登录成功', 'success')
+            setAuthority(user.role)
             setCache('userInfo', user)
             history.push('/basicdata/material')
         },

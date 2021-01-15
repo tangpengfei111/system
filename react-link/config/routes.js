@@ -15,11 +15,12 @@ export default [
           {
             path: '/',
             component: '../layouts/BasicLayout',
-            // authority: ['admin', 'user'],
             routes: [
               {
                 path: '/basicdata',
                 name: '基础数据维护',
+                icon: 'icon-data',
+                authority: ['admin', 'superAdmin', 'prodUser', 'stockUser'],
                 routes: [
                   {
                     name: '原料管理',
@@ -53,12 +54,35 @@ export default [
                   },
                   {
                     component: './404',
+                  }
+                ]
+              },
+              {
+                path: '/production',
+                name: '生产管理',
+                icon: 'icon-product-cate',
+                authority: ['admin', 'superAdmin', 'prodUser'],
+                routes: [
+                  {
+                    name: '订单管理',
+                    path: '/production/order',
+                    component: './production/order'
                   },
+                  {
+                    name: '生产计划',
+                    path: '/production/plan',
+                    component: './production/plan'
+                  },
+                  {
+                    component: './404',
+                  }
                 ]
               },
               {
                 path: '/stock',
                 name: '库存管理',
+                icon: 'icon-kucunguanli',
+                authority: ['admin', 'superAdmin', 'stockUser'],
                 routes: [
                   {
                     name: '染化剂库存',
@@ -72,12 +96,14 @@ export default [
                   },
                   {
                     component: './404',
-                  },
+                  }
                 ]
               },
               {
                 path: '/report',
                 name: '报表管理',
+                icon: 'icon-baobiaoguanli',
+                authority: ['admin', 'superAdmin', 'prodUser', 'stockUser'],
                 routes: [
                   {
                     name: '设备生产记录',
@@ -91,14 +117,21 @@ export default [
                   },
                   {
                     component: './404',
-                  },
+                  }
                 ]
               },
               {
+                path: '/user',
+                name: '用户管理',
+                icon: 'icon-lunkuohua2_yonghu',
+                component: './user',
+                authority: ['admin', 'superAdmin'],
+              },
+              {
                 name: 'list.table-list',
-                icon: 'table',
                 path: '/list',
                 component: './ListTableList',
+                authority: ['admin'],
               },
               {
                 component: './404',

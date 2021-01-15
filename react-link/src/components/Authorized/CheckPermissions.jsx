@@ -12,61 +12,64 @@ import PromiseRender from './PromiseRender';
  * @param { 未通过的组件 | no pass components } Exception
  */
 const checkPermissions = (authority, currentAuthority, target, Exception) => {
-  // 没有判定权限.默认查看所有
-  // Retirement authority, return target;
-  if (!authority) {
-    return target;
-  } // 数组处理
+	// 没有判定权限.默认查看所有
+	// Retirement authority, return target;
+	if (!authority) {
+		return target;
+	} 
 
-  if (Array.isArray(authority)) {
-    if (Array.isArray(currentAuthority)) {
-      if (currentAuthority.some((item) => authority.includes(item))) {
-        return target;
-      }
-    } else if (authority.includes(currentAuthority)) {
-      return target;
-    }
 
-    return Exception;
-  } // string 处理
+	
+	// 数组处理
+	if (Array.isArray(authority)) {
+		if (Array.isArray(currentAuthority)) {
+			if (currentAuthority.some((item) => authority.includes(item))) {
+				return target;
+			}
+		} else if (authority.includes(currentAuthority)) {
+			return target;
+		}
 
-  if (typeof authority === 'string') {
-    if (Array.isArray(currentAuthority)) {
-      if (currentAuthority.some((item) => authority === item)) {
-        return target;
-      }
-    } else if (authority === currentAuthority) {
-      return target;
-    }
+		return Exception;
+	} // string 处理
 
-    return Exception;
-  } // Promise 处理
+	if (typeof authority === 'string') {
+		if (Array.isArray(currentAuthority)) {
+			if (currentAuthority.some((item) => authority === item)) {
+				return target;
+			}
+		} else if (authority === currentAuthority) {
+			return target;
+		}
 
-  if (authority instanceof Promise) {
-    return <PromiseRender ok={target} error={Exception} promise={authority} />;
-  } // Function 处理
+		return Exception;
+	} // Promise 处理
 
-  if (typeof authority === 'function') {
-    const bool = authority(currentAuthority); // 函数执行后返回值是 Promise
+	if (authority instanceof Promise) {
+		return <PromiseRender ok={target} error={Exception} promise={authority} />;
+	} // Function 处理
 
-    if (bool instanceof Promise) {
-      return <PromiseRender ok={target} error={Exception} promise={bool} />;
-    }
+	if (typeof authority === 'function') {
+		const bool = authority(currentAuthority); // 函数执行后返回值是 Promise
 
-    if (bool) {
-      return target;
-    }
+		if (bool instanceof Promise) {
+			return <PromiseRender ok={target} error={Exception} promise={bool} />;
+		}
 
-    return Exception;
-  }
+		if (bool) {
+			return target;
+		}
 
-  throw new Error('unsupported parameters');
+		return Exception;
+	}
+
+	throw new Error('unsupported parameters');
 };
 
 export { checkPermissions };
 
 function check(authority, target, Exception) {
-  return checkPermissions(authority, CURRENT, target, Exception);
+	return checkPermissions(authority, CURRENT, target, Exception);
 }
 
 export default check;

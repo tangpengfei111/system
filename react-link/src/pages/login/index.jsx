@@ -8,7 +8,7 @@ import React from 'react'
 import { useDispatch } from "react-redux";
 import { Input, Button, Form } from 'antd'
 import { UserOutlined, LockOutlined } from '@ant-design/icons'
-import { getCache, showMsg } from '@/utils/common'
+import { getCache } from '@/utils/common'
 import Style from './style.less'
 
 

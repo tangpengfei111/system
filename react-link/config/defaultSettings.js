@@ -9,6 +9,6 @@ const proSettings = {
   colorWeak: false,
   title: '印染管理系统',
   pwa: false,
-  iconfontUrl: '',
+  iconfontUrl: '//at.alicdn.com/t/font_1652171_u2kk6cicrk.js',
 };
 export default proSettings;
